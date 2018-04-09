@@ -1,0 +1,43 @@
+{
+  "name": "roaring",
+  "version": "0.1.0",
+  "description": "Node JS porting of Roaring using WebAssembly",
+  "main": "index.js",
+  "scripts": {
+    "compile":
+      "emcc src/roaring.cpp src/RoaringByteArray.cpp -o Module.js --bind -std=c++14 -s DISABLE_EXCEPTION_CATCHING=1 -s BINARYEN_ASYNC_COMPILATION=0 -s AGGRESSIVE_VARIABLE_ELIMINATION=1 -s ALLOW_MEMORY_GROWTH=1 --closure 1 -s WASM=1 -s \"BINARYEN_METHOD='native-wasm'\" --llvm-lto 3 --llvm-opts 3 -O3",
+    "tslint": "tslint --project .",
+    "eslint": "eslint .",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SalvatorePreviti/node-roaring.git"
+  },
+  "keywords": ["roaring"],
+  "engines": {
+    "node": ">=8.10.0"
+  },
+  "author": "Salvatore Previti",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/SalvatorePreviti/node-roaring/issues"
+  },
+  "homepage": "https://github.com/SalvatorePreviti/node-roaring#readme",
+  "devDependencies": {
+    "@types/node": "^9.6.2",
+    "binaryen": "^45.0.0",
+    "eslint": "^4.19.1",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.10.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.7.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "jest": "^22.4.3",
+    "tslint": "^5.9.1",
+    "tslint-config-prettier": "^1.10.0",
+    "tslint-microsoft-contrib": "^5.0.3",
+    "typescript": "^2.8.1"
+  }
+}
