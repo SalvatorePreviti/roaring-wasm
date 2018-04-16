@@ -6,6 +6,8 @@ dist/**/*.wasm
 
 temp
 
+src/cpp/CRoaringUnityBuild
+
 # Logs
 logs
 *.log
