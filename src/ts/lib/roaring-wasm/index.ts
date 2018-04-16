@@ -12,6 +12,12 @@ type RoaringWasm = {
 
   _malloc(size: number): number
   _free(pointer: number): void
+
+  _roaring_bitmap_create_with_capacity(initialCapacity: number): number
+  _roaring_bitmap_free(roaring: number): void
+
+  _roaring_bitmap_get_cardinality(roaring: number): number
+  _roaring_bitmap_is_empty(roaring: number): boolean
 }
 
 function loadRoaringWasm(): RoaringWasm {

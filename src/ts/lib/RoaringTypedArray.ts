@@ -71,7 +71,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    * @type {boolean}
    */
   public get isDisposed(): boolean {
-    return this.byteOffset !== 0
+    return this.byteOffset === 0
   }
 
   protected constructor(lengthOrArray: number | ReadonlyArray<number> | TypedArray | RoaringTypedArray<TypedArray>, bytesPerElement: number) {

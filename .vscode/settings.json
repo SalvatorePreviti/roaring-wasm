@@ -48,6 +48,7 @@
     "unordered_set": "cpp",
     "__mutex_base": "cpp",
     "__functional_03": "cpp",
-    "__tuple": "cpp"
+    "__tuple": "cpp",
+    "roaring.c": "cpp"
   }
 }

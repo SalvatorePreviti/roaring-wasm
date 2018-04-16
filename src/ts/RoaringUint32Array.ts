@@ -8,7 +8,7 @@ import RoaringTypedArray = require('./lib/RoaringTypedArray')
  * @class RoaringUint32Array
  */
 class RoaringUint32Array extends RoaringTypedArray<Uint32Array> {
-  public get BYTES_PER_ELEMENT(): number {
+  public get BYTES_PER_ELEMENT(): 4 {
     return 4
   }
 
@@ -34,5 +34,7 @@ class RoaringUint32Array extends RoaringTypedArray<Uint32Array> {
     return new Uint32Array(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length)
   }
 }
+
+Object.defineProperty(RoaringUint32Array.prototype, 'BYTES_PER_ELEMENT', { value: 4, writable: false, configurable: false, enumerable: false })
 
 export = RoaringUint32Array

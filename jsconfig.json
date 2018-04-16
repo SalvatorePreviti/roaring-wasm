@@ -8,5 +8,5 @@
   "typeAcquisition": {
     "enable": true
   },
-  "exclude": ["**/node_modules", "**/.eslintcache"]
+  "exclude": ["**/node_modules", "**/.eslintcache", "dist"]
 }

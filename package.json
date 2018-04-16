@@ -5,6 +5,8 @@
   "description": "Node JS porting of Roaring using WebAssembly",
   "main": "index.js",
   "scripts": {
+    "clean": "node scripts/clean.js",
+    "build": "node scripts/build.js",
     "start": "node scripts/build.js",
     "test": "node scripts/build.js"
   },

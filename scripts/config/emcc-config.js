@@ -1,5 +1,14 @@
 #!/usr/bin/env node
 
+const exportedFunctions = [
+  '_malloc',
+  '_free',
+  '_roaring_bitmap_create_with_capacity',
+  '_roaring_bitmap_free',
+  '_roaring_bitmap_get_cardinality',
+  '_roaring_bitmap_is_empty'
+]
+
 function buildEmccArgs() {
   const args = []
 
@@ -22,7 +31,7 @@ function buildEmccArgs() {
   args.push('-s', 'BINARYEN=1')
   args.push('-s', 'BINARYEN_ASYNC_COMPILATION=0')
   args.push('-s', "BINARYEN_METHOD='native-wasm'")
-  args.push('-s', `EXPORTED_FUNCTIONS=["_malloc","_free"]`)
+  args.push('-s', `EXPORTED_FUNCTIONS=${JSON.stringify(exportedFunctions)}`)
   args.push('-s', 'EXPORT_NAME="roaring_wasm_module"')
   args.push('-s', 'INVOKE_RUN=0')
   args.push('-s', 'MODULARIZE=1')
