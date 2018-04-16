@@ -18,6 +18,17 @@ type RoaringWasm = {
 
   _roaring_bitmap_get_cardinality(roaring: number): number
   _roaring_bitmap_is_empty(roaring: number): boolean
+  _roaring_bitmap_add(roaring: number, value: number): void
+  _roaring_bitmap_add_many(roaring: number, count: number, values: number): void
+  _roaring_bitmap_remove(roaring: number, value: number): void
+  _roaring_bitmap_maximum(roaring: number): number
+  _roaring_bitmap_minimum(roaring: number): number
+  _roaring_bitmap_contains(roaring: number, value: number): boolean
+  _roaring_bitmap_is_subset(roaring1: number, roaring2: number): boolean
+  _roaring_bitmap_is_strict_subset(roaring1: number, roaring2: number): boolean
+  _roaring_bitmap_to_uint32_array(roaring: number, arrayPtr: number): void
+  _roaring_bitmap_equals(roaring1: number, roaring2: number): boolean
+  _roaring_bitmap_flip_inplace(roaring: number, start: number, end: number): void
 }
 
 function loadRoaringWasm(): RoaringWasm {

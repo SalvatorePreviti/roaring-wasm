@@ -21,6 +21,7 @@
     "no-reserved-keywords": false,
     "no-parameter-reassignment": false,
     "no-console": false,
-    "strict-boolean-expressions": false
+    "strict-boolean-expressions": false,
+    "typedef": false
   }
 }

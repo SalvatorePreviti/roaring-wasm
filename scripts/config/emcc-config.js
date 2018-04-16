@@ -1,18 +1,9 @@
 #!/usr/bin/env node
 
-const exportedFunctions = [
-  '_malloc',
-  '_free',
-  '_roaring_bitmap_create_with_capacity',
-  '_roaring_bitmap_free',
-  '_roaring_bitmap_get_cardinality',
-  '_roaring_bitmap_is_empty'
-]
-
+const exportedFunctions = require('./exportedFunctions')
 function buildEmccArgs() {
   const args = []
 
-  args.push('-std=c++14')
   args.push('--memory-init-file', '1')
 
   // optimizations
@@ -45,10 +36,9 @@ function buildEmccArgs() {
   // optimizations
   args.push('-s', 'EVAL_CTORS=1')
   args.push('-s', 'ASSERTIONS=0')
-  args.push('-s', 'WARN_UNALIGNED=1')
   args.push('-s', 'AGGRESSIVE_VARIABLE_ELIMINATION=1')
 
-  //args.push('-s', 'STRICT=1')
+  //args.push('-s', 'WARN_UNALIGNED=1')
 
   return args
 }
