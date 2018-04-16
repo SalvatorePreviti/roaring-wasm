@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "declaration": false,
+    "noEmit": true,
+    "paths": {
+      "roaring": ["../dist"],
+      "roaring*": ["../dist*"]
+    },
+    "rootDir": "."
+  },
+  "include": ["."],
+  "typeAcquisition": {
+    "enable": true
+  }
+}

@@ -1,18 +1,20 @@
 {
   "extends": ["tslint:latest", "tslint-microsoft-contrib", "tslint-config-prettier"],
   "rules": {
-    "no-require-imports": false,
-    "interface-name": false,
-    "prefer-type-cast": false,
-    "no-single-line-block-comment": false,
     "export-name": false,
-    "no-relative-imports": false,
-    "newline-before-return": false,
-    "type-literal-delimiter": false,
-    "no-redundant-jsdoc": false,
-    "jsdoc-format": true,
     "function-name": false,
+    "interface-name": false,
+    "jsdoc-format": true,
+    "newline-before-return": false,
     "no-any": false,
-    "no-unsafe-any": false
+    "no-redundant-jsdoc": false,
+    "no-relative-imports": false,
+    "no-require-imports": false,
+    "no-single-line-block-comment": false,
+    "no-submodule-imports": false,
+    "no-unsafe-any": false,
+    "prefer-type-cast": false,
+    "type-literal-delimiter": false,
+    "no-increment-decrement": false
   }
 }

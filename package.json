@@ -5,18 +5,14 @@
   "description": "Node JS porting of Roaring using WebAssembly",
   "main": "index.js",
   "scripts": {
-    "compile": "node scripts/compile.js",
-    "tslint": "tslint --project .",
-    "eslint": "eslint .",
-    "test": "jest"
+    "start": "node scripts/build.js",
+    "test": "node scripts/build.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SalvatorePreviti/node-roaring.git"
   },
-  "keywords": [
-    "roaring"
-  ],
+  "keywords": ["roaring"],
   "engines": {
     "node": ">=8.10.0"
   },
@@ -26,7 +22,14 @@
     "url": "https://github.com/SalvatorePreviti/node-roaring/issues"
   },
   "homepage": "https://github.com/SalvatorePreviti/node-roaring#readme",
+  "_moduleAliases": {
+    "roaring": "dist"
+  },
+  "peerDependencies": {
+    "roaring": "file:dist"
+  },
   "devDependencies": {
+    "@types/jest": "^22.2.3",
     "@types/node": "^9.6.5",
     "@types/webassembly-js-api": "0.0.1",
     "binaryen": "^46.0.0",
@@ -42,12 +45,11 @@
     "lebab": "^2.7.7",
     "mkdirp": "^0.5.1",
     "prettier": "^1.12.0",
+    "ts-jest": "^22.4.3",
     "tslint": "^5.9.1",
     "tslint-config-prettier": "^1.10.0",
     "tslint-microsoft-contrib": "^5.0.3",
-    "typescript": "^2.8.1"
-  },
-  "dependencies": {
+    "typescript": "^2.8.1",
     "delete-empty": "^2.0.0"
   }
 }
