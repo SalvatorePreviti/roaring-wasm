@@ -10,6 +10,9 @@
     "newline-before-return": false,
     "type-literal-delimiter": false,
     "no-redundant-jsdoc": false,
-    "jsdoc-format": true
+    "jsdoc-format": true,
+    "function-name": false,
+    "no-any": false,
+    "no-unsafe-any": false
   }
 }

@@ -1,4 +1,5 @@
 const childProcess = require('child_process')
+const root = require('./root')
 
 function promisifyChildProcess(child, command = 'operation') {
   return new Promise((resolve, reject) => {
@@ -42,7 +43,7 @@ function promisifyChildProcess(child, command = 'operation') {
   })
 }
 
-function spawnAsync(command, args, options) {
+function spawnAsync(command, args = [], options = { stdio: 'inherit', cwd: root }) {
   return promisifyChildProcess(() => {
     return childProcess.spawn(command, args, options)
   })

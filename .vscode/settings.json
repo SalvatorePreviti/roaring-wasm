@@ -3,6 +3,7 @@
   "editor.formatOnSave": true,
   "editor.tabSize": 2,
   "eslint.autoFixOnSave": true,
+  "tslint.autoFixOnSave": true,
   "jest.autoEnable": false,
   "files.associations": {
     ".envrc": "shellscript",
