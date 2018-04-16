@@ -1,21 +1,21 @@
 /**
+ * A disposable object.
+ *
+ * @interface IDisposable
+ */
+interface IDisposable {
+  /**
+   * Disposes the given object.
+   *
+   * @returns {boolean} True if disposed during this call, false if not.
+   */
+  dispose(): boolean
+}
+
+/**
  * Disposable object helper functions
  */
-namespace disposables {
-  /**
-   * A disposable object.
-   *
-   * @interface IDisposable
-   */
-  export interface IDisposable {
-    /**
-     * Disposes the given object.
-     *
-     * @returns {boolean} True if disposed during this call, false if not.
-     */
-    dispose(): boolean
-  }
-
+namespace IDisposable {
   /**
    * Disposes the given disposable.
    *
@@ -95,4 +95,4 @@ namespace disposables {
   }
 }
 
-export = disposables
+export = IDisposable

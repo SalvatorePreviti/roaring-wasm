@@ -16,6 +16,8 @@
     "prefer-type-cast": false,
     "type-literal-delimiter": false,
     "no-increment-decrement": false,
-    "variable-name": false
+    "variable-name": false,
+    "object-literal-shorthand": true,
+    "no-reserved-keywords": false
   }
 }

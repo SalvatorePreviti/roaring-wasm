@@ -1,14 +1,14 @@
-import disposables = require('roaring/disposables')
+import IDisposable = require('roaring/IDisposable')
 
 describe('disposables', () => {
-  class SimpleDisposable implements disposables.IDisposable {
+  class SimpleDisposable implements IDisposable {
     public disposeCount = 0
     public dispose(): boolean {
       return this.disposeCount++ === 0
     }
   }
 
-  class ThrowingDisposable implements disposables.IDisposable {
+  class ThrowingDisposable implements IDisposable {
     public disposeCalled = false
     public dispose(): boolean {
       this.disposeCalled = true
@@ -18,52 +18,52 @@ describe('disposables', () => {
 
   describe('dispose', () => {
     it('should return false with null or undefined', () => {
-      expect(disposables.dispose(null)).toBe(false)
-      expect(disposables.dispose(undefined)).toBe(false)
+      expect(IDisposable.dispose(null)).toBe(false)
+      expect(IDisposable.dispose(undefined)).toBe(false)
     })
 
     it('should call dispose and returns true', () => {
       const disposable = new SimpleDisposable()
-      expect(disposables.dispose(disposable)).toBe(true)
+      expect(IDisposable.dispose(disposable)).toBe(true)
       expect(disposable.disposeCount).toBe(1)
     })
 
     it('should return false with non disposable objects', () => {
       const nonDisposableObjects = [1, 'string', {}]
       for (const disposable of nonDisposableObjects) {
-        expect(disposables.dispose(disposable as any)).toBe(false)
+        expect(IDisposable.dispose(disposable as any)).toBe(false)
       }
     })
   })
 
   describe('tryDispose', () => {
     it('should return false with null or undefined', () => {
-      expect(disposables.tryDispose(null)).toBe(false)
-      expect(disposables.tryDispose(undefined)).toBe(false)
+      expect(IDisposable.tryDispose(null)).toBe(false)
+      expect(IDisposable.tryDispose(undefined)).toBe(false)
     })
 
     it('should call dispose and returns true', () => {
       const disposable = new SimpleDisposable()
-      expect(disposables.tryDispose(disposable)).toBe(true)
+      expect(IDisposable.tryDispose(disposable)).toBe(true)
       expect(disposable.disposeCount).toBe(1)
     })
 
     it('should return false with non disposable objects', () => {
       const nonDisposableObjects = [1, 'string', {}]
       for (const disposable of nonDisposableObjects) {
-        expect(disposables.tryDispose(disposable as any)).toBe(false)
+        expect(IDisposable.tryDispose(disposable as any)).toBe(false)
       }
     })
 
     it('should return false and eat the exception if dispose trows an exception', () => {
       const disposable = new ThrowingDisposable()
-      expect(disposables.tryDispose(disposable)).toBe(false)
+      expect(IDisposable.tryDispose(disposable)).toBe(false)
       expect(disposable.disposeCalled).toBe(true)
     })
 
     it('should execute a functor and eat the exception', () => {
       const disposable = new ThrowingDisposable()
-      expect(disposables.tryDispose(disposable)).toBe(false)
+      expect(IDisposable.tryDispose(disposable)).toBe(false)
       expect(disposable.disposeCalled).toBe(true)
     })
   })
@@ -72,7 +72,7 @@ describe('disposables', () => {
     describe('with a simple functor', () => {
       it('should execute, return result and dispose the disposable', () => {
         const disposable = new SimpleDisposable()
-        const result = disposables.using(disposable, d => {
+        const result = IDisposable.using(disposable, d => {
           expect(d).toBe(disposable)
           return '-result-'
         })
@@ -84,7 +84,7 @@ describe('disposables', () => {
         const disposable = new SimpleDisposable()
         const error = new Error()
         try {
-          disposables.using(disposable, () => {
+          IDisposable.using(disposable, () => {
             throw error
           })
         } catch (e) {
@@ -107,7 +107,7 @@ describe('disposables', () => {
           })
         }
 
-        return disposables.using(disposable, functor).then(() => {
+        return IDisposable.using(disposable, functor).then(() => {
           expect(disposable.disposeCount).toBe(1)
         })
       })
@@ -124,8 +124,7 @@ describe('disposables', () => {
         }
 
         let catchedError: Error
-        return disposables
-          .using(disposable, functor)
+        return IDisposable.using(disposable, functor)
           .catch(e => {
             catchedError = e
           })

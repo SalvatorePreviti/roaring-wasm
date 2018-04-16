@@ -2,12 +2,12 @@ import roaringWasm = require('./lib/roaring-wasm')
 import RoaringTypedArray = require('./lib/RoaringTypedArray')
 
 /**
- * Array of bytes allocted directly in roaring library WASM memory.
+ * Array of unsigned 32 bit integers allocted directly in roaring library WASM memory.
  * Note: Meory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
  *
- * @class RoaringUint8Array
+ * @class RoaringUint32Array
  */
-class RoaringUint8Array extends RoaringTypedArray<Uint8Array> {
+class RoaringUint32Array extends RoaringTypedArray<Uint32Array> {
   public get BYTES_PER_ELEMENT(): number {
     return 1
   }
@@ -16,8 +16,8 @@ class RoaringUint8Array extends RoaringTypedArray<Uint8Array> {
     return this.byteOffset
   }
 
-  public get heap(): Uint8Array {
-    return roaringWasm.HEAPU8
+  public get heap(): Uint32Array {
+    return roaringWasm.HEAPU32
   }
 
   /**
@@ -25,19 +25,19 @@ class RoaringUint8Array extends RoaringTypedArray<Uint8Array> {
    * Note: Meory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
    * @param {number} length Number of elements to allocate.
    */
-  public constructor(lengthOrArray: number | Uint8Array | ReadonlyArray<number>) {
+  public constructor(lengthOrArray: number | Uint32Array | ReadonlyArray<number>) {
     super(lengthOrArray, 1)
   }
 
   /**
-   * Gets a new Uint8Array instance that shares the memory used by this buffer.
+   * Gets a new Uint32Array instance that shares the memory used by this buffer.
    * Note that the buffer may become invalid if the WASM allocated memory grows.
    * Use the returned array for short periods of time.
    *
-   * @returns {Uint8Array} A new instance of Uint8Array
+   * @returns {Uint32Array} A new instance of Uint32Array
    */
-  public asTypedArray(): Uint8Array {
-    return new Uint8Array(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length)
+  public asTypedArray(): Uint32Array {
+    return new Uint32Array(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length)
   }
 
   /**
@@ -52,4 +52,4 @@ class RoaringUint8Array extends RoaringTypedArray<Uint8Array> {
   }
 }
 
-export = RoaringUint8Array
+export = RoaringUint32Array
