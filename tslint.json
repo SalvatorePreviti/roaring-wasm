@@ -18,6 +18,8 @@
     "no-increment-decrement": false,
     "variable-name": false,
     "object-literal-shorthand": true,
-    "no-reserved-keywords": false
+    "no-reserved-keywords": false,
+    "no-parameter-reassignment": false,
+    "no-console": false
   }
 }

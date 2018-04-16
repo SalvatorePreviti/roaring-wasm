@@ -74,8 +74,13 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
     return this.byteOffset !== 0
   }
 
-  protected constructor(lengthOrArray: number | ReadonlyArray<number> | TypedArray, bytesPerElement: number) {
+  protected constructor(lengthOrArray: number | ReadonlyArray<number> | TypedArray | RoaringTypedArray<TypedArray>, bytesPerElement: number) {
     let length: number
+
+    if (lengthOrArray instanceof RoaringTypedArray) {
+      lengthOrArray = lengthOrArray.asTypedArray()
+    }
+
     if (typeof lengthOrArray === 'number') {
       length = lengthOrArray
     } else if (Array.isArray(lengthOrArray)) {
@@ -115,7 +120,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
     if (!Number.isInteger(offset) || offset < 0 || offset + array.length > this.length) {
       throw new TypeError(`Invalid offset ${offset}`)
     }
-    this.heap.set(array, this.byteOffset + offset)
+    this.heap.set(array, this.byteOffset / this.BYTES_PER_ELEMENT + offset)
     return this
   }
 
@@ -131,7 +136,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
     }
     roaringWasm._free(this.byteOffset)
     ;(this as { byteOffset: number }).byteOffset = 0
-    ;(this as { byteLength: number }).byteLength = 0
+    ;(this as { length: number }).length = 0
     return true
   }
 
@@ -157,13 +162,13 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
   public abstract asTypedArray(): TypedArray
 
   /**
-   * Gets a new Buffer instance that shares the memory used by this buffer.
-   * Note that the buffer may become invalid if the WASM allocated memory grows.
-   * Use the returned array for short periods of time.
+   * Copies the content of this typed array into a standard JS array of numbers and returns it.
    *
-   * @returns {Buffer} A new instance of node Buffer
+   * @returns {number[]} A new array.
    */
-  public abstract asNodeBuffer(): Buffer
+  public toArray(): number[] {
+    return Array.from(this.asTypedArray())
+  }
 
   /**
    * Returns a string representation of an array.
