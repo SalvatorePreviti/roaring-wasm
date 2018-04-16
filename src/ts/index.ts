@@ -1,0 +1,4 @@
+/**
+ * NodeJS Roaring implementation
+ */
+export = {}

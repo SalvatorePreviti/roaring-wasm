@@ -1,12 +1,27 @@
 {
   "compilerOptions": {
-    "noEmit": true,
-    "target": "es6",
+    "allowJs": false,
+    "target": "es2017",
     "module": "commonjs",
-    "allowSyntheticDefaultImports": true
+    "outDir": "dist",
+    "lib": ["esnext"],
+    "allowSyntheticDefaultImports": true,
+    "alwaysStrict": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "declaration": true,
+    "emitDecoratorMetadata": false,
+    "esModuleInterop": false,
+    "experimentalDecorators": false,
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": false,
+    "newLine": "LF",
+    "moduleResolution": "node",
+    "types": ["webassembly-js-api", "node"]
   },
   "typeAcquisition": {
     "enable": true
   },
-  "exclude": ["**/node_modules", "**/.eslintcache"]
+  "include": ["src"],
+  "exclude": ["**/node_modules", "**/.eslintcache", "**/dist", "temp"]
 }

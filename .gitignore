@@ -1,3 +1,11 @@
+# compilation output
+
+dist/**/*.ts
+dist/**/*.js
+dist/**/*.wasm
+
+temp
+
 # Logs
 logs
 *.log
