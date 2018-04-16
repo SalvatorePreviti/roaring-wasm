@@ -19,7 +19,7 @@ namespace disposables {
   /**
    * Disposes the given disposable.
    *
-   * @param {IDisposable} instance
+   * @param {IDisposable} instance The IDisposable to dispose.
    * @returns {boolean} True if disposed during this call, false if not
    */
   export function dispose(instance: IDisposable | null | undefined): boolean {
@@ -27,6 +27,22 @@ namespace disposables {
       return false
     }
     return Boolean(instance.dispose())
+  }
+
+  /**
+   * Try to dispose the given instance, ignoring errors.
+   *
+   * @param instance The IDisposable to dispose.
+   */
+  export function tryDispose(disposable: (() => IDisposable) | IDisposable | null | undefined): boolean {
+    try {
+      if (typeof disposable === 'function') {
+        return dispose(disposable())
+      }
+      return dispose(disposable)
+    } catch (_error) {
+      return false
+    }
   }
 
   /**

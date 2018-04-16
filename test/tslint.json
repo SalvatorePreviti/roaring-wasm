@@ -7,6 +7,6 @@
     "no-console": false,
     "typedef": false,
     "completed-docs": false,
-    "variable-name": false
+    "promise-function-async": false
   }
 }

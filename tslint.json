@@ -15,6 +15,7 @@
     "no-unsafe-any": false,
     "prefer-type-cast": false,
     "type-literal-delimiter": false,
-    "no-increment-decrement": false
+    "no-increment-decrement": false,
+    "variable-name": false
   }
 }

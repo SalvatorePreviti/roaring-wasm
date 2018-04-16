@@ -8,16 +8,24 @@ describe('disposables', () => {
     }
   }
 
-  describe('dispose', () => {
-    it('should call dispose and returns true', () => {
-      const disposable = new SimpleDisposable()
-      expect(disposable.dispose()).toBe(true)
-      expect(disposable.disposeCount).toBe(1)
-    })
+  class ThrowingDisposable implements disposables.IDisposable {
+    public disposeCalled = false
+    public dispose(): boolean {
+      this.disposeCalled = true
+      throw new Error('dispose failed')
+    }
+  }
 
+  describe('dispose', () => {
     it('should return false with null or undefined', () => {
       expect(disposables.dispose(null)).toBe(false)
       expect(disposables.dispose(undefined)).toBe(false)
+    })
+
+    it('should call dispose and returns true', () => {
+      const disposable = new SimpleDisposable()
+      expect(disposables.dispose(disposable)).toBe(true)
+      expect(disposable.disposeCount).toBe(1)
     })
 
     it('should return false with non disposable objects', () => {
@@ -25,6 +33,38 @@ describe('disposables', () => {
       for (const disposable of nonDisposableObjects) {
         expect(disposables.dispose(disposable as any)).toBe(false)
       }
+    })
+  })
+
+  describe('tryDispose', () => {
+    it('should return false with null or undefined', () => {
+      expect(disposables.tryDispose(null)).toBe(false)
+      expect(disposables.tryDispose(undefined)).toBe(false)
+    })
+
+    it('should call dispose and returns true', () => {
+      const disposable = new SimpleDisposable()
+      expect(disposables.tryDispose(disposable)).toBe(true)
+      expect(disposable.disposeCount).toBe(1)
+    })
+
+    it('should return false with non disposable objects', () => {
+      const nonDisposableObjects = [1, 'string', {}]
+      for (const disposable of nonDisposableObjects) {
+        expect(disposables.tryDispose(disposable as any)).toBe(false)
+      }
+    })
+
+    it('should return false and eat the exception if dispose trows an exception', () => {
+      const disposable = new ThrowingDisposable()
+      expect(disposables.tryDispose(disposable)).toBe(false)
+      expect(disposable.disposeCalled).toBe(true)
+    })
+
+    it('should execute a functor and eat the exception', () => {
+      const disposable = new ThrowingDisposable()
+      expect(disposables.tryDispose(disposable)).toBe(false)
+      expect(disposable.disposeCalled).toBe(true)
     })
   })
 
