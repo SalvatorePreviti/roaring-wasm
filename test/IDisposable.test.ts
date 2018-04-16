@@ -1,4 +1,4 @@
-import IDisposable = require('roaring/IDisposable')
+import IDisposable = require('roaring-wasm/IDisposable')
 
 describe('disposables', () => {
   class SimpleDisposable implements IDisposable {

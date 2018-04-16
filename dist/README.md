@@ -1,3 +1,3 @@
 # roaring
 
-https://github.com/SalvatorePreviti/node-roaring.git
+https://github.com/SalvatorePreviti/roaring-wasm.git

@@ -5,8 +5,8 @@
     "declaration": false,
     "noEmit": true,
     "paths": {
-      "roaring": ["../dist"],
-      "roaring*": ["../dist*"]
+      "roaring-wasm": ["../dist"],
+      "roaring-wasm*": ["../dist*"]
     },
     "rootDir": "."
   },

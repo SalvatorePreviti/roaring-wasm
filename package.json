@@ -1,5 +1,5 @@
 {
-  "name": "roaring-dev",
+  "name": "roaring-wasm-dev",
   "private": true,
   "version": "0.1.0",
   "description": "Node JS porting of Roaring using WebAssembly",
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SalvatorePreviti/node-roaring.git"
+    "url": "git+https://github.com/SalvatorePreviti/roaring-wasm.git"
   },
   "keywords": ["roaring"],
   "engines": {
@@ -21,14 +21,11 @@
   "author": "Salvatore Previti",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/SalvatorePreviti/node-roaring/issues"
+    "url": "https://github.com/SalvatorePreviti/roaring-wasm/issues"
   },
-  "homepage": "https://github.com/SalvatorePreviti/node-roaring#readme",
+  "homepage": "https://github.com/SalvatorePreviti/roaring-wasm#readme",
   "_moduleAliases": {
-    "roaring": "dist"
-  },
-  "peerDependencies": {
-    "roaring": "file:dist"
+    "roaring-wasm": "dist"
   },
   "devDependencies": {
     "@types/jest": "^22.2.3",

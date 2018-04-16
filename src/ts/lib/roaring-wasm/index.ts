@@ -29,6 +29,16 @@ type RoaringWasm = {
   _roaring_bitmap_to_uint32_array(roaring: number, arrayPtr: number): void
   _roaring_bitmap_equals(roaring1: number, roaring2: number): boolean
   _roaring_bitmap_flip_inplace(roaring: number, start: number, end: number): void
+  _roaring_bitmap_remove_run_compression(roaring: number): boolean
+  _roaring_bitmap_run_optimize(roaring: number): boolean
+  _roaring_bitmap_shrink_to_fit(roaring: number): number
+  _roaring_bitmap_select_js(roaring: number, rank: number): number
+  _roaring_bitmap_and_cardinality(roaring1: number, roaring2: number): number
+  _roaring_bitmap_or_cardinality(roaring1: number, roaring2: number): number
+  _roaring_bitmap_andnot_cardinality(roaring1: number, roaring2: number): number
+  _roaring_bitmap_xor_cardinality(roaring1: number, roaring2: number): number
+  _roaring_bitmap_rank(roaring: number, value: number): number
+  _roaring_bitmap_portable_serialize(roaring: number, buffer: number): number
 }
 
 function loadRoaringWasm(): RoaringWasm {

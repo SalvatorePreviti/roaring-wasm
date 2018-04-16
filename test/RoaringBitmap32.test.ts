@@ -1,5 +1,5 @@
-import IDisposable = require('roaring/IDisposable')
-import RoaringBitmap32 = require('roaring/RoaringBitmap32')
+import IDisposable = require('roaring-wasm/IDisposable')
+import RoaringBitmap32 = require('roaring-wasm/RoaringBitmap32')
 
 describe('RoaringBitmap32', () => {
   describe('constructor', () => {

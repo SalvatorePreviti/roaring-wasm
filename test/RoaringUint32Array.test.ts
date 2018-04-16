@@ -1,6 +1,6 @@
-import IDisposable = require('roaring/IDisposable')
-import roaringWasm = require('roaring/lib/roaring-wasm')
-import RoaringUint32Array = require('roaring/RoaringUint32Array')
+import IDisposable = require('roaring-wasm/IDisposable')
+import roaringWasm = require('roaring-wasm/lib/roaring-wasm')
+import RoaringUint32Array = require('roaring-wasm/RoaringUint32Array')
 
 function sameInstance(a: any, b: any): boolean {
   return a === b

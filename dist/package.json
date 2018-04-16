@@ -1,12 +1,12 @@
 {
-  "name": "roaring",
+  "name": "roaring-wasm",
   "version": "0.1.0",
   "description": "NodeJS WASM Roaring",
   "main": "index.js",
   "types": "index.d.ts",
   "repository": {
     "type": "git",
-    "url": "\"git+https://github.com/SalvatorePreviti/node-roaring.git\""
+    "url": "\"git+https://github.com/SalvatorePreviti/roaring-wasm.git\""
   },
   "keywords": ["roaring"],
   "engines": {

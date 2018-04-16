@@ -17,8 +17,21 @@ const {
   _roaring_bitmap_is_strict_subset,
   _roaring_bitmap_to_uint32_array,
   _roaring_bitmap_equals,
-  _roaring_bitmap_flip_inplace
+  _roaring_bitmap_flip_inplace,
+  _roaring_bitmap_run_optimize,
+  _roaring_bitmap_remove_run_compression,
+  _roaring_bitmap_shrink_to_fit,
+  _roaring_bitmap_select_js,
+  _roaring_bitmap_and_cardinality,
+  _roaring_bitmap_or_cardinality,
+  _roaring_bitmap_andnot_cardinality,
+  _roaring_bitmap_xor_cardinality,
+  _roaring_bitmap_rank
 } = roaringWasm
+
+function throwDisposed() {
+  throw new Error('RoaringBitmap32 was disposed')
+}
 
 /**
  * A Roaring Bitmap that supports 32 bit unsigned integers.
@@ -31,14 +44,14 @@ class RoaringBitmap32 implements IDisposable {
   constructor(initialCapacity: number = 4) {
     this._ptr = 0
     if (!Number.isInteger(initialCapacity) || initialCapacity < 0 || initialCapacity > 0x7fffffff) {
-      throw new TypeError(`Invalid ${initialCapacity}`)
+      throw new TypeError(`${this.constructor.name}: Invalid initial capacity: ${initialCapacity}`)
     }
     if (initialCapacity < 4) {
       initialCapacity = 4
     }
     this._ptr = _roaring_bitmap_create_with_capacity(initialCapacity) || 0
     if (this._ptr === 0) {
-      throw new Error(`${this.constructor.name} failed to allocate memory`)
+      throw new Error(`${this.constructor.name}: failed to allocate memory`)
     }
   }
 
@@ -75,7 +88,7 @@ class RoaringBitmap32 implements IDisposable {
    */
   public throwIfDisposed(): void | never {
     if (this.isDisposed) {
-      throw new Error(`${this.constructor.name} was disposed`)
+      throwDisposed()
     }
   }
 
@@ -107,29 +120,29 @@ class RoaringBitmap32 implements IDisposable {
    * @returns {this}
    */
   public add(value: number): void {
-    _roaring_bitmap_add(this.getPtr(), value)
+    _roaring_bitmap_add(this._getPtr(), value)
   }
 
   public addMany(values: RoaringUint32Array): void {
     if (values.length > 0) {
-      _roaring_bitmap_add_many(this.getPtr(), values.length, values.byteOffset)
+      _roaring_bitmap_add_many(this._getPtr(), values.length, values.byteOffset)
     }
   }
 
   public remove(value: number): void {
-    _roaring_bitmap_remove(this.getPtr(), value)
+    _roaring_bitmap_remove(this._getPtr(), value)
   }
 
   public maximum(): number {
-    return _roaring_bitmap_maximum(this.getPtr())
+    return _roaring_bitmap_maximum(this._getPtr())
   }
 
   public minimum(): number {
-    return _roaring_bitmap_minimum(this.getPtr())
+    return _roaring_bitmap_minimum(this._getPtr())
   }
 
   public contains(value: number): boolean {
-    return !!_roaring_bitmap_contains(this.getPtr(), value)
+    return !!_roaring_bitmap_contains(this._getPtr(), value)
   }
 
   /**
@@ -139,15 +152,15 @@ class RoaringBitmap32 implements IDisposable {
    * @returns {boolean}
    */
   public isSubset(other: RoaringBitmap32): boolean {
-    return !!_roaring_bitmap_is_subset(this.getPtr(), other.getPtr())
+    return !!_roaring_bitmap_is_subset(this._getPtr(), other._getPtr())
   }
 
   public isStrictSubset(other: RoaringBitmap32): boolean {
-    return !!_roaring_bitmap_is_strict_subset(this.getPtr(), other.getPtr())
+    return !!_roaring_bitmap_is_strict_subset(this._getPtr(), other._getPtr())
   }
 
   public toRoaringUint32Array(): RoaringUint32Array {
-    const ptr = this.getPtr()
+    const ptr = this._getPtr()
     const cardinality = _roaring_bitmap_get_cardinality(ptr)
     const result = new RoaringUint32Array(cardinality)
     if (cardinality > 0) {
@@ -168,13 +181,57 @@ class RoaringBitmap32 implements IDisposable {
   }
 
   public flipRange(start: number, end: number): void {
-    _roaring_bitmap_flip_inplace(this.getPtr(), start, end)
+    _roaring_bitmap_flip_inplace(this._getPtr(), start, end)
   }
 
-  private getPtr(): number {
+  public removeRunCompression(): boolean {
+    return !!_roaring_bitmap_remove_run_compression(this._getPtr())
+  }
+
+  public runOptimize(): boolean {
+    return !!_roaring_bitmap_run_optimize(this._getPtr())
+  }
+
+  public shrinkToFit(): number {
+    return _roaring_bitmap_shrink_to_fit(this._getPtr())
+  }
+
+  /**
+   * If the size of the roaring bitmap is strictly greater than rank, then
+   * this function returns the element of given rank.
+   * Otherwise, it returns NaN.
+   *
+   * @param {number} rank
+   * @returns {number} element or NaN
+   */
+  public select(rank: number): number {
+    return _roaring_bitmap_select_js(this._getPtr(), rank)
+  }
+
+  public andCardinality(other: RoaringBitmap32): number {
+    return _roaring_bitmap_and_cardinality(this._getPtr(), other._getPtr())
+  }
+
+  public orCardinality(other: RoaringBitmap32): number {
+    return _roaring_bitmap_or_cardinality(this._getPtr(), other._getPtr())
+  }
+
+  public andNotCardinality(other: RoaringBitmap32): number {
+    return _roaring_bitmap_andnot_cardinality(this._getPtr(), other._getPtr())
+  }
+
+  public xorCardinality(other: RoaringBitmap32): number {
+    return _roaring_bitmap_xor_cardinality(this._getPtr(), other._getPtr())
+  }
+
+  public rank(value: number): number {
+    return _roaring_bitmap_rank(this._getPtr(), value)
+  }
+
+  private _getPtr(): number {
     const ptr = this._ptr
     if (!ptr) {
-      this.throwIfDisposed()
+      throwDisposed()
     }
     return ptr
   }
