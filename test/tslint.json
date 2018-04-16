@@ -6,6 +6,7 @@
     "no-implicit-dependencies": false,
     "no-console": false,
     "typedef": false,
-    "completed-docs": false
+    "completed-docs": false,
+    "variable-name": false
   }
 }
