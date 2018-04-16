@@ -2,7 +2,7 @@ import roaringWasm = require('./roaring-wasm')
 
 /**
  * Base class for typed arrays allocted directly in roaring library WASM memory.
- * Note: Meory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
+ * Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
  *
  * @abstract
  * @class RoaringTypedArray
