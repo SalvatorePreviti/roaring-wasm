@@ -16,10 +16,19 @@ Portable Roaring bitmaps in C - <https://github.com/RoaringBitmap/CRoaring>
 -   [dispose](#dispose)
 -   [tryDispose](#trydispose)
 -   [using](#using)
--   [RoaringBitmap32](#roaringbitmap32)
+-   [RoaringTypedArray](#roaringtypedarray)
+    -   [buffer](#buffer)
     -   [isDisposed](#isdisposed)
+    -   [set](#set)
     -   [dispose](#dispose-1)
+    -   [toArray](#toarray)
+    -   [toString](#tostring)
+-   [RoaringUint8Array](#roaringuint8array)
     -   [throwIfDisposed](#throwifdisposed)
+-   [RoaringBitmap32](#roaringbitmap32)
+    -   [isDisposed](#isdisposed-1)
+    -   [dispose](#dispose-2)
+    -   [throwIfDisposed](#throwifdisposed-1)
     -   [cardinality](#cardinality)
     -   [isEmpty](#isempty)
     -   [add](#add)
@@ -31,7 +40,7 @@ Portable Roaring bitmaps in C - <https://github.com/RoaringBitmap/CRoaring>
     -   [isSubset](#issubset)
     -   [isStrictSubset](#isstrictsubset)
     -   [toRoaringUint32Array](#toroaringuint32array)
-    -   [toArray](#toarray)
+    -   [toArray](#toarray-1)
     -   [equals](#equals)
     -   [flipRange](#fliprange)
     -   [optimize](#optimize)
@@ -51,15 +60,6 @@ Portable Roaring bitmaps in C - <https://github.com/RoaringBitmap/CRoaring>
     -   [serializePortable](#serializeportable)
     -   [deserializePortable](#deserializeportable)
 -   [RoaringUint32Array](#roaringuint32array)
--   [RoaringTypedArray](#roaringtypedarray)
-    -   [buffer](#buffer)
-    -   [isDisposed](#isdisposed-1)
-    -   [set](#set)
-    -   [dispose](#dispose-2)
-    -   [toArray](#toarray-1)
-    -   [toString](#tostring)
--   [RoaringUint8Array](#roaringuint8array)
-    -   [throwIfDisposed](#throwifdisposed-1)
 
 ## IDisposable
 
@@ -94,6 +94,63 @@ Safe function that disposes the given object when the functor or the promise ret
 -   `functor`  
 
 Returns **TResult** 
+
+## RoaringTypedArray
+
+Base class for typed arrays allocted directly in roaring library WASM memory.
+Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
+
+### buffer
+
+The ArrayBuffer instance referenced by the array.
+Note that the buffer may become invalid if the WASM allocated memory grows.
+When the WASM grows the preallocated memory this property will return the new allocated buffer.
+Use the returned buffer for short periods of time.
+
+Type: [ArrayBuffer](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
+
+### isDisposed
+
+Returns true if this object was deallocated.
+
+Type: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+### set
+
+Writes the given array at the specified position
+
+**Parameters**
+
+-   `array`  A typed or untyped array of values to set.
+-   `offset`  The index in the current array at which the values are to be written.
+
+### dispose
+
+Frees the allocated memory.
+Is safe to call this method more than once.
+
+Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if memory gets freed during this call, false if not.
+
+### toArray
+
+Copies the content of this typed array into a standard JS array of numbers and returns it.
+
+Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** A new array.
+
+### toString
+
+Returns a string representation of an array.
+
+## RoaringUint8Array
+
+Array of bytes allocted directly in roaring library WASM memory.
+Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
+
+### throwIfDisposed
+
+Throws an error if the memory was freed.
+
+Returns **(void | never)** 
 
 ## RoaringBitmap32
 
@@ -402,60 +459,3 @@ Throws an error if deserialization failed.
 
 Array of bytes allocted directly in roaring library WASM memory.
 Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
-
-## RoaringTypedArray
-
-Base class for typed arrays allocted directly in roaring library WASM memory.
-Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
-
-### buffer
-
-The ArrayBuffer instance referenced by the array.
-Note that the buffer may become invalid if the WASM allocated memory grows.
-When the WASM grows the preallocated memory this property will return the new allocated buffer.
-Use the returned buffer for short periods of time.
-
-Type: [ArrayBuffer](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
-
-### isDisposed
-
-Returns true if this object was deallocated.
-
-Type: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
-
-### set
-
-Writes the given array at the specified position
-
-**Parameters**
-
--   `array`  A typed or untyped array of values to set.
--   `offset`  The index in the current array at which the values are to be written.
-
-### dispose
-
-Frees the allocated memory.
-Is safe to call this method more than once.
-
-Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if memory gets freed during this call, false if not.
-
-### toArray
-
-Copies the content of this typed array into a standard JS array of numbers and returns it.
-
-Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** A new array.
-
-### toString
-
-Returns a string representation of an array.
-
-## RoaringUint8Array
-
-Array of bytes allocted directly in roaring library WASM memory.
-Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
-
-### throwIfDisposed
-
-Throws an error if the memory was freed.
-
-Returns **(void | never)** 

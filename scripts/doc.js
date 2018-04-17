@@ -7,7 +7,8 @@ const logging = require('./lib/logging')
 const spawnAsync = require('./lib/spawnAsync')
 
 async function doc() {
-  const files = await globby(path.join(root, 'dist', '*.js'))
+  const paths = [path.join(root, 'dist', '*.js'), path.join(root, 'dist', 'lib', '*.js')]
+  const files = await globby(paths)
   files.sort()
 
   const args = ['readme', ...files, '--section=API']
