@@ -22,6 +22,20 @@ uint32_t get_sizeof_roaring_bitmap_t() {
   return sizeof(roaring_bitmap_t);
 }
 
+bool roaring_bitmap_optimize_js(roaring_bitmap_t * bitmap) {
+  bool result = false;
+  for (int repeat = 0; repeat < 4; ++repeat) {
+    if (roaring_bitmap_run_optimize(bitmap))
+      result = true;
+    if (roaring_bitmap_shrink_to_fit(bitmap))
+      result = true;
+    if (!result) {
+      break;
+    }
+  }
+  return result;
+}
+
 roaring_bitmap_js_t * roaring_bitmap_create_js(uint32_t capacity) {
   if (capacity < 4)
     capacity = 4;

@@ -14,12 +14,9 @@ type RoaringWasm = {
 
   _malloc(size: number): number
   _free(pointer: number): void
-
   _get_sizeof_roaring_bitmap_t(): number
-
   _roaring_bitmap_create_js(initialCapacity: number): number
   _roaring_bitmap_free(roaring: number): void
-
   _roaring_bitmap_get_cardinality(roaring: number): number
   _roaring_bitmap_is_empty(roaring: number): boolean
   _roaring_bitmap_add(roaring: number, value: number): void
@@ -33,9 +30,7 @@ type RoaringWasm = {
   _roaring_bitmap_to_uint32_array(roaring: number, arrayPtr: number): void
   _roaring_bitmap_equals(roaring1: number, roaring2: number): boolean
   _roaring_bitmap_flip_inplace(roaring: number, start: number, end: number): void
-  _roaring_bitmap_remove_run_compression(roaring: number): boolean
-  _roaring_bitmap_run_optimize(roaring: number): boolean
-  _roaring_bitmap_shrink_to_fit(roaring: number): number
+  _roaring_bitmap_optimize_js(roaring: number): boolean
   _roaring_bitmap_select_js(roaring: number, rank: number): number
   _roaring_bitmap_and_cardinality(roaring1: number, roaring2: number): number
   _roaring_bitmap_or_cardinality(roaring1: number, roaring2: number): number
@@ -45,6 +40,12 @@ type RoaringWasm = {
   _roaring_bitmap_portable_size_in_bytes(roaring: number): number
   _roaring_bitmap_portable_serialize_alloc_js(roaring: number): boolean
   _roaring_bitmap_portable_deserialize_js(roaring: number, buf: number, size: number): number
+  _roaring_bitmap_and_inplace(roaring1: number, roaring2: number): void
+  _roaring_bitmap_or_inplace(roaring1: number, roaring2: number): void
+  _roaring_bitmap_xor_inplace(roaring1: number, roaring2: number): void
+  _roaring_bitmap_andnot_inplace(roaring1: number, roaring2: number): void
+  _roaring_bitmap_intersect(roaring1: number, roaring2: number): boolean
+  _roaring_bitmap_jaccard_index(roaring: number): number
 }
 
 function loadRoaringWasm(): RoaringWasm {
