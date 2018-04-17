@@ -9,7 +9,6 @@ function sameInstance(a: any, b: any): boolean {
 describe('RoaringUint32Array', () => {
   it('allows creating empty arrays', () => {
     IDisposable.using(new RoaringUint32Array(0), p => {
-      console.log(p)
       expect(p.length).toBe(0)
       expect(p.byteLength).toBe(0)
       expect(p.byteOffset).toBe(0)

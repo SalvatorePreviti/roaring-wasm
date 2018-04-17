@@ -15,7 +15,7 @@ async function listCppFiles() {
 
 async function compileWasm() {
   const files = await listCppFiles()
-  await logging.time(`compile ${files.length} cpp files`, async () => {
+  await logging.time(`compile ${files.length} C files`, async () => {
     await mkdirpAsync(path.join(root, path.dirname(emccConfig.emcc.out)))
     await spawnAsync('emcc', [...files, ...emccConfig.emcc.args, '-o', emccConfig.emcc.out], {
       stdio: 'inherit',

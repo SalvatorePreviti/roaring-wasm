@@ -74,7 +74,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
     return this.byteOffset === 0
   }
 
-  protected constructor(lengthOrArray: number | ReadonlyArray<number> | TypedArray | RoaringTypedArray<TypedArray>, bytesPerElement: number) {
+  protected constructor(lengthOrArray: number | ReadonlyArray<number> | TypedArray | RoaringTypedArray<TypedArray>, bytesPerElement: number, pointer?: number) {
     let length: number
 
     if (lengthOrArray instanceof RoaringTypedArray) {
@@ -98,11 +98,13 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
       this.byteOffset = 0
       this.length = 0
     } else {
-      const byteOffset: number = roaringWasm._malloc(length * bytesPerElement)
-      if (byteOffset === 0) {
+      if (pointer === undefined) {
+        pointer = roaringWasm._malloc(length * bytesPerElement)
+      }
+      if (!pointer) {
         throw new Error(`Failed to allocate ${length * bytesPerElement} bytes`)
       }
-      this.byteOffset = byteOffset
+      this.byteOffset = pointer
       this.length = length
 
       if (typeof lengthOrArray !== 'number') {

@@ -10,10 +10,14 @@ type RoaringWasm = {
   readonly HEAPF32: Float32Array
   readonly HEAPF64: Float64Array
 
+  roaring_bitmap_temp_offset: number
+
   _malloc(size: number): number
   _free(pointer: number): void
 
-  _roaring_bitmap_create_with_capacity(initialCapacity: number): number
+  _get_sizeof_roaring_bitmap_t(): number
+
+  _roaring_bitmap_create_js(initialCapacity: number): number
   _roaring_bitmap_free(roaring: number): void
 
   _roaring_bitmap_get_cardinality(roaring: number): number
@@ -38,16 +42,23 @@ type RoaringWasm = {
   _roaring_bitmap_andnot_cardinality(roaring1: number, roaring2: number): number
   _roaring_bitmap_xor_cardinality(roaring1: number, roaring2: number): number
   _roaring_bitmap_rank(roaring: number, value: number): number
-  _roaring_bitmap_portable_serialize(roaring: number, buffer: number): number
+  _roaring_bitmap_portable_size_in_bytes(roaring: number): number
+  _roaring_bitmap_portable_serialize_alloc_js(roaring: number): boolean
+  _roaring_bitmap_portable_deserialize_js(roaring: number, buf: number, size: number): number
 }
 
 function loadRoaringWasm(): RoaringWasm {
   const cwd: string = process.cwd()
   try {
     process.chdir(__dirname)
-    return require('./roaring-wasm-module')({
+
+    const roaringWasm = require('./roaring-wasm-module')({
       noExitRuntime: true
-    })
+    }) as RoaringWasm
+
+    roaringWasm.roaring_bitmap_temp_offset = roaringWasm._get_sizeof_roaring_bitmap_t()
+
+    return roaringWasm
   } finally {
     process.chdir(cwd)
   }

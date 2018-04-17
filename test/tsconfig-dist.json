@@ -5,10 +5,10 @@
     "declaration": false,
     "noEmit": true,
     "paths": {
-      "roaring-wasm": ["../src/ts"],
-      "roaring-wasm*": ["../src/ts*"]
+      "roaring-wasm": ["../dist"],
+      "roaring-wasm*": ["../dist*"]
     },
-    "rootDir": "../"
+    "rootDir": "."
   },
   "include": ["."],
   "typeAcquisition": {

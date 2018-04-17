@@ -1,7 +1,8 @@
 const exportedFunctions = [
   '_malloc',
   '_free',
-  '_roaring_bitmap_create_with_capacity',
+  '_get_sizeof_roaring_bitmap_t',
+  '_roaring_bitmap_create_js',
   '_roaring_bitmap_free',
   '_roaring_bitmap_get_cardinality',
   '_roaring_bitmap_is_empty',
@@ -25,7 +26,12 @@ const exportedFunctions = [
   '_roaring_bitmap_andnot_cardinality',
   '_roaring_bitmap_xor_cardinality',
   '_roaring_bitmap_rank',
-  '_roaring_bitmap_portable_serialize'
+  '_roaring_bitmap_size_in_bytes',
+  '_roaring_bitmap_serialize_alloc_js',
+  '_roaring_bitmap_portable_size_in_bytes',
+  '_roaring_bitmap_portable_serialize_alloc_js',
+  '_roaring_bitmap_deserialize_js',
+  '_roaring_bitmap_portable_deserialize_js'
 ]
 
 module.exports = exportedFunctions

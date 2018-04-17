@@ -22,6 +22,7 @@
     "no-parameter-reassignment": false,
     "no-console": false,
     "strict-boolean-expressions": false,
+    "no-bitwise": false,
     "typedef": false
   }
 }

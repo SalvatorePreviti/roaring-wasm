@@ -56,7 +56,7 @@ function buildEmccClosureArgs() {
 
 const config = {
   emcc: {
-    sources: ['src/**/*.cpp'],
+    sources: ['src/**/*.c', 'src/**/*.cpp'],
     out: 'dist/lib/roaring-wasm/roaring-wasm-module.js',
     args: buildEmccArgs(),
     closureArgs: buildEmccClosureArgs()

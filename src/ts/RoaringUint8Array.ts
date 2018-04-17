@@ -26,8 +26,8 @@ class RoaringUint8Array extends RoaringTypedArray<Uint8Array> {
    *
    * @param {(number | RoaringUint8Array | Uint8Array | ReadonlyArray<number>)} lengthOrArray Length of the array to allocate or the array to copy
    */
-  public constructor(lengthOrArray: number | Uint8Array | RoaringUint8Array | ReadonlyArray<number>) {
-    super(lengthOrArray, 1)
+  public constructor(lengthOrArray: number | Uint8Array | RoaringUint8Array | ReadonlyArray<number>, pointer?: number) {
+    super(lengthOrArray, 1, pointer)
   }
 
   public asTypedArray(): Uint8Array {
