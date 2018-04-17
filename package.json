@@ -36,6 +36,8 @@
     "binaryen": "^46.0.0",
     "chalk": "^2.4.0",
     "del": "^3.0.0",
+    "delete-empty": "^2.0.0",
+    "documentation": "^6.2.0",
     "eslint": "^4.19.1",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-import": "^2.11.0",
@@ -50,7 +52,6 @@
     "tslint": "^5.9.1",
     "tslint-config-prettier": "^1.10.0",
     "tslint-microsoft-contrib": "^5.0.3",
-    "typescript": "^2.8.1",
-    "delete-empty": "^2.0.0"
+    "typescript": "^2.8.1"
   }
 }

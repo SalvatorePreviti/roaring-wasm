@@ -4,6 +4,7 @@ const logging = require('./lib/logging')
 const clean = require('./clean')
 const compileWasm = require('./compile-wasm')
 const compileTs = require('./compile-ts')
+const doc = require('./doc')
 const test = require('./test')
 
 async function build() {
@@ -12,6 +13,7 @@ async function build() {
     await compileWasm()
     await compileTs()
     await test()
+    await doc()
     logging.log()
   })
   logging.log()
