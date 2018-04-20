@@ -33,6 +33,10 @@ class RoaringUint32Array extends RoaringTypedArray<Uint32Array> {
   public asTypedArray(): Uint32Array {
     return new Uint32Array(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length)
   }
+
+  public asNodeBuffer(): Buffer {
+    return Buffer.from(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length * 4)
+  }
 }
 
 Object.defineProperty(RoaringUint32Array.prototype, 'BYTES_PER_ELEMENT', { value: 4, writable: false, configurable: false, enumerable: false })

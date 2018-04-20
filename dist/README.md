@@ -2,6 +2,8 @@
 
 WebAssembly port of CRoaring.
 
+This project - <https://github.com/SalvatorePreviti/roaring-wasm>
+
 Roaring Bitmaps - <http://roaringbitmap.org/>
 
 Portable Roaring bitmaps in C - <https://github.com/RoaringBitmap/CRoaring>
@@ -13,21 +15,23 @@ Portable Roaring bitmaps in C - <https://github.com/RoaringBitmap/CRoaring>
 ### Table of Contents
 
 -   [IDisposable](#idisposable)
--   [dispose](#dispose)
--   [tryDispose](#trydispose)
--   [using](#using)
+    -   [dispose](#dispose)
+    -   [dispose](#dispose-1)
+    -   [tryDispose](#trydispose)
+    -   [using](#using)
 -   [RoaringTypedArray](#roaringtypedarray)
     -   [buffer](#buffer)
     -   [isDisposed](#isdisposed)
     -   [set](#set)
-    -   [dispose](#dispose-1)
+    -   [dispose](#dispose-2)
     -   [toArray](#toarray)
     -   [toString](#tostring)
 -   [RoaringUint8Array](#roaringuint8array)
     -   [throwIfDisposed](#throwifdisposed)
+-   [Roaring32Compressed](#roaring32compressed)
 -   [RoaringBitmap32](#roaringbitmap32)
     -   [isDisposed](#isdisposed-1)
-    -   [dispose](#dispose-2)
+    -   [dispose](#dispose-3)
     -   [throwIfDisposed](#throwifdisposed-1)
     -   [cardinality](#cardinality)
     -   [isEmpty](#isempty)
@@ -55,9 +59,12 @@ Portable Roaring bitmaps in C - <https://github.com/RoaringBitmap/CRoaring>
     -   [andNot](#andnot)
     -   [rank](#rank)
     -   [getSerializationSizeInBytesPortable](#getserializationsizeinbytesportable)
+    -   [getSerializationSizeInBytesNative](#getserializationsizeinbytesnative)
     -   [intersects](#intersects)
     -   [jaccardIndex](#jaccardindex)
     -   [serializePortable](#serializeportable)
+    -   [serializeNative](#serializenative)
+    -   [serializeCompressed](#serializecompressed)
     -   [deserializePortable](#deserializeportable)
 -   [RoaringUint32Array](#roaringuint32array)
 
@@ -65,7 +72,13 @@ Portable Roaring bitmaps in C - <https://github.com/RoaringBitmap/CRoaring>
 
 Disposable object helper functions
 
-## dispose
+### dispose
+
+Disposes the given object.
+
+Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if disposed during this call, false if not.
+
+### dispose
 
 Disposes the given disposable.
 
@@ -75,7 +88,7 @@ Disposes the given disposable.
 
 Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if disposed during this call, false if not
 
-## tryDispose
+### tryDispose
 
 Try to dispose the given instance, ignoring errors.
 
@@ -84,7 +97,7 @@ Try to dispose the given instance, ignoring errors.
 -   `disposable`  
 -   `instance`  The IDisposable to dispose.
 
-## using
+### using
 
 Safe function that disposes the given object when the functor or the promise returned by the functor completes.
 
@@ -151,6 +164,10 @@ Note: Memory is not garbage collected, you are responsible to free the allocated
 Throws an error if the memory was freed.
 
 Returns **(void | never)** 
+
+## Roaring32Compressed
+
+Compression and decompression functions
 
 ## RoaringBitmap32
 
@@ -416,6 +433,12 @@ Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/G
 How many bytes are required to serialize this bitmap in a portable way.
 The portable serialization is compatible with Java and Go versions of this library.
 
+### getSerializationSizeInBytesNative
+
+How many bytes are required to serialize this bitmap in a portable way.
+Can be lessthan the portable version.
+The portable serialization is compatible with the C++ versions of this library.
+
 ### intersects
 
 Check whether the two bitmaps intersect (have at least one element in common).
@@ -438,10 +461,37 @@ Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/G
 
 ### serializePortable
 
-write a bitmap to a byte buffer allocated in WASM memory.
+Serializes a bitmap to a byte buffer allocated in WASM memory.
 This is meant to be compatible with the Java and Go versions of the library.
+
 The returned RoaringUint8Array is allocated in WASM memory and not garbage collected,
 it need to be freed manually calling dispose().
+
+Returns **[RoaringUint8Array](#roaringuint8array)** The RoaringUint8Array. Remember to manually dispose to free the memory.
+
+### serializeNative
+
+Serializes a bitmap to a byte buffer allocated in WASM memory.
+This is meant to be compatible with the C++ version of the library.
+Can generate smaller outputs than the portable version.
+
+The returned RoaringUint8Array is allocated in WASM memory and not garbage collected,
+it need to be freed manually calling dispose().
+
+Returns **[RoaringUint8Array](#roaringuint8array)** The RoaringUint8Array. Remember to manually dispose to free the memory.
+
+### serializeCompressed
+
+Serializes a bitmap to a byte buffer allocated in WASM memory.
+Compresses the serialized bitmap using a custom LZMA format.
+Is slower but can generate very small outputs than the other versions.
+
+The returned RoaringUint8Array is allocated in WASM memory and not garbage collected,
+it need to be freed manually calling dispose().
+
+**Parameters**
+
+-   `compressionLevel` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** between 0 and 9 (optional, default `3`)
 
 Returns **[RoaringUint8Array](#roaringuint8array)** The RoaringUint8Array. Remember to manually dispose to free the memory.
 

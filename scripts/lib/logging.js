@@ -69,17 +69,21 @@ const logging = {
       logging.failure(description)
       throw error
     }
-    if (result && typeof result.then === 'function' && typeof result.catch === 'function') {
-      return result
-        .then(x => {
-          logging.timeEnd(successText)
-          return x
-        })
-        .catch(error => {
+    if (result && typeof result.then === 'function') {
+      result = result.then(x => {
+        logging.timeEnd(successText)
+        return x
+      })
+
+      if (typeof result.catch === 'function') {
+        result = result.catch(error => {
           logging.failure(description)
           console.log()
-          return Promise.reject(error)
+          throw error
         })
+      }
+    } else {
+      logging.timeEnd(successText)
     }
     return result
   },

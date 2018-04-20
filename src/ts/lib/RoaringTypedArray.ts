@@ -1,3 +1,4 @@
+import IDisposable = require('../IDisposable')
 import roaringWasm = require('./roaring-wasm')
 
 /**
@@ -6,9 +7,9 @@ import roaringWasm = require('./roaring-wasm')
  *
  * @abstract
  * @class RoaringTypedArray
- * @template TypedArray
+ * @template TypedArray Uint8Array | Uint16Array | Uint32Array
  */
-abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | Uint32Array> {
+abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | Uint32Array> extends IDisposable {
   /**
    * The offset in bytes of the array (the location of the first byte in WASM memory).
    * @readonly
@@ -75,6 +76,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
   }
 
   protected constructor(lengthOrArray: number | ReadonlyArray<number> | TypedArray | RoaringTypedArray<TypedArray>, bytesPerElement: number, pointer?: number) {
+    super()
     let length: number
 
     if (lengthOrArray instanceof RoaringTypedArray) {
@@ -155,13 +157,22 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
   }
 
   /**
-   * Gets a new Uint8Array instance that shares the memory used by this buffer.
-   * Note that the buffer may become invalid if the WASM allocated memory grows.
+   * Gets a new typed array instance that shares the memory used by this buffer.
+   * Note that the buffer may point to an outdated WASM memory if the WASM allocated memory grows while using the returned buffer.
    * Use the returned array for short periods of time.
    *
-   * @returns {Uint8Array} A new instance of Uint8Array
+   * @returns {TypedArray} A new instance of Uint8Array
    */
   public abstract asTypedArray(): TypedArray
+
+  /**
+   * Gets a new NodeJS Buffer instance that shares the memory used by this buffer.
+   * Note that the buffer may point to an outdated WASM memory if the WASM allocated memory grows while using the returned buffer.
+   * Use the returned array for short periods of time.
+   *
+   * @returns {Buffer} A new instance of NodeJS Buffer
+   */
+  public abstract asNodeBuffer(): Buffer
 
   /**
    * Copies the content of this typed array into a standard JS array of numbers and returns it.
