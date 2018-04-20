@@ -58,6 +58,11 @@ roaring_bitmap_js_t * roaring_bitmap_create_js(uint32_t capacity) {
   return result;
 }
 
+double roaring_bitmap_select_js(const roaring_bitmap_t * bm, uint32_t rank) {
+  uint32_t element;
+  return roaring_bitmap_select(bm, rank, &element) ? element : NAN;
+}
+
 bool roaring_bitmap_portable_deserialize_js(roaring_bitmap_t * bitmap, const char * buf, uint32_t size) {
   if (!bitmap || !size || !buf) {
     return false;
@@ -66,7 +71,46 @@ bool roaring_bitmap_portable_deserialize_js(roaring_bitmap_t * bitmap, const cha
   return ra_portable_deserialize(&bitmap->high_low_container, buf, size, &bytesread);
 }
 
-bool roaring_bitmap_portable_serialize_alloc_js(roaring_bitmap_js_t * b) {
+bool roaring_bitmap_native_deserialize_js(roaring_bitmap_t * bitmap, const char * buf, uint32_t size) {
+  if (size == 0) {
+    return true;
+  }
+
+  if (!bitmap || !buf) {
+    return false;
+  }
+
+  switch (buf[0]) {
+    case SERIALIZATION_ARRAY_UINT32: {
+      if (size == 1) {
+        return true;
+      }
+
+      if (size < 5) {
+        return false;
+      }
+
+      uint32_t card;
+      memcpy(&card, buf + 1, sizeof(uint32_t));
+
+      if (card == 0) {
+        return true;
+      }
+
+      const uint32_t * elems = (const uint32_t *)(buf + 1 + sizeof(uint32_t));
+      roaring_bitmap_add_many(bitmap, card, elems);
+      return true;
+    }
+
+    case SERIALIZATION_CONTAINER: {
+      return roaring_bitmap_portable_deserialize_js(bitmap, buf + 1, size - 1);
+    }
+  }
+
+  return false;
+}
+
+bool roaring_bitmap_portable_serialize_js(roaring_bitmap_js_t * b) {
   if (b == NULL)
     return false;
 
@@ -92,7 +136,28 @@ bool roaring_bitmap_portable_serialize_alloc_js(roaring_bitmap_js_t * b) {
   return true;
 }
 
-double roaring_bitmap_select_js(const roaring_bitmap_t * bm, uint32_t rank) {
-  uint32_t element;
-  return roaring_bitmap_select(bm, rank, &element) ? element : NAN;
+bool roaring_bitmap_native_serialize_js(roaring_bitmap_js_t * b) {
+  if (b == NULL)
+    return false;
+
+  if (!b)
+    return false;
+
+  size_t size = roaring_bitmap_size_in_bytes(&b->b);
+  if (size == 0)
+    return false;
+
+  char * ptr = (char *)malloc(size);
+  if (ptr == NULL)
+    return false;
+
+  size_t newSize = roaring_bitmap_serialize(&b->b, ptr);
+  if (newSize == 0) {
+    free(ptr);
+    return false;
+  }
+
+  b->tempUint32 = size;
+  b->tempPointer = ptr;
+  return true;
 }

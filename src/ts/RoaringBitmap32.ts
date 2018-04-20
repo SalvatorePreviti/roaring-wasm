@@ -26,15 +26,20 @@ const {
   _roaring_bitmap_andnot_cardinality,
   _roaring_bitmap_xor_cardinality,
   _roaring_bitmap_rank,
-  _roaring_bitmap_portable_size_in_bytes,
-  _roaring_bitmap_portable_serialize_alloc_js,
-  _roaring_bitmap_portable_deserialize_js,
   _roaring_bitmap_and_inplace,
   _roaring_bitmap_or_inplace,
   _roaring_bitmap_xor_inplace,
   _roaring_bitmap_andnot_inplace,
   _roaring_bitmap_intersect,
-  _roaring_bitmap_jaccard_index
+  _roaring_bitmap_jaccard_index,
+
+  _roaring_bitmap_portable_size_in_bytes,
+  _roaring_bitmap_portable_serialize_js,
+  _roaring_bitmap_portable_deserialize_js,
+
+  _roaring_bitmap_size_in_bytes,
+  _roaring_bitmap_native_serialize_js,
+  _roaring_bitmap_native_deserialize_js
 } = roaringWasm
 
 /**
@@ -44,10 +49,11 @@ const {
  *
  * @class RoaringBitmap32
  */
-class RoaringBitmap32 implements IDisposable {
+class RoaringBitmap32 extends IDisposable {
   private _ptr: number
 
   public constructor(initialCapacity: number = 0) {
+    super()
     this._ptr = 0
     if (!Number.isInteger(initialCapacity) || initialCapacity < 0 || initialCapacity > 0x7fffffff) {
       throw new TypeError(`${this.constructor.name}: Invalid initial capacity: ${initialCapacity}`)
@@ -385,6 +391,15 @@ class RoaringBitmap32 implements IDisposable {
   }
 
   /**
+   * How many bytes are required to serialize this bitmap in a portable way.
+   * Can be lessthan the portable version.
+   * The portable serialization is compatible with the C++ versions of this library.
+   */
+  public getSerializationSizeInBytesNative(): number {
+    return _roaring_bitmap_size_in_bytes(this._getPtr()) >>> 0
+  }
+
+  /**
    * Check whether the two bitmaps intersect (have at least one element in common).
    *
    * @param {RoaringBitmap32} other The other bitmap.
@@ -408,8 +423,9 @@ class RoaringBitmap32 implements IDisposable {
   }
 
   /**
-   * write a bitmap to a byte buffer allocated in WASM memory.
+   * Serializes a bitmap to a byte buffer allocated in WASM memory.
    * This is meant to be compatible with the Java and Go versions of the library.
+   *
    * The returned RoaringUint8Array is allocated in WASM memory and not garbage collected,
    * it need to be freed manually calling dispose().
    *
@@ -417,8 +433,28 @@ class RoaringBitmap32 implements IDisposable {
    */
   public serializePortable(): RoaringUint8Array {
     const ptr = this._getPtr()
-    if (!_roaring_bitmap_portable_serialize_alloc_js(ptr)) {
-      throw new Error('RoaringBitmap32 serialization failed')
+    if (!_roaring_bitmap_portable_serialize_js(ptr)) {
+      throw new Error('RoaringBitmap32 portable serialization failed')
+    }
+
+    const tempPtr = (ptr + roaringWasm.roaring_bitmap_temp_offset) / 4
+    return new RoaringUint8Array(roaringWasm.HEAPU32[tempPtr], roaringWasm.HEAPU32[tempPtr + 1])
+  }
+
+  /**
+   * Serializes a bitmap to a byte buffer allocated in WASM memory.
+   * This is meant to be compatible with the C++ version of the library.
+   * Can generate smaller outputs than the portable version.
+   *
+   * The returned RoaringUint8Array is allocated in WASM memory and not garbage collected,
+   * it need to be freed manually calling dispose().
+   *
+   * @returns {RoaringUint8Array} The RoaringUint8Array. Remember to manually dispose to free the memory.
+   */
+  public serializeNative(): RoaringUint8Array {
+    const ptr = this._getPtr()
+    if (!_roaring_bitmap_native_serialize_js(ptr)) {
+      throw new Error('RoaringBitmap32 native serialization failed')
     }
 
     const tempPtr = (ptr + roaringWasm.roaring_bitmap_temp_offset) / 4
@@ -442,6 +478,28 @@ class RoaringBitmap32 implements IDisposable {
         throw new TypeError('RoaringBitmap32 deserialize expects a RoaringUint8Array')
       }
       if (!_roaring_bitmap_portable_deserialize_js(this._getPtr(), buffer.byteOffset, buffer.length)) {
+        throw new Error('RoaringBitmap32 deserialization failed')
+      }
+    }
+  }
+
+  /**
+   * Reads a bitmap from a serialized version.
+   * This is meant to be compatible with the Java and Go versions of the library.
+   * Throws an error if deserialization failed.
+   *
+   * @param {(RoaringUint8Array | Uint8Array | number[])} buffer The containing the data to deserialize.
+   */
+  public deserializeNative(buffer: RoaringUint8Array | Uint8Array | number[]): void {
+    if (buffer instanceof Uint8Array || Array.isArray(buffer)) {
+      IDisposable.using(new RoaringUint8Array(buffer), p => {
+        this.deserializeNative(p)
+      })
+    } else {
+      if (!(buffer instanceof RoaringUint8Array)) {
+        throw new TypeError('RoaringBitmap32 deserialize expects a RoaringUint8Array')
+      }
+      if (!_roaring_bitmap_native_deserialize_js(this._getPtr(), buffer.byteOffset, buffer.length)) {
         throw new Error('RoaringBitmap32 deserialization failed')
       }
     }

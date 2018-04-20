@@ -37,32 +37,41 @@ type RoaringWasm = {
   _roaring_bitmap_andnot_cardinality(roaring1: number, roaring2: number): number
   _roaring_bitmap_xor_cardinality(roaring1: number, roaring2: number): number
   _roaring_bitmap_rank(roaring: number, value: number): number
-  _roaring_bitmap_portable_size_in_bytes(roaring: number): number
-  _roaring_bitmap_portable_serialize_alloc_js(roaring: number): boolean
-  _roaring_bitmap_portable_deserialize_js(roaring: number, buf: number, size: number): number
   _roaring_bitmap_and_inplace(roaring1: number, roaring2: number): void
   _roaring_bitmap_or_inplace(roaring1: number, roaring2: number): void
   _roaring_bitmap_xor_inplace(roaring1: number, roaring2: number): void
   _roaring_bitmap_andnot_inplace(roaring1: number, roaring2: number): void
   _roaring_bitmap_intersect(roaring1: number, roaring2: number): boolean
   _roaring_bitmap_jaccard_index(roaring: number): number
+
+  _roaring_bitmap_portable_size_in_bytes(roaring: number): number
+  _roaring_bitmap_portable_serialize_js(roaring: number): boolean
+  _roaring_bitmap_portable_deserialize_js(roaring: number, buf: number, size: number): number
+
+  _roaring_bitmap_size_in_bytes(roaring: number): number
+  _roaring_bitmap_native_serialize_js(roaring: number): boolean
+
+  _roaring_bitmap_compressed_serialize_js(roaring: number, level: number): boolean
+  _roaring_bitmap_native_deserialize_js(roaring: number, buf: number, size: number): number
 }
 
 function loadRoaringWasm(): RoaringWasm {
-  const cwd: string = process.cwd()
-  try {
-    process.chdir(__dirname)
+  //const cwd = typeof process === 'object' && typeof process.cwd === 'function' && process.cwd()
 
-    const roaringWasm = require('./roaring-wasm-module')({
-      noExitRuntime: true
-    }) as RoaringWasm
+  const roaringWasmModule = require('./roaring-wasm-module')
 
-    roaringWasm.roaring_bitmap_temp_offset = roaringWasm._get_sizeof_roaring_bitmap_t()
-
-    return roaringWasm
-  } finally {
-    process.chdir(cwd)
+  const m = {
+    noExitRuntime: true,
+    locateFile(file: any) {
+      return typeof __dirname === 'string' && __dirname ? `${__dirname}/${file}` : file
+    }
   }
+
+  const roaringWasm = roaringWasmModule(m) as RoaringWasm
+
+  roaringWasm.roaring_bitmap_temp_offset = roaringWasm._get_sizeof_roaring_bitmap_t()
+
+  return roaringWasm
 }
 
 /**

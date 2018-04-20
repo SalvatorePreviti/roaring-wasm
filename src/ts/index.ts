@@ -4,7 +4,7 @@ import RoaringUint32Array = require('./RoaringUint32Array')
 import RoaringUint8Array = require('./RoaringUint8Array')
 
 /**
- * @module roaring
+ * @module roaring-wasm
  * All exported types.
  */
 export = {

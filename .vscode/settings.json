@@ -4,6 +4,9 @@
   "editor.tabSize": 2,
   "eslint.autoFixOnSave": true,
   "tslint.autoFixOnSave": true,
+  "prettier.eslintIntegration": false,
+  "prettier.parser": "babylon",
+  "prettier.requireConfig": true,
   "jest.autoEnable": false,
   "files.associations": {
     ".envrc": "shellscript",
@@ -49,6 +52,20 @@
     "__mutex_base": "cpp",
     "__functional_03": "cpp",
     "__tuple": "cpp",
-    "roaring.c": "cpp"
+    "roaring.c": "cpp",
+    "istream": "c",
+    "lzlib.h": "c",
+    "stdint.h": "c",
+    "encoder.h": "c",
+    "lzip.h": "c",
+    "stdbool.h": "c",
+    "list": "c",
+    "set": "c",
+    "encoder_base.h": "c",
+    "fast_encoder.h": "c",
+    "lzmaenc.h": "c",
+    "lzmadec.h": "c",
+    "lzfind.h": "c",
+    "types.h": "c"
   }
 }

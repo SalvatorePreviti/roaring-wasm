@@ -3,6 +3,7 @@
 dist/**/*.ts
 dist/**/*.js
 dist/**/*.wasm
+src/**/*.o
 
 temp
 

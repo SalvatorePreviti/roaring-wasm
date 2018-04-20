@@ -23,6 +23,8 @@
     "no-console": false,
     "strict-boolean-expressions": false,
     "no-bitwise": false,
-    "typedef": false
+    "no-non-null-assertion": false,
+    "typedef": false,
+    "promise-function-async": false
   }
 }

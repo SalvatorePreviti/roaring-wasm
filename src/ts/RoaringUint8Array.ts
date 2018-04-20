@@ -33,6 +33,10 @@ class RoaringUint8Array extends RoaringTypedArray<Uint8Array> {
   public asTypedArray(): Uint8Array {
     return new Uint8Array(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length)
   }
+
+  public asNodeBuffer(): Buffer {
+    return Buffer.from(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length)
+  }
 }
 
 Object.defineProperty(RoaringUint8Array.prototype, 'BYTES_PER_ELEMENT', { value: 1, writable: false, configurable: false, enumerable: false })

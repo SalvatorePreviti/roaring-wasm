@@ -24,18 +24,20 @@ const exportedFunctions = [
   '_roaring_bitmap_andnot_cardinality',
   '_roaring_bitmap_xor_cardinality',
   '_roaring_bitmap_rank',
-  '_roaring_bitmap_size_in_bytes',
-  '_roaring_bitmap_serialize_alloc_js',
-  '_roaring_bitmap_portable_size_in_bytes',
-  '_roaring_bitmap_portable_serialize_alloc_js',
-  '_roaring_bitmap_deserialize_js',
-  '_roaring_bitmap_portable_deserialize_js',
   '_roaring_bitmap_and_inplace',
   '_roaring_bitmap_or_inplace',
   '_roaring_bitmap_xor_inplace',
   '_roaring_bitmap_andnot_inplace',
   '_roaring_bitmap_intersect',
-  '_roaring_bitmap_jaccard_index'
+  '_roaring_bitmap_jaccard_index',
+
+  '_roaring_bitmap_portable_size_in_bytes',
+  '_roaring_bitmap_portable_serialize_js',
+  '_roaring_bitmap_portable_deserialize_js',
+
+  '_roaring_bitmap_size_in_bytes',
+  '_roaring_bitmap_native_serialize_js',
+  '_roaring_bitmap_native_deserialize_js'
 ]
 
 module.exports = exportedFunctions

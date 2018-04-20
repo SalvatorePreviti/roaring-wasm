@@ -4,14 +4,46 @@ const exportedFunctions = require('./exportedFunctions')
 function buildEmccArgs() {
   const args = []
 
-  args.push('--memory-init-file', '1')
-
   // optimizations
   args.push('-O3')
   args.push('--llvm-lto', '3')
-  args.push('--llvm-opts', '3')
+  args.push(
+    '--llvm-opts',
+    JSON.stringify([
+      '-O3',
+      '-thread-model=single',
+      '-always-inline',
+      '-consthoist',
+      '-tailcallopt',
+      '-constprop',
+      '-std-link-opts',
+      '-ipconstprop',
+      '-sink',
+      '-simple-loop-unswitch',
+      '-partially-inline-libcalls',
+      '-nary-reassociate',
+      '-loop-predication',
+      '-loop-interchange',
+      '-loop-data-prefetch',
+      '-mldst-motion',
+      '-irce',
+      '-gvn-sink',
+      '-gvn-hoist',
+      '-unreachableblockelim',
+      '-global-merge',
+      '-speculative-execution',
+      '-slsr',
+      '-dce',
+      '-die',
+      '-dse',
+      '-loop-versioning-licm',
+      '-iv-users',
+      '-enable-unsafe-fp-math'
+    ])
+  )
 
   // js optimizations
+  args.push('--output_eol', 'linux')
   args.push('--js-opts', '1')
   args.push('--closure', '1')
   args.push('--minify', '0')
@@ -19,6 +51,9 @@ function buildEmccArgs() {
   // see https://github.com/kripken/emscripten/blob/master/src/settings.js
 
   // settings
+
+  args.push('--memory-init-file', '1')
+
   args.push('-s', 'BINARYEN=1')
   args.push('-s', 'BINARYEN_ASYNC_COMPILATION=0')
   args.push('-s', "BINARYEN_METHOD='native-wasm'")
@@ -55,12 +90,10 @@ function buildEmccClosureArgs() {
 }
 
 const config = {
-  emcc: {
-    sources: ['src/**/*.c', 'src/**/*.cpp'],
-    out: 'dist/lib/roaring-wasm/roaring-wasm-module.js',
-    args: buildEmccArgs(),
-    closureArgs: buildEmccClosureArgs()
-  }
+  out: 'dist/lib/roaring-wasm/roaring-wasm-module.js',
+  args: buildEmccArgs(),
+  closureArgs: buildEmccClosureArgs(),
+  files: ['src/cpp/CRoaringUnityBuild/roaring.c', 'src/cpp/roaring-js.c']
 }
 
 module.exports = config
