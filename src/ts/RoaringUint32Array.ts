@@ -5,8 +5,12 @@ import RoaringTypedArray = require('./lib/RoaringTypedArray')
  * Array of bytes allocted directly in roaring library WASM memory.
  * Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
  *
+ * Extends RoaringTypedArray<Uint32Array>.
+ * Implements IDisposable
+ *
  * @class RoaringUint32Array
  * @extends {RoaringTypedArray<Uint32Array>}
+ * @implements {RoaringTypedArray<Uint32Array>}
  * @implements {IDisposable}
  */
 class RoaringUint32Array extends RoaringTypedArray<Uint32Array> {

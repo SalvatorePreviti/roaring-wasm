@@ -140,6 +140,9 @@ Returns a string representation of an array.
 Array of bytes allocted directly in roaring library WASM memory.
 Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
 
+Extends @see RoaringTypedArray<Uint8Array>.
+Implements @see IDisposable
+
 ### throwIfDisposed
 
 Throws an error if the memory was freed.
@@ -151,6 +154,8 @@ Returns **(void | never)**
 A Roaring Bitmap that supports 32 bit unsigned integers.
 The roaring bitmap allocates in WASM memory, remember to dispose
 the RoaringBitmap32 when not needed anymore to release WASM memory.
+
+Implements @see IDisposable
 
 ### xorCardinality
 
@@ -485,3 +490,6 @@ Throws an error if deserialization failed.
 
 Array of bytes allocted directly in roaring library WASM memory.
 Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
+
+Extends @see RoaringTypedArray<Uint32Array>.
+Implements @see IDisposable

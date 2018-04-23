@@ -47,6 +47,8 @@ const {
  * The roaring bitmap allocates in WASM memory, remember to dispose
  * the RoaringBitmap32 when not needed anymore to release WASM memory.
  *
+ * Implements IDisposable
+ *
  * @class RoaringBitmap32
  * @implements {IDisposable}
  */
