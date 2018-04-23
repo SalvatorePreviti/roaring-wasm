@@ -103,7 +103,13 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
       length = lengthOrArray
     } else if (Array.isArray(lengthOrArray)) {
       length = lengthOrArray.length
-    } else if (lengthOrArray instanceof Uint8Array && lengthOrArray instanceof Uint16Array && lengthOrArray instanceof Uint32Array) {
+    } else if (
+      lengthOrArray instanceof Uint8Array ||
+      lengthOrArray instanceof Uint16Array ||
+      lengthOrArray instanceof Uint32Array ||
+      // tslint:disable-next-line:no-typeof-undefined
+      (typeof Buffer !== 'undefined' && lengthOrArray instanceof Buffer)
+    ) {
       if (lengthOrArray.BYTES_PER_ELEMENT !== bytesPerElement) {
         throw new TypeError(
           `Typed array mismatch, expected ${bytesPerElement} bytes per element, received ${lengthOrArray.BYTES_PER_ELEMENT}`
