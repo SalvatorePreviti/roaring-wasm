@@ -44,6 +44,7 @@ const {
 
 /**
  * A Roaring Bitmap that supports 32 bit unsigned integers.
+ *
  * The roaring bitmap allocates in WASM memory, remember to dispose
  * the RoaringBitmap32 when not needed anymore to release WASM memory.
  *
@@ -55,15 +56,137 @@ const {
 class RoaringBitmap32 implements IDisposable {
   private _ptr: number
 
-  public constructor(initialCapacity: number = 0) {
+  /**
+   * Creates a new roaring bitmap.
+   *
+   * The roaring bitmap allocates in WASM memory, remember to dispose
+   * the RoaringBitmap32 when not needed anymore to release WASM memory.
+   * @param {number} [initialCapacity=0]
+   * @memberof RoaringBitmap32
+   */
+  public constructor(initialCapacity?: number)
+
+  /**
+   * Creates a new roaring bitmap adding the specified values.
+   *
+   * The roaring bitmap allocates in WASM memory, remember to dispose
+   * the RoaringBitmap32 when not needed anymore to release WASM memory.
+   * @param { Set<number> | RoaringUint32Array | Uint32Array | ReadonlyArray<number>} values The values to add
+   * @memberof RoaringBitmap32
+   */
+  public constructor(values: Set<number> | RoaringUint32Array | Uint32Array | ReadonlyArray<number>)
+
+  /**
+   * Creates a new roaring bitmap.
+   *
+   * The roaring bitmap allocates in WASM memory, remember to dispose
+   * the RoaringBitmap32 when not needed anymore to release WASM memory.
+   * @param {number} [initialCapacity=0]
+   * @memberof RoaringBitmap32
+   */
+  public constructor(x: number | undefined | Set<number> | RoaringUint32Array | Uint32Array | ReadonlyArray<number>) {
     this._ptr = 0
-    if (!Number.isInteger(initialCapacity) || initialCapacity < 0 || initialCapacity > 0x7fffffff) {
-      throw new TypeError(`${this.constructor.name}: Invalid initial capacity: ${initialCapacity}`)
+    if (typeof x === 'number' && (!Number.isInteger(x) || x < 0 || x > 0x7fffffff)) {
+      throw new TypeError(`${this.constructor.name}: Invalid initial capacity: ${x}`)
     }
-    this._ptr = _roaring_bitmap_create_js(initialCapacity) >>> 0
+
+    this._ptr = _roaring_bitmap_create_js(typeof x === 'number' ? x : 0) >>> 0
     if (!this._ptr) {
       throw new Error(`${this.constructor.name}: failed to allocate RoaringBitmap32`)
     }
+
+    if (x && typeof x !== 'number') {
+      try {
+        this.addMany(x)
+      } catch (error) {
+        _roaring_bitmap_free(this._ptr)
+        throw error
+      }
+    }
+  }
+
+  /**
+   * Creates a new roaring bitmap deserializing it from a buffer
+   *
+   * The roaring bitmap allocates in WASM memory, remember to dispose
+   * the RoaringBitmap32 when not needed anymore to release WASM memory.
+   *
+   * @static
+   * @param {(RoaringUint8Array | Uint8Array | number[])} buffer The buffer to deserialize
+   * @param {boolean} [portable=false] If true, deserialization is compatible with the Java and Go versions of the library.
+   * If false, deserialization is compatible with the C version of the library. Default is false.
+   * @returns {RoaringBitmap32} The reulting bitmap. Remember to dispose the instance when finished using it.
+   * @memberof RoaringBitmap32
+   */
+  public static deserialize(buffer: RoaringUint8Array | Uint8Array | number[], portable: boolean = false): RoaringBitmap32 {
+    const bitmap = new RoaringBitmap32()
+    try {
+      bitmap.deserialize(buffer, portable)
+    } catch (error) {
+      IDisposable.tryDispose(bitmap)
+      throw error
+    }
+    return bitmap
+  }
+
+  /**
+   * Utility function that deserializes a RoaringBitmap32 serialized in a buffer to an Array<number> of values.
+   * The array can be very big, be careful when you use this function.
+   *
+   * @static
+   * @param {(RoaringUint8Array | Uint8Array | number[])} buffer The buffer to deserialize.
+   * @param {boolean} [portable=false] If true, deserialization is compatible with the Java and Go versions of the library.
+   * If false, deserialization is compatible with the C version of the library. Default is false.
+   * @returns {number[]} All the values in the bitmap.
+   * @memberof RoaringBitmap32
+   */
+  public static deserializeToArray(buffer: RoaringUint8Array | Uint8Array | number[], portable: boolean = false): number[] {
+    return IDisposable.using(new RoaringBitmap32(), bitmap => {
+      bitmap.deserialize(buffer, portable)
+      return bitmap.toArray()
+    })
+  }
+
+  /**
+   * Utility function that deserializes a RoaringBitmap32 serialized in a buffer to a Set<number> of values.
+   * The array can be very big, be careful when you use this function.
+   *
+   * @static
+   * @param {(RoaringUint8Array | Uint8Array | number[])} buffer The buffer to deserialize.
+   * @param {boolean} [portable=false] If true, deserialization is compatible with the Java and Go versions of the library.
+   * If false, deserialization is compatible with the C version of the library. Default is false.
+   * @returns {number[]} All the values in the bitmap.
+   * @memberof RoaringBitmap32
+   */
+  public static deserializeToSet(buffer: RoaringUint8Array | Uint8Array | number[], portable: boolean = false): Set<number> {
+    return IDisposable.using(new RoaringBitmap32(), bitmap => {
+      bitmap.deserialize(buffer, portable)
+      return IDisposable.using(bitmap.toRoaringUint32Array(), array => {
+        return new Set(array.asTypedArray())
+      })
+    })
+  }
+
+  /**
+   * Utility function that serializes an array of uint32 to a new NodeJS buffer.
+   * The returned buffer is automatically garbage collected.
+   *
+   * @static
+   * @param {(RoaringUint32Array | Uint32Array | ReadonlyArray<number>)} values
+   * @param {boolean} [portable=false] If true, serialization is compatible with the Java and Go versions of the library.
+   * If false, serialization is compatible with the C version of the library. Default is false.
+   * @returns {Buffer} The NodeJS buffer containing the serialized data.
+   * @memberof RoaringBitmap32
+   */
+  public static serializeArrayToNewBuffer(
+    values: Set<number> | RoaringUint32Array | Uint32Array | ReadonlyArray<number>,
+    portable: boolean = false
+  ): Buffer {
+    return IDisposable.using(new RoaringBitmap32(values), bitmap => {
+      return IDisposable.using(bitmap.serialize(portable), serialized => {
+        return Buffer.from(serialized.asNodeBuffer())
+      })
+    })
   }
 
   /**
@@ -144,12 +267,20 @@ class RoaringBitmap32 implements IDisposable {
    * Using this is faster than calling add() multiple times.
    * Inserting ordered or partialky ordered arrays is faster.
    *
-   * @param {RoaringUint32Array} values
+   * @param {Set<number> | RoaringUint32Array | Uint32Array | ReadonlyArray<number>32Array} values The values to add.
    * @memberof RoaringBitmap32
    */
-  public addMany(values: RoaringUint32Array): void {
-    if (values.length > 0) {
-      _roaring_bitmap_add_many(_getPtr(this), values.length, values.byteOffset)
+  public addMany(values: Set<number> | RoaringUint32Array | Uint32Array | ReadonlyArray<number>): void {
+    if ((values as { readonly length: number }).length > 0) {
+      if (values instanceof RoaringUint32Array) {
+        _roaring_bitmap_add_many(_getPtr(this), values.length, values.byteOffset)
+      } else {
+        IDisposable.using(new RoaringUint32Array(values as RoaringUint32Array | Uint32Array | ReadonlyArray<number>), buffer => {
+          this.addMany(buffer)
+        })
+      }
+    } else if (values instanceof Set) {
+      this.addMany(Array.from(values))
     }
   }
 
@@ -551,6 +682,51 @@ class RoaringBitmap32 implements IDisposable {
       }
     }
   }
+
+  /**
+   * How many bytes are required to serialize this bitmap.
+   *
+   * @param {boolean} [portable=false] If true, deserialization is compatible with the Java and Go versions of the library.
+   * If false, deserialization is compatible with the C version of the library. Default is false.
+   * @memberof RoaringBitmap32
+   */
+  public getSerializationSizeInBytes(portable: boolean = false): number {
+    const ptr = this._ptr
+    return ptr ? (portable ? _roaring_bitmap_portable_size_in_bytes(ptr) : _roaring_bitmap_native_size_in_bytes_js(ptr) >>> 0) : 0
+  }
+
+  /**
+   * Serializes a bitmap to a byte buffer allocated in WASM memory.
+   *
+   * The returned RoaringUint8Array is allocated in WASM memory and not garbage collected,
+   * it need to be freed manually calling dispose().
+   *
+   * @param {boolean} [portable=false] If true, serialization is compatible with the Java and Go versions of the library.
+   * If false, serialization is compatible with the C version of the library. Default is false.
+   * @returns {RoaringUint8Array} The RoaringUint8Array. Remember to manually dispose to free the memory.
+   * @memberof RoaringBitmap32
+   */
+  public serialize(portable: boolean = false): RoaringUint8Array {
+    return portable ? this.serializePortable() : this.serializeNative()
+  }
+
+  /**
+   * Reads a bitmap from a serialized version.
+   * Throws an error if deserialization failed.
+   *
+   * @param {(RoaringUint8Array | Uint8Array | number[])} buffer
+   * @param {boolean} [portable=false] If true, deserialization is compatible with the Java and Go versions of the library.
+   * If false, deserialization is compatible with the C version of the library. Default is false.
+   * @returns {void}
+   * @memberof RoaringBitmap32
+   */
+  public deserialize(buffer: RoaringUint8Array | Uint8Array | number[], portable: boolean = false): void {
+    if (portable) {
+      this.deserializePortable(buffer)
+    } else {
+      this.deserializeNative(buffer)
+    }
+  }
 }
 
 function _getPtr(bitmap: RoaringBitmap32): number {
@@ -568,7 +744,7 @@ function _getOtherPtr(bitmap: RoaringBitmap32): number {
 
   const ptr = (bitmap as any)._ptr
   if (!ptr) {
-    throw new TypeError('RoaringBitmap32 was disposed')
+    _throwDisposed()
   }
   return ptr
 }
