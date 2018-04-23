@@ -144,6 +144,8 @@ Returns a string representation of an array.
 
 ## RoaringUint8Array
 
+**Extends RoaringTypedArray**
+
 Array of bytes allocted directly in roaring library WASM memory.
 Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
 
@@ -585,6 +587,8 @@ it need to be freed manually calling dispose().
 Returns **[RoaringUint8Array](#roaringuint8array)** The RoaringUint8Array. Remember to manually dispose to free the memory.
 
 ## RoaringUint32Array
+
+**Extends RoaringTypedArray**
 
 Array of bytes allocted directly in roaring library WASM memory.
 Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.

@@ -9,7 +9,7 @@ import RoaringTypedArray = require('./lib/RoaringTypedArray')
  * Implements IDisposable
  *
  * @class RoaringUint32Array
- * @extends {RoaringTypedArray<Uint32Array>}
+ * @extends {RoaringTypedArray}
  * @implements {RoaringTypedArray<Uint32Array>}
  * @implements {IDisposable}
  */
@@ -34,7 +34,7 @@ class RoaringUint32Array extends RoaringTypedArray<Uint32Array> {
    * @memberof RoaringUint32Array
    */
   public constructor(lengthOrArray: number | RoaringUint32Array | Uint32Array | ReadonlyArray<number>, pointer?: number) {
-    super(lengthOrArray, 1, pointer)
+    super(lengthOrArray, 4, pointer)
   }
 
   public asTypedArray(): Uint32Array {

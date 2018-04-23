@@ -20,7 +20,7 @@
     "object-literal-shorthand": true,
     "no-reserved-keywords": false,
     "no-parameter-reassignment": false,
-    "no-console": false,
+    "no-console": true,
     "strict-boolean-expressions": false,
     "no-bitwise": false,
     "no-non-null-assertion": false,

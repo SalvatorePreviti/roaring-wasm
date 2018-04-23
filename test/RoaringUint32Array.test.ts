@@ -45,4 +45,13 @@ describe('RoaringUint32Array', () => {
       expect(p.isDisposed).toBe(false)
     })
   })
+
+  it('works copying arrays', () => {
+    IDisposable.using(new RoaringUint32Array([123, 189, 456, 789]), p => {
+      expect(p.toArray()).toEqual([123, 189, 456, 789])
+      IDisposable.using(new RoaringUint32Array(p), q => {
+        expect(q.toArray()).toEqual([123, 189, 456, 789])
+      })
+    })
+  })
 })

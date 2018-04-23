@@ -9,7 +9,7 @@ import RoaringTypedArray = require('./lib/RoaringTypedArray')
  * Implements IDisposable
  *
  * @class RoaringUint8Array
- * @extends {RoaringTypedArray<Uint8Array>}
+ * @extends {RoaringTypedArray}
  * @implements {RoaringTypedArray<Uint8Array>}
  * @implements {IDisposable}
  */
