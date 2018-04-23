@@ -183,6 +183,7 @@ class RoaringBitmap32 implements IDisposable {
     portable: boolean = false
   ): Buffer {
     return IDisposable.using(new RoaringBitmap32(values), bitmap => {
+      bitmap.optimize()
       return IDisposable.using(bitmap.serialize(portable), serialized => {
         return Buffer.from(serialized.asNodeBuffer())
       })
