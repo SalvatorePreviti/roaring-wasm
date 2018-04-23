@@ -1,19 +1,21 @@
-# roaring-wasm - A better compressed bitset
+# roaring-wasm
 
 WebAssembly port of Roaring Bitmaps for NodeJS.
 
 Roaring bitmaps are compressed bitmaps. They can be hundreds of times faster.
 
+## motivation
+
 This project was born to use Roaring WASM in AWS Lambdas without the need to compile a node-gyp module.
 AWS Lambda supports node 8.10 and supports WASM.
 
-# installation
+## installation
 
-```
+```sh
 npm install --save roaring-wasm
 ```
 
-# Sources and References
+## references
 
 This package - <https://www.npmjs.com/package/roaring-wasm>
 
@@ -27,7 +29,7 @@ emscripten - <https://github.com/kripken/emscripten/wiki>
 
 AWS Lambda - <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-handler.html>
 
-# LICENSES
+# licenses
 
 * This package is provided as open source software using Apache License.
 
