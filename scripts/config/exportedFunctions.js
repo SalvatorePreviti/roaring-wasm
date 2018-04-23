@@ -35,9 +35,9 @@ const exportedFunctions = [
   '_roaring_bitmap_portable_serialize_js',
   '_roaring_bitmap_portable_deserialize_js',
 
-  '_roaring_bitmap_size_in_bytes',
-  '_roaring_bitmap_native_serialize_js',
-  '_roaring_bitmap_native_deserialize_js'
+  '_roaring_bitmap_native_size_in_bytes_js',
+  '_roaring_bitmap_native_deserialize_js',
+  '_roaring_bitmap_native_serialize_js'
 ]
 
 module.exports = exportedFunctions

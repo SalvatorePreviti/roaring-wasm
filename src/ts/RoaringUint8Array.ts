@@ -6,6 +6,8 @@ import RoaringTypedArray = require('./lib/RoaringTypedArray')
  * Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
  *
  * @class RoaringUint8Array
+ * @extends {RoaringTypedArray<Uint8Array>}
+ * @implements {IDisposable}
  */
 class RoaringUint8Array extends RoaringTypedArray<Uint8Array> {
   public get BYTES_PER_ELEMENT(): 1 {
@@ -25,6 +27,7 @@ class RoaringUint8Array extends RoaringTypedArray<Uint8Array> {
    * Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
    *
    * @param {(number | RoaringUint8Array | Uint8Array | ReadonlyArray<number>)} lengthOrArray Length of the array to allocate or the array to copy
+   * @memberof RoaringUint32Array
    */
   public constructor(lengthOrArray: number | Uint8Array | RoaringUint8Array | ReadonlyArray<number>, pointer?: number) {
     super(lengthOrArray, 1, pointer)
@@ -39,6 +42,11 @@ class RoaringUint8Array extends RoaringTypedArray<Uint8Array> {
   }
 }
 
-Object.defineProperty(RoaringUint8Array.prototype, 'BYTES_PER_ELEMENT', { value: 1, writable: false, configurable: false, enumerable: false })
+Object.defineProperty(RoaringUint8Array.prototype, 'BYTES_PER_ELEMENT', {
+  value: 1,
+  writable: false,
+  configurable: false,
+  enumerable: false
+})
 
 export = RoaringUint8Array

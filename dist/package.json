@@ -1,17 +1,24 @@
 {
   "name": "roaring-wasm",
-  "version": "0.1.2",
-  "description": "NodeJS WASM Roaring",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "version": "0.1.3",
+  "description": "WebAssembly port of Roaring Bitmaps for NodeJS",
+  "author": "Salvatore Previti",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/SalvatorePreviti/roaring-wasm",
+  "keywords": ["roaring", "CRoaring", "WASM", "WebAssembly", "emscripten", "lambda"],
+  "bugs": {
+    "url": "https://github.com/SalvatorePreviti/roaring-wasm/issues"
+  },
   "repository": {
     "type": "git",
     "url": "\"git+https://github.com/SalvatorePreviti/roaring-wasm.git\""
   },
-  "keywords": ["roaring"],
+  "main": "index.js",
+  "types": "index.d.ts",
   "engines": {
     "node": ">=8.10.0"
   },
-  "author": "Salvatore Previti",
-  "license": "Apache-2.0"
+  "dependencies": {
+    "idisposable": "^0.1.1"
+  }
 }

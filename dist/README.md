@@ -1,12 +1,39 @@
-# roaring-wasm - A better compressed bitset
+# roaring-wasm
 
-WebAssembly port of CRoaring.
+WebAssembly port of Roaring Bitmaps for NodeJS.
 
-This project - <https://github.com/SalvatorePreviti/roaring-wasm>
+Roaring bitmaps are compressed bitmaps. They can be hundreds of times faster.
+
+## motivation
+
+This project was born to use Roaring WASM in AWS Lambdas without the need to compile a node-gyp module.
+AWS Lambda supports node 8.10 and supports WASM.
+
+## installation
+
+```sh
+npm install --save roaring-wasm
+```
+
+## references
+
+This package - <https://www.npmjs.com/package/roaring-wasm>
+
+Source code and build tools for this package - <https://github.com/SalvatorePreviti/roaring-wasm>
 
 Roaring Bitmaps - <http://roaringbitmap.org/>
 
 Portable Roaring bitmaps in C - <https://github.com/RoaringBitmap/CRoaring>
+
+emscripten - <https://github.com/kripken/emscripten/wiki>
+
+AWS Lambda - <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-handler.html>
+
+# licenses
+
+-   This package is provided as open source software using Apache License.
+
+-   CRoaring is provided as open source software using Apache License.
 
 # API
 
@@ -14,24 +41,19 @@ Portable Roaring bitmaps in C - <https://github.com/RoaringBitmap/CRoaring>
 
 ### Table of Contents
 
--   [IDisposable](#idisposable)
-    -   [dispose](#dispose)
-    -   [dispose](#dispose-1)
-    -   [tryDispose](#trydispose)
-    -   [using](#using)
 -   [RoaringTypedArray](#roaringtypedarray)
     -   [buffer](#buffer)
     -   [isDisposed](#isdisposed)
     -   [set](#set)
-    -   [dispose](#dispose-2)
+    -   [dispose](#dispose)
     -   [toArray](#toarray)
     -   [toString](#tostring)
 -   [RoaringUint8Array](#roaringuint8array)
     -   [throwIfDisposed](#throwifdisposed)
--   [Roaring32Compressed](#roaring32compressed)
 -   [RoaringBitmap32](#roaringbitmap32)
+    -   [xorCardinality](#xorcardinality)
     -   [isDisposed](#isdisposed-1)
-    -   [dispose](#dispose-3)
+    -   [dispose](#dispose-1)
     -   [throwIfDisposed](#throwifdisposed-1)
     -   [cardinality](#cardinality)
     -   [isEmpty](#isempty)
@@ -52,61 +74,20 @@ Portable Roaring bitmaps in C - <https://github.com/RoaringBitmap/CRoaring>
     -   [andCardinality](#andcardinality)
     -   [orCardinality](#orcardinality)
     -   [andNotCardinality](#andnotcardinality)
-    -   [xorCardinality](#xorcardinality)
-    -   [and](#and)
-    -   [or](#or)
-    -   [xor](#xor)
-    -   [andNot](#andnot)
+    -   [andWith](#andwith)
+    -   [orWith](#orwith)
+    -   [xorWith](#xorwith)
+    -   [andNotWith](#andnotwith)
     -   [rank](#rank)
-    -   [getSerializationSizeInBytesPortable](#getserializationsizeinbytesportable)
-    -   [getSerializationSizeInBytesNative](#getserializationsizeinbytesnative)
     -   [intersects](#intersects)
     -   [jaccardIndex](#jaccardindex)
+    -   [getSerializationSizeInBytesPortable](#getserializationsizeinbytesportable)
     -   [serializePortable](#serializeportable)
-    -   [serializeNative](#serializenative)
-    -   [serializeCompressed](#serializecompressed)
     -   [deserializePortable](#deserializeportable)
+    -   [getSerializationSizeInBytesNative](#getserializationsizeinbytesnative)
+    -   [serializeNative](#serializenative)
+    -   [deserializeNative](#deserializenative)
 -   [RoaringUint32Array](#roaringuint32array)
-
-## IDisposable
-
-Disposable object helper functions
-
-### dispose
-
-Disposes the given object.
-
-Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if disposed during this call, false if not.
-
-### dispose
-
-Disposes the given disposable.
-
-**Parameters**
-
--   `instance` **[IDisposable](#idisposable)** The IDisposable to dispose.
-
-Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if disposed during this call, false if not
-
-### tryDispose
-
-Try to dispose the given instance, ignoring errors.
-
-**Parameters**
-
--   `disposable`  
--   `instance`  The IDisposable to dispose.
-
-### using
-
-Safe function that disposes the given object when the functor or the promise returned by the functor completes.
-
-**Parameters**
-
--   `instance` **TDisposable** The instance to use and dispose when the functor completes.
--   `functor`  
-
-Returns **TResult** 
 
 ## RoaringTypedArray
 
@@ -165,15 +146,22 @@ Throws an error if the memory was freed.
 
 Returns **(void | never)** 
 
-## Roaring32Compressed
-
-Compression and decompression functions
-
 ## RoaringBitmap32
 
 A Roaring Bitmap that supports 32 bit unsigned integers.
 The roaring bitmap allocates in WASM memory, remember to dispose
 the RoaringBitmap32 when not needed anymore to release WASM memory.
+
+### xorCardinality
+
+Computes the size of the symmetric difference (xor) between two bitmaps.
+Both bitmaps are unchanged.
+
+**Parameters**
+
+-   `other` **[RoaringBitmap32](#roaringbitmap32)** 
+
+Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** Cardinality of the symmetric difference (xor) of two bitmaps.
 
 ### isDisposed
 
@@ -366,18 +354,7 @@ Both bitmaps are unchanged.
 
 Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** Cardinality of the difference (andnot) of two bitmaps.
 
-### xorCardinality
-
-Computes the size of the symmetric difference (xor) between two bitmaps.
-Both bitmaps are unchanged.
-
-**Parameters**
-
--   `other` **[RoaringBitmap32](#roaringbitmap32)** 
-
-Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** Cardinality of the symmetric difference (xor) of two bitmaps.
-
-### and
+### andWith
 
 Intersects this bitmap with another.
 Removes the elements from this bitmap that don't exists in the other.
@@ -388,7 +365,7 @@ The provided bitmap is not modified.
 
 -   `other` **[RoaringBitmap32](#roaringbitmap32)** 
 
-### or
+### orWith
 
 Adds the element of the other bitmap into this bitmap.
 Stores the result in this bitmap.
@@ -398,7 +375,7 @@ The provided bitmap is not modified.
 
 -   `other` **[RoaringBitmap32](#roaringbitmap32)** 
 
-### xor
+### xorWith
 
 Computes the difference between two bitmaps.
 Stores the result in this bitmap.
@@ -408,7 +385,7 @@ The provided bitmap is not modified.
 
 -   `other` **[RoaringBitmap32](#roaringbitmap32)** 
 
-### andNot
+### andNotWith
 
 Compute the difference between this and the provided bitmap,
 writing the result in the current bitmap.
@@ -428,17 +405,6 @@ Returns the number of integers that are smaller or equal to the given value.
 
 Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values smaller than the given value
 
-### getSerializationSizeInBytesPortable
-
-How many bytes are required to serialize this bitmap in a portable way.
-The portable serialization is compatible with Java and Go versions of this library.
-
-### getSerializationSizeInBytesNative
-
-How many bytes are required to serialize this bitmap in a portable way.
-Can be lessthan the portable version.
-The portable serialization is compatible with the C++ versions of this library.
-
 ### intersects
 
 Check whether the two bitmaps intersect (have at least one element in common).
@@ -457,7 +423,16 @@ See <https://en.wikipedia.org/wiki/Jaccard_index>
 
 The Jaccard index is undefined if both bitmaps are empty.
 
+**Parameters**
+
+-   `other`  
+
 Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The Jaccard index
+
+### getSerializationSizeInBytesPortable
+
+How many bytes are required to serialize this bitmap in a portable way.
+The portable serialization is compatible with Java and Go versions of this library.
 
 ### serializePortable
 
@@ -468,6 +443,22 @@ The returned RoaringUint8Array is allocated in WASM memory and not garbage colle
 it need to be freed manually calling dispose().
 
 Returns **[RoaringUint8Array](#roaringuint8array)** The RoaringUint8Array. Remember to manually dispose to free the memory.
+
+### deserializePortable
+
+Reads a bitmap from a serialized version.
+This is meant to be compatible with the Java and Go versions of the library.
+Throws an error if deserialization failed.
+
+**Parameters**
+
+-   `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) \| [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The containing the data to deserialize.
+
+### getSerializationSizeInBytesNative
+
+How many bytes are required to serialize this bitmap in a portable way.
+The native serialization is compatible with the C version of the library.
+Native serialization may return more compressed buffer than the portable version.
 
 ### serializeNative
 
@@ -480,22 +471,7 @@ it need to be freed manually calling dispose().
 
 Returns **[RoaringUint8Array](#roaringuint8array)** The RoaringUint8Array. Remember to manually dispose to free the memory.
 
-### serializeCompressed
-
-Serializes a bitmap to a byte buffer allocated in WASM memory.
-Compresses the serialized bitmap using a custom LZMA format.
-Is slower but can generate very small outputs than the other versions.
-
-The returned RoaringUint8Array is allocated in WASM memory and not garbage collected,
-it need to be freed manually calling dispose().
-
-**Parameters**
-
--   `compressionLevel` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** between 0 and 9 (optional, default `3`)
-
-Returns **[RoaringUint8Array](#roaringuint8array)** The RoaringUint8Array. Remember to manually dispose to free the memory.
-
-### deserializePortable
+### deserializeNative
 
 Reads a bitmap from a serialized version.
 This is meant to be compatible with the Java and Go versions of the library.

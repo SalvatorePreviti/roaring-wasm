@@ -28,6 +28,7 @@
     "pretty": true,
     "rootDir": "src/ts",
     "strict": true,
+    "removeComments": false,
     "strictFunctionTypes": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,

@@ -1,4 +1,4 @@
-import IDisposable = require('../IDisposable')
+import IDisposable = require('idisposable')
 import roaringWasm = require('./roaring-wasm')
 
 /**
@@ -9,11 +9,12 @@ import roaringWasm = require('./roaring-wasm')
  * @class RoaringTypedArray
  * @template TypedArray Uint8Array | Uint16Array | Uint32Array
  */
-abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | Uint32Array> extends IDisposable {
+abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | Uint32Array> implements IDisposable {
   /**
    * The offset in bytes of the array (the location of the first byte in WASM memory).
    * @readonly
    * @type {number}
+   * @memberof RoaringTypedArray
    */
   public readonly byteOffset: number
 
@@ -22,6 +23,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    *
    * @readonly
    * @type {number}
+   * @memberof RoaringTypedArray
    */
   public readonly length: number
 
@@ -30,6 +32,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    *
    * @readonly
    * @type {number}
+   * @memberof RoaringTypedArray
    */
   public abstract get BYTES_PER_ELEMENT(): number
 
@@ -38,6 +41,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    *
    * @readonly
    * @type {number}
+   * @memberof RoaringTypedArray
    */
   public abstract get byteLength(): number
 
@@ -49,6 +53,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    *
    * @readonly
    * @type {ArrayBuffer}
+   * @memberof RoaringTypedArray
    */
   public get buffer(): ArrayBuffer {
     return roaringWasm.wasmMemory.buffer
@@ -62,6 +67,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    *
    * @readonly
    * @type {TypedArray}
+   * @memberof RoaringTypedArray
    */
   public abstract get heap(): TypedArray
 
@@ -70,13 +76,23 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    *
    * @readonly
    * @type {boolean}
+   * @memberof RoaringTypedArray
    */
   public get isDisposed(): boolean {
     return this.byteOffset === 0
   }
 
-  protected constructor(lengthOrArray: number | ReadonlyArray<number> | TypedArray | RoaringTypedArray<TypedArray>, bytesPerElement: number, pointer?: number) {
-    super()
+  /**
+   * Creates an instance of RoaringTypedArray.
+   * @param {(number | ReadonlyArray<number> | TypedArray | RoaringTypedArray<TypedArray>)} lengthOrArray The length to create or the array to clone.
+   * @param {number} bytesPerElement Number of bytes per element.
+   * @memberof RoaringTypedArray
+   */
+  protected constructor(
+    lengthOrArray: number | ReadonlyArray<number> | TypedArray | RoaringTypedArray<TypedArray>,
+    bytesPerElement: number,
+    _pointer?: number
+  ) {
     let length: number
 
     if (lengthOrArray instanceof RoaringTypedArray) {
@@ -89,7 +105,9 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
       length = lengthOrArray.length
     } else if (lengthOrArray instanceof Uint8Array && lengthOrArray instanceof Uint16Array && lengthOrArray instanceof Uint32Array) {
       if (lengthOrArray.BYTES_PER_ELEMENT !== bytesPerElement) {
-        throw new TypeError(`Typed array mismatch, expected ${bytesPerElement} bytes per element, received ${lengthOrArray.BYTES_PER_ELEMENT}`)
+        throw new TypeError(
+          `Typed array mismatch, expected ${bytesPerElement} bytes per element, received ${lengthOrArray.BYTES_PER_ELEMENT}`
+        )
       }
       length = lengthOrArray.length
     } else {
@@ -100,13 +118,13 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
       this.byteOffset = 0
       this.length = 0
     } else {
-      if (pointer === undefined) {
-        pointer = roaringWasm._malloc(length * bytesPerElement)
+      if (_pointer === undefined) {
+        _pointer = roaringWasm._malloc(length * bytesPerElement)
       }
-      if (!pointer) {
+      if (!_pointer) {
         throw new Error(`Failed to allocate ${length * bytesPerElement} bytes`)
       }
-      this.byteOffset = pointer
+      this.byteOffset = _pointer
       this.length = length
 
       if (typeof lengthOrArray !== 'number') {
@@ -119,6 +137,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    * Writes the given array at the specified position
    * @param array A typed or untyped array of values to set.
    * @param offset The index in the current array at which the values are to be written.
+   * @memberof RoaringTypedArray
    */
   public set(array: ArrayLike<number>, offset: number = 0): this {
     if (!Number.isInteger(offset) || offset < 0 || offset + array.length > this.length) {
@@ -133,6 +152,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    * Is safe to call this method more than once.
    *
    * @returns {boolean} True if memory gets freed during this call, false if not.
+   * @memberof RoaringTypedArray
    */
   public dispose(): boolean {
     if (this.byteOffset === 0) {
@@ -152,7 +172,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    */
   public throwIfDisposed(): void | never {
     if (this.isDisposed) {
-      throw new Error(`${this.constructor.name} memory was freed`)
+      throw new TypeError(`${this.constructor.name} memory was freed`)
     }
   }
 
@@ -162,6 +182,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    * Use the returned array for short periods of time.
    *
    * @returns {TypedArray} A new instance of Uint8Array
+   * @memberof RoaringTypedArray
    */
   public abstract asTypedArray(): TypedArray
 
@@ -171,6 +192,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    * Use the returned array for short periods of time.
    *
    * @returns {Buffer} A new instance of NodeJS Buffer
+   * @memberof RoaringTypedArray
    */
   public abstract asNodeBuffer(): Buffer
 
@@ -178,6 +200,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    * Copies the content of this typed array into a standard JS array of numbers and returns it.
    *
    * @returns {number[]} A new array.
+   * @memberof RoaringTypedArray
    */
   public toArray(): number[] {
     return Array.from(this.asTypedArray())
@@ -185,6 +208,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
 
   /**
    * Returns a string representation of an array.
+   * @memberof RoaringTypedArray
    */
   public toString(): string {
     return this.asTypedArray().toString()

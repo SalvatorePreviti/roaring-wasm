@@ -1,4 +1,4 @@
-import IDisposable = require('roaring-wasm/IDisposable')
+import IDisposable = require('idisposable')
 import RoaringBitmap32 = require('roaring-wasm/RoaringBitmap32')
 
 describe('RoaringBitmap32 empty', () => {
@@ -40,13 +40,25 @@ describe('RoaringBitmap32 empty', () => {
     expect(instance.getSerializationSizeInBytesPortable()).toBe(8)
   })
 
-  it('should have a portable serialization size 8 also after optimization', () => {
-    instance.optimize()
-    expect(instance.getSerializationSizeInBytesPortable()).toBe(8)
-  })
-
-  it('should serialize as "empty"', () => {
+  it('should serialize as "empty" (portable)', () => {
     const array = IDisposable.using(instance.serializePortable(), buffer => buffer.toArray())
     expect(array).toEqual([58, 48, 0, 0, 0, 0, 0, 0])
+  })
+
+  it('should have a native serialization size 5', () => {
+    expect(instance.getSerializationSizeInBytesNative()).toBe(5)
+  })
+
+  it('should serialize as "empty" (native)', () => {
+    const array = IDisposable.using(instance.serializeNative(), buffer => buffer.toArray())
+    expect(array).toEqual([1, 0, 0, 0, 0])
+  })
+
+  it('should be a subset of itself', () => {
+    expect(instance.isSubset(instance)).toBe(true)
+  })
+
+  it('should not be a strict subset of itself', () => {
+    expect(instance.isStrictSubset(instance)).toBe(false)
   })
 })

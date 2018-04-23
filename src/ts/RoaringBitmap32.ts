@@ -1,4 +1,4 @@
-import IDisposable = require('./IDisposable')
+import IDisposable = require('idisposable')
 import roaringWasm = require('./lib/roaring-wasm')
 import RoaringUint32Array = require('./RoaringUint32Array')
 import RoaringUint8Array = require('./RoaringUint8Array')
@@ -37,9 +37,9 @@ const {
   _roaring_bitmap_portable_serialize_js,
   _roaring_bitmap_portable_deserialize_js,
 
-  _roaring_bitmap_size_in_bytes,
-  _roaring_bitmap_native_serialize_js,
-  _roaring_bitmap_native_deserialize_js
+  _roaring_bitmap_native_size_in_bytes_js,
+  _roaring_bitmap_native_deserialize_js,
+  _roaring_bitmap_native_serialize_js
 } = roaringWasm
 
 /**
@@ -48,19 +48,19 @@ const {
  * the RoaringBitmap32 when not needed anymore to release WASM memory.
  *
  * @class RoaringBitmap32
+ * @implements {IDisposable}
  */
-class RoaringBitmap32 extends IDisposable {
+class RoaringBitmap32 implements IDisposable {
   private _ptr: number
 
   public constructor(initialCapacity: number = 0) {
-    super()
     this._ptr = 0
     if (!Number.isInteger(initialCapacity) || initialCapacity < 0 || initialCapacity > 0x7fffffff) {
       throw new TypeError(`${this.constructor.name}: Invalid initial capacity: ${initialCapacity}`)
     }
     this._ptr = _roaring_bitmap_create_js(initialCapacity) >>> 0
-    if (this._ptr === 0) {
-      throw new Error(`${this.constructor.name}: failed to allocate memory`)
+    if (!this._ptr) {
+      throw new Error(`${this.constructor.name}: failed to allocate RoaringBitmap32`)
     }
   }
 
@@ -69,6 +69,7 @@ class RoaringBitmap32 extends IDisposable {
    *
    * @readonly
    * @type {boolean}
+   * @memberof RoaringBitmap32
    */
   public get isDisposed(): boolean {
     return !this._ptr
@@ -79,6 +80,7 @@ class RoaringBitmap32 extends IDisposable {
    * Is safe to call this method more than once.
    *
    * @returns {boolean} True if disposed during this call, false if not.
+   * @memberof RoaringBitmap32
    */
   public dispose(): boolean {
     const ptr: number = this._ptr
@@ -94,10 +96,11 @@ class RoaringBitmap32 extends IDisposable {
    * Throws an exception if this object was disposed before.
    *
    * @returns {(void | never)}
+   * @memberof RoaringBitmap32
    */
   public throwIfDisposed(): void | never {
     if (!this._ptr) {
-      throwDisposed()
+      _throwDisposed()
     }
   }
 
@@ -105,6 +108,7 @@ class RoaringBitmap32 extends IDisposable {
    * Get the cardinality of the bitmap (number of elements).
    *
    * @returns {number} Number of elements in this bitmap.
+   * @memberof RoaringBitmap32
    */
   public cardinality(): number {
     const ptr: number = this._ptr
@@ -115,6 +119,7 @@ class RoaringBitmap32 extends IDisposable {
    * Returns true if the bitmap has no elements.
    *
    * @returns {boolean} True if the bitmap is empty.
+   * @memberof RoaringBitmap32
    */
   public isEmpty(): boolean {
     const ptr: number = this._ptr
@@ -126,9 +131,10 @@ class RoaringBitmap32 extends IDisposable {
    * Values are unique, this function does nothing if the value already exists.
    *
    * @param {number} value 32 bit unsigned integer to add in the set.
+   * @memberof RoaringBitmap32
    */
   public add(value: number): void {
-    _roaring_bitmap_add(this._getPtr(), value)
+    _roaring_bitmap_add(_getPtr(this), value)
   }
 
   /**
@@ -137,10 +143,11 @@ class RoaringBitmap32 extends IDisposable {
    * Inserting ordered or partialky ordered arrays is faster.
    *
    * @param {RoaringUint32Array} values
+   * @memberof RoaringBitmap32
    */
   public addMany(values: RoaringUint32Array): void {
     if (values.length > 0) {
-      _roaring_bitmap_add_many(this._getPtr(), values.length, values.byteOffset)
+      _roaring_bitmap_add_many(_getPtr(this), values.length, values.byteOffset)
     }
   }
 
@@ -149,9 +156,10 @@ class RoaringBitmap32 extends IDisposable {
    * If the value does not exists, this function does nothing.
    *
    * @param {number} value The value to remove.
+   * @memberof RoaringBitmap32
    */
   public remove(value: number): void {
-    _roaring_bitmap_remove(this._getPtr(), value)
+    _roaring_bitmap_remove(_getPtr(this), value)
   }
 
   /**
@@ -159,9 +167,10 @@ class RoaringBitmap32 extends IDisposable {
    * If the bitmap is empty, returns 0.
    *
    * @returns {number} The maximum 32 bit unsigned integer or 0 if empty.
+   * @memberof RoaringBitmap32
    */
   public maximum(): number {
-    return _roaring_bitmap_maximum(this._getPtr()) >>> 0
+    return _roaring_bitmap_maximum(_getPtr(this)) >>> 0
   }
 
   /**
@@ -169,9 +178,10 @@ class RoaringBitmap32 extends IDisposable {
    * If the bitmap is empty, returns 0xFFFFFFFF
    *
    * @returns {number} The minimum 32 bit unsigned integer or 0xFFFFFFFF if empty.
+   * @memberof RoaringBitmap32
    */
   public minimum(): number {
-    return _roaring_bitmap_minimum(this._getPtr()) >>> 0
+    return _roaring_bitmap_minimum(_getPtr(this)) >>> 0
   }
 
   /**
@@ -179,9 +189,10 @@ class RoaringBitmap32 extends IDisposable {
    *
    * @param {number} value The value to look for.
    * @returns {boolean} True if value exists in the set, false if not.
+   * @memberof RoaringBitmap32
    */
   public contains(value: number): boolean {
-    return !!_roaring_bitmap_contains(this._getPtr(), value)
+    return !!_roaring_bitmap_contains(_getPtr(this), value)
   }
 
   /**
@@ -189,9 +200,10 @@ class RoaringBitmap32 extends IDisposable {
    *
    * @param {RoaringBitmap32} other the other bitmap
    * @returns {boolean}
+   * @memberof RoaringBitmap32
    */
   public isSubset(other: RoaringBitmap32): boolean {
-    return !!_roaring_bitmap_is_subset(this._getPtr(), other._getPtr())
+    return !!_roaring_bitmap_is_subset(_getPtr(this), _getOtherPtr(other))
   }
 
   /**
@@ -199,9 +211,10 @@ class RoaringBitmap32 extends IDisposable {
    *
    * @param {RoaringBitmap32} other The other bitmap
    * @returns {boolean} True if this bitmap is a strict subset of other
+   * @memberof RoaringBitmap32
    */
   public isStrictSubset(other: RoaringBitmap32): boolean {
-    return !!_roaring_bitmap_is_strict_subset(this._getPtr(), other._getPtr())
+    return !!_roaring_bitmap_is_strict_subset(_getPtr(this), _getOtherPtr(other))
   }
 
   /**
@@ -211,9 +224,10 @@ class RoaringBitmap32 extends IDisposable {
    * it need to be freed manually calling dispose().
    *
    * @returns {RoaringUint32Array} The RoaringUint32Array. Remember to manually dispose to free the memory.
+   * @memberof RoaringBitmap32
    */
   public toRoaringUint32Array(): RoaringUint32Array {
-    const ptr = this._getPtr()
+    const ptr = _getPtr(this)
     const cardinality = _roaring_bitmap_get_cardinality(ptr) >>> 0
     const result = new RoaringUint32Array(cardinality)
     if (cardinality > 0) {
@@ -227,6 +241,7 @@ class RoaringBitmap32 extends IDisposable {
    * The array may be very big, use this function with caution.
    *
    * @returns {number[]} The array containing all values in the set.
+   * @memberof RoaringBitmap32
    */
   public toArray(): number[] {
     return IDisposable.using(this.toRoaringUint32Array(), typedArray => typedArray.toArray())
@@ -237,6 +252,7 @@ class RoaringBitmap32 extends IDisposable {
    *
    * @param {RoaringBitmap32} other
    * @returns {boolean} True if the bitmaps contains the same data, false if not.
+   * @memberof RoaringBitmap32
    */
   public equals(other: RoaringBitmap32): boolean {
     if (!(other instanceof RoaringBitmap32) || !this._ptr || !other._ptr) {
@@ -251,6 +267,7 @@ class RoaringBitmap32 extends IDisposable {
    *
    * @param {number} start Range start.
    * @param {number} end Range end.
+   * @memberof RoaringBitmap32
    */
   public flipRange(start: number, end: number): void {
     start >>>= 0
@@ -258,7 +275,7 @@ class RoaringBitmap32 extends IDisposable {
     if (end > start) {
       return
     }
-    _roaring_bitmap_flip_inplace(this._getPtr(), start, end)
+    _roaring_bitmap_flip_inplace(_getPtr(this), start, end)
   }
 
   /**
@@ -266,9 +283,10 @@ class RoaringBitmap32 extends IDisposable {
    * Returns true if something changed.
    *
    * @returns {boolean} True if something changed.
+   * @memberof RoaringBitmap32
    */
   public optimize(): boolean {
-    return !!_roaring_bitmap_optimize_js(this._getPtr())
+    return !!_roaring_bitmap_optimize_js(_getPtr(this))
   }
 
   /**
@@ -278,9 +296,10 @@ class RoaringBitmap32 extends IDisposable {
    *
    * @param {number} rank Element rank
    * @returns {number} element or NaN
+   * @memberof RoaringBitmap32
    */
   public select(rank: number): number {
-    return _roaring_bitmap_select_js(this._getPtr(), rank)
+    return _roaring_bitmap_select_js(_getPtr(this), rank)
   }
 
   /**
@@ -289,9 +308,10 @@ class RoaringBitmap32 extends IDisposable {
    *
    * @param {RoaringBitmap32} other
    * @returns {number} Cardinality of the intersection between two bitmaps.
+   * @memberof RoaringBitmap32
    */
   public andCardinality(other: RoaringBitmap32): number {
-    return _roaring_bitmap_and_cardinality(this._getPtr(), other._getPtr()) >>> 0
+    return _roaring_bitmap_and_cardinality(_getPtr(this), _getOtherPtr(other)) >>> 0
   }
 
   /**
@@ -300,9 +320,10 @@ class RoaringBitmap32 extends IDisposable {
    *
    * @param {RoaringBitmap32} other
    * @returns {number} Cardinality of the union of two bitmaps.
+   * @memberof RoaringBitmap32
    */
   public orCardinality(other: RoaringBitmap32): number {
-    return _roaring_bitmap_or_cardinality(this._getPtr(), other._getPtr()) >>> 0
+    return _roaring_bitmap_or_cardinality(_getPtr(this), _getOtherPtr(other)) >>> 0
   }
 
   /**
@@ -311,9 +332,10 @@ class RoaringBitmap32 extends IDisposable {
    *
    * @param {RoaringBitmap32} other
    * @returns {number} Cardinality of the difference (andnot) of two bitmaps.
+   * @memberof RoaringBitmap32
    */
   public andNotCardinality(other: RoaringBitmap32): number {
-    return _roaring_bitmap_andnot_cardinality(this._getPtr(), other._getPtr()) >>> 0
+    return _roaring_bitmap_andnot_cardinality(_getPtr(this), _getOtherPtr(other)) >>> 0
   }
 
   /**
@@ -324,7 +346,7 @@ class RoaringBitmap32 extends IDisposable {
    * @returns {number} Cardinality of the symmetric difference (xor) of two bitmaps.
    */
   public xorCardinality(other: RoaringBitmap32): number {
-    return _roaring_bitmap_xor_cardinality(this._getPtr(), other._getPtr()) >>> 0
+    return _roaring_bitmap_xor_cardinality(_getPtr(this), _getOtherPtr(other)) >>> 0
   }
 
   /**
@@ -334,9 +356,10 @@ class RoaringBitmap32 extends IDisposable {
    * The provided bitmap is not modified.
    *
    * @param {RoaringBitmap32} other
+   * @memberof RoaringBitmap32
    */
-  public and(other: RoaringBitmap32): void {
-    _roaring_bitmap_and_inplace(this._getPtr(), other._getPtr())
+  public andWith(other: RoaringBitmap32): void {
+    _roaring_bitmap_and_inplace(_getPtr(this), _getOtherPtr(other))
   }
 
   /**
@@ -345,9 +368,10 @@ class RoaringBitmap32 extends IDisposable {
    * The provided bitmap is not modified.
    *
    * @param {RoaringBitmap32} other
+   * @memberof RoaringBitmap32
    */
-  public or(other: RoaringBitmap32): void {
-    _roaring_bitmap_or_inplace(this._getPtr(), other._getPtr())
+  public orWith(other: RoaringBitmap32): void {
+    _roaring_bitmap_or_inplace(_getPtr(this), _getOtherPtr(other))
   }
 
   /**
@@ -356,9 +380,10 @@ class RoaringBitmap32 extends IDisposable {
    * The provided bitmap is not modified.
    *
    * @param {RoaringBitmap32} other
+   * @memberof RoaringBitmap32
    */
-  public xor(other: RoaringBitmap32): void {
-    _roaring_bitmap_xor_inplace(this._getPtr(), other._getPtr())
+  public xorWith(other: RoaringBitmap32): void {
+    _roaring_bitmap_xor_inplace(_getPtr(this), _getOtherPtr(other))
   }
 
   /**
@@ -367,9 +392,10 @@ class RoaringBitmap32 extends IDisposable {
    * The provided bitmap is not modified.
    *
    * @param {RoaringBitmap32} other
+   * @memberof RoaringBitmap32
    */
-  public andNot(other: RoaringBitmap32): void {
-    _roaring_bitmap_andnot_inplace(this._getPtr(), other._getPtr())
+  public andNotWith(other: RoaringBitmap32): void {
+    _roaring_bitmap_andnot_inplace(_getPtr(this), _getOtherPtr(other))
   }
 
   /**
@@ -377,26 +403,10 @@ class RoaringBitmap32 extends IDisposable {
    *
    * @param {number} value The value to rank
    * @returns {number} The number of values smaller than the given value
+   * @memberof RoaringBitmap32
    */
   public rank(value: number): number {
-    return _roaring_bitmap_rank(this._getPtr(), value) >>> 0
-  }
-
-  /**
-   * How many bytes are required to serialize this bitmap in a portable way.
-   * The portable serialization is compatible with Java and Go versions of this library.
-   */
-  public getSerializationSizeInBytesPortable(): number {
-    return _roaring_bitmap_portable_size_in_bytes(this._getPtr()) >>> 0
-  }
-
-  /**
-   * How many bytes are required to serialize this bitmap in a portable way.
-   * Can be lessthan the portable version.
-   * The portable serialization is compatible with the C++ versions of this library.
-   */
-  public getSerializationSizeInBytesNative(): number {
-    return _roaring_bitmap_size_in_bytes(this._getPtr()) >>> 0
+    return _roaring_bitmap_rank(_getPtr(this), value) >>> 0
   }
 
   /**
@@ -404,9 +414,10 @@ class RoaringBitmap32 extends IDisposable {
    *
    * @param {RoaringBitmap32} other The other bitmap.
    * @returns {boolean} True if the two bitmaps intersects, false if not.
+   * @memberof RoaringBitmap32
    */
   public intersects(other: RoaringBitmap32): boolean {
-    return !!_roaring_bitmap_intersect(this._getPtr(), other._getPtr())
+    return !!_roaring_bitmap_intersect(_getPtr(this), _getOtherPtr(other))
   }
 
   /**
@@ -417,9 +428,21 @@ class RoaringBitmap32 extends IDisposable {
    * The Jaccard index is undefined if both bitmaps are empty.
    *
    * @returns {number} The Jaccard index
+   * @memberof RoaringBitmap32
    */
-  public jaccardIndex(): number {
-    return _roaring_bitmap_jaccard_index(this._getPtr())
+  public jaccardIndex(other: RoaringBitmap32): number {
+    return _roaring_bitmap_jaccard_index(_getPtr(this), _getOtherPtr(other))
+  }
+
+  /**
+   * How many bytes are required to serialize this bitmap in a portable way.
+   * The portable serialization is compatible with Java and Go versions of this library.
+   *
+   * @memberof RoaringBitmap32
+   */
+  public getSerializationSizeInBytesPortable(): number {
+    const ptr = this._ptr
+    return ptr ? _roaring_bitmap_portable_size_in_bytes(ptr) >>> 0 : 0
   }
 
   /**
@@ -430,15 +453,55 @@ class RoaringBitmap32 extends IDisposable {
    * it need to be freed manually calling dispose().
    *
    * @returns {RoaringUint8Array} The RoaringUint8Array. Remember to manually dispose to free the memory.
+   * @memberof RoaringBitmap32
    */
   public serializePortable(): RoaringUint8Array {
-    const ptr = this._getPtr()
-    if (!_roaring_bitmap_portable_serialize_js(ptr)) {
-      throw new Error('RoaringBitmap32 portable serialization failed')
+    const ptr = _getPtr(this)
+    const code = _roaring_bitmap_portable_serialize_js(ptr)
+    if (code !== 0) {
+      throw new Error(`RoaringBitmap32 portable serialization failed, code:${code}`)
     }
 
     const tempPtr = (ptr + roaringWasm.roaring_bitmap_temp_offset) / 4
     return new RoaringUint8Array(roaringWasm.HEAPU32[tempPtr], roaringWasm.HEAPU32[tempPtr + 1])
+  }
+
+  /**
+   * Reads a bitmap from a serialized version.
+   * This is meant to be compatible with the Java and Go versions of the library.
+   * Throws an error if deserialization failed.
+   *
+   * @param {(RoaringUint8Array | Uint8Array | number[])} buffer The containing the data to deserialize.
+   * @memberof RoaringBitmap32
+   */
+  public deserializePortable(buffer: RoaringUint8Array | Uint8Array | number[]): void {
+    if (buffer instanceof Uint8Array || Array.isArray(buffer)) {
+      _getPtr(this)
+      IDisposable.using(new RoaringUint8Array(buffer), p => {
+        this.deserializePortable(p)
+      })
+    } else {
+      if (!(buffer instanceof RoaringUint8Array)) {
+        throw new TypeError('RoaringBitmap32 deserialize expects a RoaringUint8Array')
+      }
+
+      const code = _roaring_bitmap_portable_deserialize_js(_getPtr(this), buffer.byteOffset, buffer.length)
+      if (code !== 0) {
+        throw new Error(`RoaringBitmap32 deserialization failed, code:${code}`)
+      }
+    }
+  }
+
+  /**
+   * How many bytes are required to serialize this bitmap in a portable way.
+   * The native serialization is compatible with the C version of the library.
+   * Native serialization may return more compressed buffer than the portable version.
+   *
+   * @memberof RoaringBitmap32
+   */
+  public getSerializationSizeInBytesNative(): number {
+    const ptr = this._ptr
+    return ptr ? _roaring_bitmap_native_size_in_bytes_js(ptr) >>> 0 : 0
   }
 
   /**
@@ -450,13 +513,14 @@ class RoaringBitmap32 extends IDisposable {
    * it need to be freed manually calling dispose().
    *
    * @returns {RoaringUint8Array} The RoaringUint8Array. Remember to manually dispose to free the memory.
+   * @memberof RoaringBitmap32
    */
   public serializeNative(): RoaringUint8Array {
-    const ptr = this._getPtr()
-    if (!_roaring_bitmap_native_serialize_js(ptr)) {
-      throw new Error('RoaringBitmap32 native serialization failed')
+    const ptr = _getPtr(this)
+    const code = _roaring_bitmap_native_serialize_js(ptr)
+    if (code !== 0) {
+      throw new Error(`RoaringBitmap32 compressed serialization failed, code:${code}`)
     }
-
     const tempPtr = (ptr + roaringWasm.roaring_bitmap_temp_offset) / 4
     return new RoaringUint8Array(roaringWasm.HEAPU32[tempPtr], roaringWasm.HEAPU32[tempPtr + 1])
   }
@@ -467,31 +531,11 @@ class RoaringBitmap32 extends IDisposable {
    * Throws an error if deserialization failed.
    *
    * @param {(RoaringUint8Array | Uint8Array | number[])} buffer The containing the data to deserialize.
-   */
-  public deserializePortable(buffer: RoaringUint8Array | Uint8Array | number[]): void {
-    if (buffer instanceof Uint8Array || Array.isArray(buffer)) {
-      IDisposable.using(new RoaringUint8Array(buffer), p => {
-        this.deserializePortable(p)
-      })
-    } else {
-      if (!(buffer instanceof RoaringUint8Array)) {
-        throw new TypeError('RoaringBitmap32 deserialize expects a RoaringUint8Array')
-      }
-      if (!_roaring_bitmap_portable_deserialize_js(this._getPtr(), buffer.byteOffset, buffer.length)) {
-        throw new Error('RoaringBitmap32 deserialization failed')
-      }
-    }
-  }
-
-  /**
-   * Reads a bitmap from a serialized version.
-   * This is meant to be compatible with the Java and Go versions of the library.
-   * Throws an error if deserialization failed.
-   *
-   * @param {(RoaringUint8Array | Uint8Array | number[])} buffer The containing the data to deserialize.
+   * @memberof RoaringBitmap32
    */
   public deserializeNative(buffer: RoaringUint8Array | Uint8Array | number[]): void {
     if (buffer instanceof Uint8Array || Array.isArray(buffer)) {
+      _getPtr(this)
       IDisposable.using(new RoaringUint8Array(buffer), p => {
         this.deserializeNative(p)
       })
@@ -499,23 +543,36 @@ class RoaringBitmap32 extends IDisposable {
       if (!(buffer instanceof RoaringUint8Array)) {
         throw new TypeError('RoaringBitmap32 deserialize expects a RoaringUint8Array')
       }
-      if (!_roaring_bitmap_native_deserialize_js(this._getPtr(), buffer.byteOffset, buffer.length)) {
-        throw new Error('RoaringBitmap32 deserialization failed')
+      const code = _roaring_bitmap_native_deserialize_js(_getPtr(this), buffer.byteOffset, buffer.length)
+      if (code !== 0) {
+        throw new Error(`RoaringBitmap32 deserialization failed, code:${code}`)
       }
     }
   }
-
-  private _getPtr(): number {
-    const ptr = this._ptr
-    if (!ptr) {
-      throwDisposed()
-    }
-    return ptr
-  }
 }
 
-function throwDisposed() {
-  throw new Error('RoaringBitmap32 was disposed')
+function _getPtr(bitmap: RoaringBitmap32): number {
+  const ptr = (bitmap as any)._ptr
+  if (!ptr) {
+    _throwDisposed()
+  }
+  return ptr
+}
+
+function _getOtherPtr(bitmap: RoaringBitmap32): number {
+  if (!(bitmap instanceof RoaringBitmap32)) {
+    throw new TypeError('RoaringBitmap32 expected')
+  }
+
+  const ptr = (bitmap as any)._ptr
+  if (!ptr) {
+    throw new TypeError('RoaringBitmap32 was disposed')
+  }
+  return ptr
+}
+
+function _throwDisposed() {
+  throw new TypeError('RoaringBitmap32 was disposed')
 }
 
 export = RoaringBitmap32

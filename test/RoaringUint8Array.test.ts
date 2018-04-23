@@ -1,4 +1,4 @@
-import IDisposable = require('roaring-wasm/IDisposable')
+import IDisposable = require('idisposable')
 import roaringWasm = require('roaring-wasm/lib/roaring-wasm')
 import RoaringUint8Array = require('roaring-wasm/RoaringUint8Array')
 

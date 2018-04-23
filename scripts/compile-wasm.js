@@ -19,7 +19,8 @@ function emcc(files) {
     stdio: 'inherit',
     cwd: root,
     env: Object.assign({}, process.env, {
-      EMCC_CLOSURE_ARGS: `${emccConfig.closureArgs.join(' ')} ${process.env.EMCC_CLOSURE_ARGS || ''}`
+      EMCC_CLOSURE_ARGS: `${emccConfig.closureArgs.join(' ')} ${process.env.EMCC_CLOSURE_ARGS || ''}`,
+      EMMAKEN_CFLAGS: `-Wall -Wno-error=unused-local-typedefs -flto ${process.env.EMCC_CLOSURE_ARGS || ''}`,
     })
   })
 }
