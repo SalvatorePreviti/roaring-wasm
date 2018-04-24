@@ -44,6 +44,9 @@ type RoaringWasm = {
   _roaring_bitmap_intersect(roaring1: number, roaring2: number): boolean
   _roaring_bitmap_jaccard_index(roaring1: number, roaring2: number): number
 
+  _roaring_bitmap_add_checked_js(roaring: number, value: number): boolean
+  _roaring_bitmap_remove_checked_js(roaring: number, value: number): boolean
+
   _roaring_bitmap_portable_size_in_bytes(roaring: number): number
   _roaring_bitmap_portable_serialize_js(roaring: number): number
   _roaring_bitmap_portable_deserialize_js(roaring: number, buf: number, size: number): number

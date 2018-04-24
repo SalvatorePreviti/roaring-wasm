@@ -15,6 +15,8 @@ AWS Lambda supports node 8.10 and supports WASM.
 npm install --save roaring-wasm
 ```
 
+Try it live - <https://npm.runkit.com/roaring-wasm>
+
 ## references
 
 This package - <https://www.npmjs.com/package/roaring-wasm>
@@ -54,8 +56,10 @@ AWS Lambda - <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-han
     -   [cardinality](#cardinality)
     -   [isEmpty](#isempty)
     -   [add](#add)
+    -   [addChecked](#addchecked)
     -   [addMany](#addmany)
     -   [remove](#remove)
+    -   [removeChecked](#removechecked)
     -   [maximum](#maximum)
     -   [minimum](#minimum)
     -   [contains](#contains)
@@ -248,6 +252,18 @@ Values are unique, this function does nothing if the value already exists.
 
 -   `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 32 bit unsigned integer to add in the set.
 
+### addChecked
+
+Adds a 32 bit unsigned integer value checking if the bitmap changes.
+Use add() if you don't need to know if something changed.
+Values are unique, this function does nothing and returns false if the value already exists.
+
+**Parameters**
+
+-   `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 32 bit unsigned integer to add in the set.
+
+Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if the bitmap changed, false if not.
+
 ### addMany
 
 Adds multiple values.
@@ -266,6 +282,18 @@ If the value does not exists, this function does nothing.
 **Parameters**
 
 -   `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to remove.
+
+### removeChecked
+
+Removes a value from the set checking if the bitmap changes.
+Use remove() if you don't need to know if something changed.
+If the value does not exists, this function does nothing and returns false.
+
+**Parameters**
+
+-   `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 32 bit unsigned integer to remove from the set.
+
+Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if the bitmap changed, false if not.
 
 ### maximum
 

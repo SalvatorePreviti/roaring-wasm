@@ -15,6 +15,8 @@ AWS Lambda supports node 8.10 and supports WASM.
 npm install --save roaring-wasm
 ```
 
+Try it live - <https://npm.runkit.com/roaring-wasm>
+
 ## references
 
 This package - <https://www.npmjs.com/package/roaring-wasm>

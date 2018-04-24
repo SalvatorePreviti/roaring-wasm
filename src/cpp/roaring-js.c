@@ -24,6 +24,18 @@ uint32_t get_sizeof_roaring_bitmap_t() {
   return sizeof(roaring_bitmap_t);
 }
 
+bool roaring_bitmap_add_checked_js(roaring_bitmap_t * bitmap, uint32_t value) {
+  uint32_t c = (uint32_t)roaring_bitmap_get_cardinality(bitmap);
+  roaring_bitmap_add(bitmap, value);
+  return c != (uint32_t)roaring_bitmap_get_cardinality(bitmap);
+}
+
+bool roaring_bitmap_remove_checked_js(roaring_bitmap_t * bitmap, uint32_t value) {
+  uint32_t c = (uint32_t)roaring_bitmap_get_cardinality(bitmap);
+  roaring_bitmap_remove(bitmap, value);
+  return c != (uint32_t)roaring_bitmap_get_cardinality(bitmap);
+}
+
 bool roaring_bitmap_optimize_js(roaring_bitmap_t * bitmap) {
   bool result = false;
   for (int repeat = 0; repeat < 4; ++repeat) {

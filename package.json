@@ -1,7 +1,7 @@
 {
   "name": "roaring-wasm-dev",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.11",
   "description": "Node JS porting of Roaring using WebAssembly",
   "main": "index.js",
   "scripts": {
@@ -14,9 +14,7 @@
     "type": "git",
     "url": "git+https://github.com/SalvatorePreviti/roaring-wasm.git"
   },
-  "keywords": [
-    "roaring"
-  ],
+  "keywords": ["roaring"],
   "engines": {
     "node": ">=8.10.0"
   },

@@ -32,6 +32,9 @@ const {
   _roaring_bitmap_intersect,
   _roaring_bitmap_jaccard_index,
 
+  _roaring_bitmap_add_checked_js,
+  _roaring_bitmap_remove_checked_js,
+
   _roaring_bitmap_portable_size_in_bytes,
   _roaring_bitmap_portable_serialize_js,
   _roaring_bitmap_portable_deserialize_js,
@@ -240,6 +243,19 @@ class RoaringBitmap32 {
   }
 
   /**
+   * Adds a 32 bit unsigned integer value checking if the bitmap changes.
+   * Use add() if you don't need to know if something changed.
+   * Values are unique, this function does nothing and returns false if the value already exists.
+   *
+   * @param {number} value 32 bit unsigned integer to add in the set.
+   * @returns {boolean} True if the bitmap changed, false if not.
+   * @memberof RoaringBitmap32
+   */
+  public addChecked(value: number): boolean {
+    return !!_roaring_bitmap_add_checked_js(_getPtr(this), value)
+  }
+
+  /**
    * Adds multiple values.
    * Using this is faster than calling add() multiple times.
    * Inserting ordered or partially ordered arrays is faster.
@@ -273,6 +289,19 @@ class RoaringBitmap32 {
    */
   public remove(value: number): void {
     _roaring_bitmap_remove(_getPtr(this), value)
+  }
+
+  /**
+   * Removes a value from the set checking if the bitmap changes.
+   * Use remove() if you don't need to know if something changed.
+   * If the value does not exists, this function does nothing and returns false.
+   *
+   * @param {number} value 32 bit unsigned integer to remove from the set.
+   * @returns {boolean} True if the bitmap changed, false if not.
+   * @memberof RoaringBitmap32
+   */
+  public removeChecked(value: number): boolean {
+    return !!_roaring_bitmap_remove_checked_js(_getPtr(this), value)
   }
 
   /**
