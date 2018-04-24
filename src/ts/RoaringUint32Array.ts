@@ -11,6 +11,8 @@ class RoaringUint32Array implements Iterable<number> {
    * The type of typed array used by this class.
    * For RoaringUint32Array is Uint32Array.
    *
+   * @static
+   * @property
    * @readonly
    * @type {typeof Uint32Array}
    * @memberof RoaringUint32Array
@@ -21,6 +23,8 @@ class RoaringUint32Array implements Iterable<number> {
    * The size in bytes of each element in the array.
    * For RoaringUint32Array is always 4
    *
+   * @static
+   * @property
    * @readonly
    * @type {number}
    * @memberof RoaringUint32Array
@@ -32,6 +36,7 @@ class RoaringUint32Array implements Iterable<number> {
    * For RoaringUint32Array is Uint32Array.
    *
    * @readonly
+   * @property
    * @type {typeof Uint32Array}
    * @memberof RoaringUint32Array
    */
@@ -44,6 +49,7 @@ class RoaringUint32Array implements Iterable<number> {
    * For RoaringUint32Array is always 4
    *
    * @readonly
+   * @property
    * @type {number}
    * @memberof RoaringUint32Array
    */
@@ -58,6 +64,7 @@ class RoaringUint32Array implements Iterable<number> {
    * Use the returned buffer for short periods of time.
    *
    * @readonly
+   * @property
    * @type {ArrayBuffer}
    * @memberof RoaringUint32Array
    */
@@ -69,6 +76,7 @@ class RoaringUint32Array implements Iterable<number> {
    * Returns true if this object was deallocated.
    *
    * @readonly
+   * @property
    * @type {boolean}
    * @memberof RoaringUint32Array
    */
@@ -81,6 +89,7 @@ class RoaringUint32Array implements Iterable<number> {
    * For RoaringUint32Array it is equal to this.length * 4
    *
    * @readonly
+   * @property
    * @type {number}
    * @memberof RoaringUint32Array
    */
@@ -95,6 +104,7 @@ class RoaringUint32Array implements Iterable<number> {
    * Use the returned array for short periods of time.
    *
    * @readonly
+   * @property
    * @type {TypedArray}
    * @memberof RoaringUint32Array
    */
@@ -105,6 +115,7 @@ class RoaringUint32Array implements Iterable<number> {
   /**
    * The offset in bytes of the array (the location of the first byte in WASM memory).
    * @readonly
+   * @property
    * @type {number}
    * @memberof RoaringUint32Array
    */
@@ -114,6 +125,7 @@ class RoaringUint32Array implements Iterable<number> {
    * Number of elements allocated in this array.
    *
    * @readonly
+   * @property
    * @type {number}
    * @memberof RoaringUint32Array
    */
@@ -127,6 +139,7 @@ class RoaringUint32Array implements Iterable<number> {
    * If the parameter is a number, it creates a new uninitialized array of the given length.
    * If the parameter is an Iterable, it creates a copy of the given iterable.
    *
+   * @constructor
    * @param {(number | RoaringUint32Array | Uint32Array | ReadonlyArray<number>)} lengthOrArray Length of the array to allocate or the array to copy
    * @memberof RoaringUint32Array
    */
@@ -193,6 +206,8 @@ class RoaringUint32Array implements Iterable<number> {
   /**
    * Throws an error if the memory was freed.
    *
+   * @readonly
+   * @property
    * @returns {(void | never)}
    * @memberof RoaringUint32Array
    */
@@ -231,9 +246,11 @@ class RoaringUint32Array implements Iterable<number> {
   }
 
   /**
-   * Copies the content of this typed array into a standard JS array of numbers and returns it.
+   * Gets a new JS typed array instance that shares the memory used by this buffer.
+   * Note that the buffer may point to an outdated WASM memory if the WASM allocated memory grows while using the returned buffer.
+   * Use the returned array for short periods of time.
    *
-   * @returns {number[]} A new array.
+   * @returns {Uint32Array} A new typed array that shares the memory with this array.
    * @memberof RoaringUint32Array
    */
   public asTypedArray(): Uint32Array {

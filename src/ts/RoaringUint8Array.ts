@@ -11,7 +11,9 @@ class RoaringUint8Array implements Iterable<number> {
    * The type of typed array used by this class.
    * For RoaringUint8Array is Uint8Array.
    *
+   * @static
    * @readonly
+   * @property
    * @type {typeof Uint8Array}
    * @memberof RoaringUint8Array
    */
@@ -21,7 +23,9 @@ class RoaringUint8Array implements Iterable<number> {
    * The size in bytes of each element in the array.
    * For RoaringUint8Array is always 1
    *
+   * @static
    * @readonly
+   * @property
    * @type {number}
    * @memberof RoaringUint8Array
    */
@@ -32,6 +36,7 @@ class RoaringUint8Array implements Iterable<number> {
    * For RoaringUint8Array is Uint8Array.
    *
    * @readonly
+   * @property
    * @type {typeof Uint8Array}
    * @memberof RoaringUint8Array
    */
@@ -44,6 +49,7 @@ class RoaringUint8Array implements Iterable<number> {
    * For RoaringUint8Array is always 1
    *
    * @readonly
+   * @property
    * @type {number}
    * @memberof RoaringUint8Array
    */
@@ -58,6 +64,7 @@ class RoaringUint8Array implements Iterable<number> {
    * Use the returned buffer for short periods of time.
    *
    * @readonly
+   * @property
    * @type {ArrayBuffer}
    * @memberof RoaringUint8Array
    */
@@ -69,6 +76,7 @@ class RoaringUint8Array implements Iterable<number> {
    * Returns true if this object was deallocated.
    *
    * @readonly
+   * @property
    * @type {boolean}
    * @memberof RoaringUint8Array
    */
@@ -81,6 +89,7 @@ class RoaringUint8Array implements Iterable<number> {
    * For RoaringUint8Array it is equal to this.length
    *
    * @readonly
+   * @property
    * @type {number}
    * @memberof RoaringUint8Array
    */
@@ -95,6 +104,7 @@ class RoaringUint8Array implements Iterable<number> {
    * Use the returned array for short periods of time.
    *
    * @readonly
+   * @property
    * @type {TypedArray}
    * @memberof RoaringUint8Array
    */
@@ -105,6 +115,7 @@ class RoaringUint8Array implements Iterable<number> {
   /**
    * The offset in bytes of the array (the location of the first byte in WASM memory).
    * @readonly
+   * @property
    * @type {number}
    * @memberof RoaringUint8Array
    */
@@ -114,6 +125,7 @@ class RoaringUint8Array implements Iterable<number> {
    * Number of elements allocated in this array.
    *
    * @readonly
+   * @property
    * @type {number}
    * @memberof RoaringUint8Array
    */
@@ -127,8 +139,9 @@ class RoaringUint8Array implements Iterable<number> {
    * If the parameter is a number, it creates a new uninitialized array of the given length.
    * If the parameter is an Iterable, it creates a copy of the given iterable.
    *
+   * @constructor
    * @param {(number | RoaringUint8Array | Uint8Array | ReadonlyArray<number>)} lengthOrArray Length of the array to allocate or the array to copy
-   * @memberof RoaringUint32Array
+   * @memberof RoaringUint8Array
    */
   public constructor(lengthOrArray: number | Iterable<number>, _pointer?: number) {
     this.byteOffset = 0
@@ -190,6 +203,8 @@ class RoaringUint8Array implements Iterable<number> {
   /**
    * Throws an error if the memory was freed.
    *
+   * @readonly
+   * @property
    * @returns {(void | never)}
    * @memberof RoaringUint8Array
    */
@@ -228,9 +243,11 @@ class RoaringUint8Array implements Iterable<number> {
   }
 
   /**
-   * Copies the content of this typed array into a standard JS array of numbers and returns it.
+   * Gets a new JS typed array instance that shares the memory used by this buffer.
+   * Note that the buffer may point to an outdated WASM memory if the WASM allocated memory grows while using the returned buffer.
+   * Use the returned array for short periods of time.
    *
-   * @returns {number[]} A new array.
+   * @returns {Uint8Array} A new typed array that shares the memory with this array.
    * @memberof RoaringUint8Array
    */
   public asTypedArray(): Uint8Array {
@@ -295,7 +312,7 @@ class RoaringUint8Array implements Iterable<number> {
    * Iterator that iterates through all values in the array.
    *
    * @returns {IterableIterator<number>}
-   * @memberof RoaringUint32Array
+   * @memberof RoaringUint8Array
    */
   public [Symbol.iterator](): IterableIterator<number> {
     return this.asTypedArray()[Symbol.iterator]()

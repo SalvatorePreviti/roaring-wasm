@@ -103,7 +103,6 @@ AWS Lambda - <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-han
     -   [toSet](#toset-1)
     -   [toString](#tostring)
     -   [iterator](#iterator)
-    -   [iterator](#iterator-1)
 -   [RoaringUint8Array](#roaringuint8array)
     -   [TypedArray](#typedarray-2)
     -   [TypedArray](#typedarray-3)
@@ -122,6 +121,7 @@ AWS Lambda - <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-han
     -   [toNodeBuffer](#tonodebuffer-1)
     -   [toArray](#toarray-2)
     -   [toString](#tostring-1)
+    -   [iterator](#iterator-1)
 
 ## RoaringBitmap32
 
@@ -619,9 +619,11 @@ Writes the given array at the specified position
 
 ### asTypedArray
 
-Copies the content of this typed array into a standard JS array of numbers and returns it.
+Gets a new JS typed array instance that shares the memory used by this buffer.
+Note that the buffer may point to an outdated WASM memory if the WASM allocated memory grows while using the returned buffer.
+Use the returned array for short periods of time.
 
-Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** A new array.
+Returns **[Uint32Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array)** A new typed array that shares the memory with this array.
 
 ### asNodeBuffer
 
@@ -660,12 +662,6 @@ Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Gl
 ### toString
 
 Returns a string representation of an array.
-
-### iterator
-
-Iterator that iterates through all values in the array.
-
-Returns **IterableIterator&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 
 
 ### iterator
 
@@ -757,9 +753,11 @@ Writes the given array at the specified position
 
 ### asTypedArray
 
-Copies the content of this typed array into a standard JS array of numbers and returns it.
+Gets a new JS typed array instance that shares the memory used by this buffer.
+Note that the buffer may point to an outdated WASM memory if the WASM allocated memory grows while using the returned buffer.
+Use the returned array for short periods of time.
 
-Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** A new array.
+Returns **[Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array)** A new typed array that shares the memory with this array.
 
 ### asNodeBuffer
 
@@ -792,3 +790,9 @@ Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Gl
 ### toString
 
 Returns a string representation of an array.
+
+### iterator
+
+Iterator that iterates through all values in the array.
+
+Returns **IterableIterator&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 

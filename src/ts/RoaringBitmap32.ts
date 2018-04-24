@@ -58,6 +58,7 @@ class RoaringBitmap32 {
    *
    * The roaring bitmap allocates in WASM memory, remember to dispose
    * the RoaringBitmap32 when not needed anymore to release WASM memory.
+   * @constructor
    * @param { Set<number> | RoaringUint32Array | Uint32Array | ReadonlyArray<number>} values The values to add
    * @memberof RoaringBitmap32
    */
@@ -168,6 +169,7 @@ class RoaringBitmap32 {
    * Returns true if this instance was disposed.
    *
    * @readonly
+   * @property
    * @type {boolean}
    * @memberof RoaringBitmap32
    */
