@@ -25,12 +25,6 @@
     "no-bitwise": false,
     "no-non-null-assertion": false,
     "typedef": false,
-    "promise-function-async": false,
-    "import-name": [
-      true,
-      {
-        "idisposable": "IDisposable"
-      }
-    ]
+    "promise-function-async": false
   }
 }

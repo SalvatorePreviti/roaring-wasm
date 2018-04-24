@@ -83,18 +83,45 @@ AWS Lambda - <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-han
     -   [serializeToRoaringUint8Array](#serializetoroaringuint8array)
     -   [serializeToUint8Array](#serializetouint8array)
     -   [serializeToNodeBuffer](#serializetonodebuffer)
--   [RoaringTypedArray](#roaringtypedarray)
+-   [RoaringUint32Array](#roaringuint32array)
+    -   [TypedArray](#typedarray)
+    -   [TypedArray](#typedarray-1)
+    -   [BYTES_PER_ELEMENT](#bytes_per_element)
+    -   [BYTES_PER_ELEMENT](#bytes_per_element-1)
     -   [buffer](#buffer)
     -   [isDisposed](#isdisposed-1)
-    -   [set](#set)
+    -   [byteLength](#bytelength)
+    -   [heap](#heap)
     -   [dispose](#dispose-1)
+    -   [throwIfDisposed](#throwifdisposed-1)
+    -   [set](#set)
+    -   [asTypedArray](#astypedarray)
+    -   [asNodeBuffer](#asnodebuffer)
+    -   [toTypedArray](#totypedarray)
     -   [toNodeBuffer](#tonodebuffer)
     -   [toArray](#toarray-1)
+    -   [toSet](#toset-1)
     -   [toString](#tostring)
--   [RoaringUint8Array](#roaringuint8array)
-    -   [throwIfDisposed](#throwifdisposed-1)
--   [RoaringUint32Array](#roaringuint32array)
     -   [iterator](#iterator)
+    -   [iterator](#iterator-1)
+-   [RoaringUint8Array](#roaringuint8array)
+    -   [TypedArray](#typedarray-2)
+    -   [TypedArray](#typedarray-3)
+    -   [BYTES_PER_ELEMENT](#bytes_per_element-2)
+    -   [BYTES_PER_ELEMENT](#bytes_per_element-3)
+    -   [buffer](#buffer-1)
+    -   [isDisposed](#isdisposed-2)
+    -   [byteLength](#bytelength-1)
+    -   [heap](#heap-1)
+    -   [dispose](#dispose-2)
+    -   [throwIfDisposed](#throwifdisposed-2)
+    -   [set](#set-1)
+    -   [asTypedArray](#astypedarray-1)
+    -   [asNodeBuffer](#asnodebuffer-1)
+    -   [toTypedArray](#totypedarray-1)
+    -   [toNodeBuffer](#tonodebuffer-1)
+    -   [toArray](#toarray-2)
+    -   [toString](#tostring-1)
 
 ## RoaringBitmap32
 
@@ -102,8 +129,6 @@ A Roaring Bitmap that supports 32 bit unsigned integers.
 
 The roaring bitmap allocates in WASM memory, remember to dispose
 the RoaringBitmap32 when not needed anymore to release WASM memory.
-
-Implements IDisposable
 
 ### xorCardinality
 
@@ -510,10 +535,34 @@ The returned buffer is automatically garbage collected and there is no need to b
 
 Returns **[Buffer](https://nodejs.org/api/buffer.html)** The NodeJS Buffer that contains the serialized bitmap
 
-## RoaringTypedArray
+## RoaringUint32Array
 
-Base class for typed arrays allocted directly in roaring library WASM memory.
+Array of unsigned 32 bit integers allocted directly in roaring library WASM memory.
 Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
+
+### TypedArray
+
+The type of typed array used by this class.
+For RoaringUint32Array is Uint32Array.
+
+### TypedArray
+
+The type of typed array used by this class.
+For RoaringUint32Array is Uint32Array.
+
+### BYTES_PER_ELEMENT
+
+The size in bytes of each element in the array.
+For RoaringUint32Array is always 4
+
+Type: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+### BYTES_PER_ELEMENT
+
+The size in bytes of each element in the array.
+For RoaringUint32Array is always 4
+
+Type: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)
 
 ### buffer
 
@@ -530,6 +579,35 @@ Returns true if this object was deallocated.
 
 Type: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
 
+### byteLength
+
+The length in bytes of the array.
+For RoaringUint32Array it is equal to this.length \* 4
+
+Type: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+### heap
+
+The full WASM heap in hich this array is allocated.
+Note that the buffer may become invalid if the WASM allocated memory grows.
+When the WASM grows the preallocated memory this property will return the new allocated buffer.
+Use the returned array for short periods of time.
+
+Type: [TypedArray](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypedArray)
+
+### dispose
+
+Frees the allocated memory.
+Is safe to call this method more than once.
+
+Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if memory gets freed during this call, false if not.
+
+### throwIfDisposed
+
+Throws an error if the memory was freed.
+
+Returns **(void | never)** 
+
 ### set
 
 Writes the given array at the specified position
@@ -539,12 +617,164 @@ Writes the given array at the specified position
 -   `array`  A typed or untyped array of values to set.
 -   `offset`  The index in the current array at which the values are to be written.
 
+### asTypedArray
+
+Copies the content of this typed array into a standard JS array of numbers and returns it.
+
+Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** A new array.
+
+### asNodeBuffer
+
+Gets a new NodeJS Buffer instance that shares the memory used by this buffer.
+Note that the buffer may point to an outdated WASM memory if the WASM allocated memory grows while using the returned buffer.
+Use the returned array for short periods of time.
+
+Returns **[Buffer](https://nodejs.org/api/buffer.html)** A new instance of NodeJS Buffer
+
+### toTypedArray
+
+Copies the content of this buffer to a typed array.
+The returned array is garbage collected and don't need to be disposed manually.
+
+Returns **[TypedArray](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypedArray)** A new typed array that contains a copy of this buffer
+
+### toNodeBuffer
+
+Copies the content of this buffer to a NodeJS Buffer.
+The returned buffer is garbage collected and don't need to be disposed manually.
+
+Returns **[Buffer](https://nodejs.org/api/buffer.html)** A new instance of NodeJS Buffer that contains a copy of this buffer
+
+### toArray
+
+Copies the content of this typed array into a new JS array of numbers and returns it.
+
+Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** A new array.
+
+### toSet
+
+Copies the content of this typed array into a new JS Set<number> and returns it.
+
+Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** A new array.
+
+### toString
+
+Returns a string representation of an array.
+
+### iterator
+
+Iterator that iterates through all values in the array.
+
+Returns **IterableIterator&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 
+
+### iterator
+
+Iterator that iterates through all values in the array.
+
+Returns **IterableIterator&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 
+
+## RoaringUint8Array
+
+Array of bytes allocted directly in roaring library WASM memory.
+Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
+
+### TypedArray
+
+The type of typed array used by this class.
+For RoaringUint8Array is Uint8Array.
+
+### TypedArray
+
+The type of typed array used by this class.
+For RoaringUint8Array is Uint8Array.
+
+### BYTES_PER_ELEMENT
+
+The size in bytes of each element in the array.
+For RoaringUint8Array is always 1
+
+Type: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+### BYTES_PER_ELEMENT
+
+The size in bytes of each element in the array.
+For RoaringUint8Array is always 1
+
+Type: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+### buffer
+
+The ArrayBuffer instance referenced by the array.
+Note that the buffer may become invalid if the WASM allocated memory grows.
+When the WASM grows the preallocated memory this property will return the new allocated buffer.
+Use the returned buffer for short periods of time.
+
+Type: [ArrayBuffer](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
+
+### isDisposed
+
+Returns true if this object was deallocated.
+
+Type: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+### byteLength
+
+The length in bytes of the array.
+For RoaringUint8Array it is equal to this.length
+
+Type: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)
+
+### heap
+
+The full WASM heap in hich this array is allocated.
+Note that the buffer may become invalid if the WASM allocated memory grows.
+When the WASM grows the preallocated memory this property will return the new allocated buffer.
+Use the returned array for short periods of time.
+
+Type: [TypedArray](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypedArray)
+
 ### dispose
 
 Frees the allocated memory.
 Is safe to call this method more than once.
 
 Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if memory gets freed during this call, false if not.
+
+### throwIfDisposed
+
+Throws an error if the memory was freed.
+
+Returns **(void | never)** 
+
+### set
+
+Writes the given array at the specified position
+
+**Parameters**
+
+-   `array`  A typed or untyped array of values to set.
+-   `offset`  The index in the current array at which the values are to be written.
+
+### asTypedArray
+
+Copies the content of this typed array into a standard JS array of numbers and returns it.
+
+Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** A new array.
+
+### asNodeBuffer
+
+Gets a new NodeJS Buffer instance that shares the memory used by this buffer.
+Note that the buffer may point to an outdated WASM memory if the WASM allocated memory grows while using the returned buffer.
+Use the returned array for short periods of time.
+
+Returns **[Buffer](https://nodejs.org/api/buffer.html)** A new instance of NodeJS Buffer
+
+### toTypedArray
+
+Copies the content of this buffer to a typed array.
+The returned array is garbage collected and don't need to be disposed manually.
+
+Returns **[TypedArray](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypedArray)** A new typed array that contains a copy of this buffer
 
 ### toNodeBuffer
 
@@ -562,35 +792,3 @@ Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Gl
 ### toString
 
 Returns a string representation of an array.
-
-## RoaringUint8Array
-
-**Extends RoaringTypedArray**
-
-Array of bytes allocted directly in roaring library WASM memory.
-Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
-
-Extends RoaringTypedArray<Uint8Array>.
-Implements IDisposable
-
-### throwIfDisposed
-
-Throws an error if the memory was freed.
-
-Returns **(void | never)** 
-
-## RoaringUint32Array
-
-**Extends RoaringTypedArray**
-
-Array of bytes allocted directly in roaring library WASM memory.
-Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
-
-Extends RoaringTypedArray<Uint32Array>.
-Implements IDisposable
-
-### iterator
-
-Iterator that iterates through all values in the array.
-
-Returns **IterableIterator&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 

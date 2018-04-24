@@ -7,6 +7,12 @@
     "no-console": false,
     "typedef": false,
     "completed-docs": false,
-    "promise-function-async": false
+    "promise-function-async": false,
+    "import-name": [
+      true,
+      {
+        "idisposable": "IDisposable"
+      }
+    ]
   }
 }

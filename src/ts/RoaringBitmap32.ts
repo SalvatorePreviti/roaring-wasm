@@ -1,4 +1,3 @@
-import IDisposable = require('idisposable')
 import roaringWasm = require('./lib/roaring-wasm')
 import RoaringUint32Array = require('./RoaringUint32Array')
 import RoaringUint8Array = require('./RoaringUint8Array')
@@ -48,12 +47,10 @@ const {
  * The roaring bitmap allocates in WASM memory, remember to dispose
  * the RoaringBitmap32 when not needed anymore to release WASM memory.
  *
- * Implements IDisposable
  *
  * @class RoaringBitmap32
- * @implements {IDisposable}
  */
-class RoaringBitmap32 implements IDisposable {
+class RoaringBitmap32 {
   private _ptr: number | undefined
 
   /**
@@ -95,7 +92,7 @@ class RoaringBitmap32 implements IDisposable {
     try {
       bitmap.deserialize(buffer, portable)
     } catch (error) {
-      IDisposable.tryDispose(bitmap)
+      bitmap.dispose()
       throw error
     }
     return bitmap
@@ -249,16 +246,19 @@ class RoaringBitmap32 implements IDisposable {
    * @memberof RoaringBitmap32
    */
   public addMany(values: RoaringUint32Array | Uint32Array | ReadonlyArray<number> | Set<number>): void {
-    if ((values as { readonly length: number }).length > 0) {
-      if (values instanceof RoaringUint32Array) {
+    if (values instanceof RoaringUint32Array) {
+      if (values.length > 0) {
         _roaring_bitmap_add_many(_getPtr(this), values.length, values.byteOffset)
-      } else {
-        IDisposable.using(new RoaringUint32Array(values as RoaringUint32Array | Uint32Array | ReadonlyArray<number>), buffer => {
-          this.addMany(buffer)
-        })
       }
-    } else if (values instanceof Set) {
-      this.addMany(Array.from(values))
+    } else {
+      const roaringArray = new RoaringUint32Array(values)
+      try {
+        if (roaringArray.length > 0) {
+          _roaring_bitmap_add_many(_getPtr(this), roaringArray.length, roaringArray.byteOffset)
+        }
+      } finally {
+        roaringArray.dispose()
+      }
     }
   }
 
