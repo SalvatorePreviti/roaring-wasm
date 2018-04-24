@@ -41,25 +41,16 @@ AWS Lambda - <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-han
 
 ### Table of Contents
 
--   [RoaringTypedArray](#roaringtypedarray)
-    -   [buffer](#buffer)
-    -   [isDisposed](#isdisposed)
-    -   [set](#set)
-    -   [dispose](#dispose)
-    -   [toArray](#toarray)
-    -   [toString](#tostring)
--   [RoaringUint8Array](#roaringuint8array)
-    -   [throwIfDisposed](#throwifdisposed)
 -   [RoaringBitmap32](#roaringbitmap32)
     -   [xorCardinality](#xorcardinality)
     -   [deserialize](#deserialize)
     -   [deserialize](#deserialize-1)
+    -   [serializeArrayToNewBuffer](#serializearraytonewbuffer)
     -   [deserializeToArray](#deserializetoarray)
     -   [deserializeToSet](#deserializetoset)
-    -   [serializeArrayToNewBuffer](#serializearraytonewbuffer)
-    -   [isDisposed](#isdisposed-1)
-    -   [dispose](#dispose-1)
-    -   [throwIfDisposed](#throwifdisposed-1)
+    -   [isDisposed](#isdisposed)
+    -   [dispose](#dispose)
+    -   [throwIfDisposed](#throwifdisposed)
     -   [cardinality](#cardinality)
     -   [isEmpty](#isempty)
     -   [add](#add)
@@ -71,7 +62,9 @@ AWS Lambda - <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-han
     -   [isSubset](#issubset)
     -   [isStrictSubset](#isstrictsubset)
     -   [toRoaringUint32Array](#toroaringuint32array)
-    -   [toArray](#toarray-1)
+    -   [toArray](#toarray)
+    -   [toSet](#toset)
+    -   [toUint32Array](#touint32array)
     -   [equals](#equals)
     -   [flipRange](#fliprange)
     -   [optimize](#optimize)
@@ -86,77 +79,22 @@ AWS Lambda - <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-han
     -   [rank](#rank)
     -   [intersects](#intersects)
     -   [jaccardIndex](#jaccardindex)
-    -   [getSerializationSizeInBytesPortable](#getserializationsizeinbytesportable)
-    -   [serializePortable](#serializeportable)
-    -   [deserializePortable](#deserializeportable)
-    -   [getSerializationSizeInBytesNative](#getserializationsizeinbytesnative)
-    -   [serializeNative](#serializenative)
-    -   [deserializeNative](#deserializenative)
     -   [getSerializationSizeInBytes](#getserializationsizeinbytes)
-    -   [serialize](#serialize)
+    -   [serializeToRoaringUint8Array](#serializetoroaringuint8array)
+    -   [serializeToUint8Array](#serializetouint8array)
+    -   [serializeToNodeBuffer](#serializetonodebuffer)
+-   [RoaringTypedArray](#roaringtypedarray)
+    -   [buffer](#buffer)
+    -   [isDisposed](#isdisposed-1)
+    -   [set](#set)
+    -   [dispose](#dispose-1)
+    -   [toNodeBuffer](#tonodebuffer)
+    -   [toArray](#toarray-1)
+    -   [toString](#tostring)
+-   [RoaringUint8Array](#roaringuint8array)
+    -   [throwIfDisposed](#throwifdisposed-1)
 -   [RoaringUint32Array](#roaringuint32array)
-
-## RoaringTypedArray
-
-Base class for typed arrays allocted directly in roaring library WASM memory.
-Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
-
-### buffer
-
-The ArrayBuffer instance referenced by the array.
-Note that the buffer may become invalid if the WASM allocated memory grows.
-When the WASM grows the preallocated memory this property will return the new allocated buffer.
-Use the returned buffer for short periods of time.
-
-Type: [ArrayBuffer](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
-
-### isDisposed
-
-Returns true if this object was deallocated.
-
-Type: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
-
-### set
-
-Writes the given array at the specified position
-
-**Parameters**
-
--   `array`  A typed or untyped array of values to set.
--   `offset`  The index in the current array at which the values are to be written.
-
-### dispose
-
-Frees the allocated memory.
-Is safe to call this method more than once.
-
-Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if memory gets freed during this call, false if not.
-
-### toArray
-
-Copies the content of this typed array into a standard JS array of numbers and returns it.
-
-Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** A new array.
-
-### toString
-
-Returns a string representation of an array.
-
-## RoaringUint8Array
-
-**Extends RoaringTypedArray**
-
-Array of bytes allocted directly in roaring library WASM memory.
-Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
-
-Extends RoaringTypedArray<Uint8Array>.
-Implements IDisposable
-
-### throwIfDisposed
-
-Throws an error if the memory was freed.
-
-Returns **(void | never)** 
+    -   [iterator](#iterator)
 
 ## RoaringBitmap32
 
@@ -206,6 +144,19 @@ Throws an error if deserialization failed.
 
 Returns **void** 
 
+### serializeArrayToNewBuffer
+
+Utility function that serializes an array of uint32 to a new NodeJS buffer.
+The returned buffer is automatically garbage collected.
+
+**Parameters**
+
+-   `values` **([RoaringUint32Array](#roaringuint32array) \| [Uint32Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array) | ReadonlyArray&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)> | [Set](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Set)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** 
+-   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, serialization is compatible with the Java and Go versions of the library.
+    If false, serialization is compatible with the C version of the library. Default is false. (optional, default `false`)
+
+Returns **[Buffer](https://nodejs.org/api/buffer.html)** The NodeJS buffer containing the serialized data.
+
 ### deserializeToArray
 
 Utility function that deserializes a RoaringBitmap32 serialized in a buffer to an Array<number> of values.
@@ -231,19 +182,6 @@ The array can be very big, be careful when you use this function.
     If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
 Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** All the values in the bitmap.
-
-### serializeArrayToNewBuffer
-
-Utility function that serializes an array of uint32 to a new NodeJS buffer.
-The returned buffer is automatically garbage collected.
-
-**Parameters**
-
--   `values` **([RoaringUint32Array](#roaringuint32array) \| [Uint32Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array) | ReadonlyArray&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** 
--   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, serialization is compatible with the Java and Go versions of the library.
-    If false, serialization is compatible with the C version of the library. Default is false. (optional, default `false`)
-
-Returns **[Buffer](https://nodejs.org/api/buffer.html)** The NodeJS buffer containing the serialized data.
 
 ### isDisposed
 
@@ -289,11 +227,11 @@ Values are unique, this function does nothing if the value already exists.
 
 Adds multiple values.
 Using this is faster than calling add() multiple times.
-Inserting ordered or partialky ordered arrays is faster.
+Inserting ordered or partially ordered arrays is faster.
 
 **Parameters**
 
--   `values`  
+-   `values` **([RoaringUint32Array](#roaringuint32array) \| [Uint32Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array) | ReadonlyArray&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)> | [Set](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Set)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The values to add.
 
 ### remove
 
@@ -360,9 +298,23 @@ Returns **[RoaringUint32Array](#roaringuint32array)** The RoaringUint32Array. Re
 ### toArray
 
 Converts the bitmap to a JS array.
-The array may be very big, use this function with caution.
+The resulting array may be very big, use this function with caution.
 
-Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The array containing all values in the set.
+Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The array containing all values in the bitmap.
+
+### toSet
+
+Converts the bitmap to a JS Set<number>.
+The resulting set may be very big, use this function with caution.
+
+Returns **[Set](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Set)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The set containing all values in the bitmap.
+
+### toUint32Array
+
+Converts the bitmap to a JS Uint32Array.
+The resulting array may be very big, use this function with caution.
+
+Returns **[Uint32Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array)** The array containing all values in the bitmap.
 
 ### equals
 
@@ -511,58 +463,6 @@ The Jaccard index is undefined if both bitmaps are empty.
 
 Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The Jaccard index
 
-### getSerializationSizeInBytesPortable
-
-How many bytes are required to serialize this bitmap in a portable way.
-The portable serialization is compatible with Java and Go versions of this library.
-
-### serializePortable
-
-Serializes a bitmap to a byte buffer allocated in WASM memory.
-This is meant to be compatible with the Java and Go versions of the library.
-
-The returned RoaringUint8Array is allocated in WASM memory and not garbage collected,
-it need to be freed manually calling dispose().
-
-Returns **[RoaringUint8Array](#roaringuint8array)** The RoaringUint8Array. Remember to manually dispose to free the memory.
-
-### deserializePortable
-
-Reads a bitmap from a serialized version.
-This is meant to be compatible with the Java and Go versions of the library.
-Throws an error if deserialization failed.
-
-**Parameters**
-
--   `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) \| [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The containing the data to deserialize.
-
-### getSerializationSizeInBytesNative
-
-How many bytes are required to serialize this bitmap in a portable way.
-The native serialization is compatible with the C version of the library.
-Native serialization may return more compressed buffer than the portable version.
-
-### serializeNative
-
-Serializes a bitmap to a byte buffer allocated in WASM memory.
-This is meant to be compatible with the C++ version of the library.
-Can generate smaller outputs than the portable version.
-
-The returned RoaringUint8Array is allocated in WASM memory and not garbage collected,
-it need to be freed manually calling dispose().
-
-Returns **[RoaringUint8Array](#roaringuint8array)** The RoaringUint8Array. Remember to manually dispose to free the memory.
-
-### deserializeNative
-
-Reads a bitmap from a serialized version.
-This is meant to be compatible with the Java and Go versions of the library.
-Throws an error if deserialization failed.
-
-**Parameters**
-
--   `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) \| [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The containing the data to deserialize.
-
 ### getSerializationSizeInBytes
 
 How many bytes are required to serialize this bitmap.
@@ -572,7 +472,7 @@ How many bytes are required to serialize this bitmap.
 -   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, deserialization is compatible with the Java and Go versions of the library.
     If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
-### serialize
+### serializeToRoaringUint8Array
 
 Serializes a bitmap to a byte buffer allocated in WASM memory.
 
@@ -586,6 +486,99 @@ it need to be freed manually calling dispose().
 
 Returns **[RoaringUint8Array](#roaringuint8array)** The RoaringUint8Array. Remember to manually dispose to free the memory.
 
+### serializeToUint8Array
+
+Serializes a bitmap to a typed Uint8Array.
+The returned array is automatically garbage collected and there is no need to be disposed manually.
+
+**Parameters**
+
+-   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, serialization is compatible with the Java and Go versions of the library.
+    If false, serialization is compatible with the C version of the library. Default is false. (optional, default `false`)
+
+Returns **[Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array)** The Uint8Array that contains the serialized bitmap
+
+### serializeToNodeBuffer
+
+Serializes a bitmap to a NodeJS buffer.
+The returned buffer is automatically garbage collected and there is no need to be disposed manually.
+
+**Parameters**
+
+-   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, serialization is compatible with the Java and Go versions of the library.
+    If false, serialization is compatible with the C version of the library. Default is false. (optional, default `false`)
+
+Returns **[Buffer](https://nodejs.org/api/buffer.html)** The NodeJS Buffer that contains the serialized bitmap
+
+## RoaringTypedArray
+
+Base class for typed arrays allocted directly in roaring library WASM memory.
+Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
+
+### buffer
+
+The ArrayBuffer instance referenced by the array.
+Note that the buffer may become invalid if the WASM allocated memory grows.
+When the WASM grows the preallocated memory this property will return the new allocated buffer.
+Use the returned buffer for short periods of time.
+
+Type: [ArrayBuffer](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
+
+### isDisposed
+
+Returns true if this object was deallocated.
+
+Type: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)
+
+### set
+
+Writes the given array at the specified position
+
+**Parameters**
+
+-   `array`  A typed or untyped array of values to set.
+-   `offset`  The index in the current array at which the values are to be written.
+
+### dispose
+
+Frees the allocated memory.
+Is safe to call this method more than once.
+
+Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if memory gets freed during this call, false if not.
+
+### toNodeBuffer
+
+Copies the content of this buffer to a NodeJS Buffer.
+The returned buffer is garbage collected and don't need to be disposed manually.
+
+Returns **[Buffer](https://nodejs.org/api/buffer.html)** A new instance of NodeJS Buffer that contains a copy of this buffer
+
+### toArray
+
+Copies the content of this typed array into a standard JS array of numbers and returns it.
+
+Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** A new array.
+
+### toString
+
+Returns a string representation of an array.
+
+## RoaringUint8Array
+
+**Extends RoaringTypedArray**
+
+Array of bytes allocted directly in roaring library WASM memory.
+Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
+
+Extends RoaringTypedArray<Uint8Array>.
+Implements IDisposable
+
+### throwIfDisposed
+
+Throws an error if the memory was freed.
+
+Returns **(void | never)** 
+
 ## RoaringUint32Array
 
 **Extends RoaringTypedArray**
@@ -595,3 +588,9 @@ Note: Memory is not garbage collected, you are responsible to free the allocated
 
 Extends RoaringTypedArray<Uint32Array>.
 Implements IDisposable
+
+### iterator
+
+Iterator that iterates through all values in the array.
+
+Returns **IterableIterator&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 

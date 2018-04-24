@@ -1,5 +1,5 @@
 import roaringWasm = require('./lib/roaring-wasm')
-import RoaringTypedArray = require('./lib/RoaringTypedArray')
+import RoaringTypedArray = require('./RoaringTypedArray')
 
 /**
  * Array of bytes allocted directly in roaring library WASM memory.
@@ -10,7 +10,7 @@ import RoaringTypedArray = require('./lib/RoaringTypedArray')
  *
  * @class RoaringUint32Array
  * @extends {RoaringTypedArray}
- * @implements {RoaringTypedArray<Uint32Array>}
+ * @implements {RoaringTypedArray}
  * @implements {IDisposable}
  */
 class RoaringUint32Array extends RoaringTypedArray<Uint32Array> {
@@ -35,6 +35,12 @@ class RoaringUint32Array extends RoaringTypedArray<Uint32Array> {
    */
   public constructor(lengthOrArray: number | RoaringUint32Array | Uint32Array | ReadonlyArray<number>, pointer?: number) {
     super(lengthOrArray, 4, pointer)
+  }
+
+  public toTypedArray(): Uint32Array {
+    const array = new Uint32Array(this.length)
+    array.set(this.asTypedArray())
+    return array
   }
 
   public asTypedArray(): Uint32Array {

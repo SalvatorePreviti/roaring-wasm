@@ -1,5 +1,5 @@
 import IDisposable = require('idisposable')
-import roaringWasm = require('./roaring-wasm')
+import roaringWasm = require('./lib/roaring-wasm')
 
 /**
  * Base class for typed arrays allocted directly in roaring library WASM memory.
@@ -89,7 +89,7 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    * @memberof RoaringTypedArray
    */
   protected constructor(
-    lengthOrArray: number | ReadonlyArray<number> | TypedArray | RoaringTypedArray<TypedArray>,
+    lengthOrArray: number | ReadonlyArray<number> | TypedArray | RoaringTypedArray<TypedArray> | Set<number>,
     bytesPerElement: number,
     _pointer?: number
   ) {
@@ -116,6 +116,8 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
         )
       }
       length = lengthOrArray.length
+    } else if (lengthOrArray instanceof Set) {
+      length = lengthOrArray.size
     } else {
       throw new TypeError('Invalid argument')
     }
@@ -145,11 +147,36 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    * @param offset The index in the current array at which the values are to be written.
    * @memberof RoaringTypedArray
    */
-  public set(array: ArrayLike<number>, offset: number = 0): this {
-    if (!Number.isInteger(offset) || offset < 0 || offset + array.length > this.length) {
+  public set(array: ArrayLike<number> | Set<number>, offset: number = 0): this {
+    let length = (array as ArrayLike<number>).length
+
+    if (!Number.isInteger(offset) || offset < 0) {
       throw new TypeError(`Invalid offset ${offset}`)
     }
-    this.heap.set(array, this.byteOffset / this.BYTES_PER_ELEMENT + offset)
+
+    if (length > 0) {
+      if (offset + length > this.length) {
+        throw new TypeError(`Invalid offset ${offset}`)
+      }
+      this.heap.set(array as ArrayLike<number>, this.byteOffset / this.BYTES_PER_ELEMENT + offset)
+      return this
+    }
+
+    if (array instanceof Set) {
+      length = array.size
+      if (length <= 0) {
+        return this
+      }
+      if (offset + length > this.length) {
+        throw new TypeError(`Invalid offset ${offset}`)
+      }
+      const heap = this.heap
+      let p = this.byteOffset / this.BYTES_PER_ELEMENT + offset
+      for (const x of array) {
+        heap[p++] = x
+      }
+    }
+
     return this
   }
 
@@ -203,6 +230,26 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
   public abstract asNodeBuffer(): Buffer
 
   /**
+   * Copies the content of this buffer to a typed array.
+   * The returned array is garbage collected and don't need to be disposed manually.
+   *
+   * @returns {TypedArray} A new typed array that contains a copy of this buffer
+   * @memberof RoaringTypedArray
+   */
+  public abstract toTypedArray(): TypedArray
+
+  /**
+   * Copies the content of this buffer to a NodeJS Buffer.
+   * The returned buffer is garbage collected and don't need to be disposed manually.
+   *
+   * @returns {Buffer} A new instance of NodeJS Buffer that contains a copy of this buffer
+   * @memberof RoaringTypedArray
+   */
+  public toNodeBuffer(): Buffer {
+    return Buffer.from(this.asNodeBuffer())
+  }
+
+  /**
    * Copies the content of this typed array into a standard JS array of numbers and returns it.
    *
    * @returns {number[]} A new array.
@@ -218,6 +265,16 @@ abstract class RoaringTypedArray<TypedArray extends Uint8Array | Uint16Array | U
    */
   public toString(): string {
     return this.asTypedArray().toString()
+  }
+
+  /**
+   * Iterator that iterates through all values in the array.
+   *
+   * @returns {IterableIterator<number>}
+   * @memberof RoaringUint32Array
+   */
+  public [Symbol.iterator](): IterableIterator<number> {
+    return this.asTypedArray()[Symbol.iterator]()
   }
 }
 

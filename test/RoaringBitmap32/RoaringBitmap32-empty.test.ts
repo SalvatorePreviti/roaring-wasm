@@ -37,20 +37,20 @@ describe('RoaringBitmap32 empty', () => {
   })
 
   it('should have a portable serialization size 8', () => {
-    expect(instance.getSerializationSizeInBytesPortable()).toBe(8)
+    expect(instance.getSerializationSizeInBytes(true)).toBe(8)
   })
 
   it('should serialize as "empty" (portable)', () => {
-    const array = IDisposable.using(instance.serializePortable(), buffer => buffer.toArray())
+    const array = IDisposable.using(instance.serializeToRoaringUint8Array(true), buffer => buffer.toArray())
     expect(array).toEqual([58, 48, 0, 0, 0, 0, 0, 0])
   })
 
   it('should have a native serialization size 5', () => {
-    expect(instance.getSerializationSizeInBytesNative()).toBe(5)
+    expect(instance.getSerializationSizeInBytes()).toBe(5)
   })
 
   it('should serialize as "empty" (native)', () => {
-    const array = IDisposable.using(instance.serializeNative(), buffer => buffer.toArray())
+    const array = IDisposable.using(instance.serializeToRoaringUint8Array(), buffer => buffer.toArray())
     expect(array).toEqual([1, 0, 0, 0, 0])
   })
 

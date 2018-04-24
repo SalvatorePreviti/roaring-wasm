@@ -49,20 +49,20 @@ describe('RoaringBitmap32 one element', () => {
     })
 
     it('should have a portable serialization size 18', () => {
-      expect(instance.getSerializationSizeInBytesPortable()).toBe(18)
+      expect(instance.getSerializationSizeInBytes(true)).toBe(18)
     })
 
     it('should serialize as (portable)', () => {
-      const array = IDisposable.using(instance.serializePortable(), buffer => buffer.toArray())
+      const array = IDisposable.using(instance.serializeToRoaringUint8Array(true), buffer => buffer.toArray())
       expect(array).toEqual([58, 48, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 123, 0])
     })
 
     it('should have a native serialization size 9', () => {
-      expect(instance.getSerializationSizeInBytesNative()).toBe(9)
+      expect(instance.getSerializationSizeInBytes()).toBe(9)
     })
 
     it('should serialize as (native)', () => {
-      const array = IDisposable.using(instance.serializeNative(), buffer => buffer.toArray())
+      const array = IDisposable.using(instance.serializeToRoaringUint8Array(), buffer => buffer.toArray())
       expect(array).toEqual([1, 1, 0, 0, 0, 123, 0, 0, 0])
     })
 
