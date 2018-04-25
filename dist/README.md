@@ -76,10 +76,10 @@ AWS Lambda - <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-han
     -   [andCardinality](#andcardinality)
     -   [orCardinality](#orcardinality)
     -   [andNotCardinality](#andnotcardinality)
-    -   [andWith](#andwith)
-    -   [orWith](#orwith)
-    -   [xorWith](#xorwith)
-    -   [andNotWith](#andnotwith)
+    -   [andInPlace](#andinplace)
+    -   [orInPlace](#orinplace)
+    -   [xorInPlace](#xorinplace)
+    -   [andNotInPlace](#andnotinplace)
     -   [rank](#rank)
     -   [intersects](#intersects)
     -   [jaccardIndex](#jaccardindex)
@@ -441,7 +441,7 @@ Both bitmaps are unchanged.
 
 Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** Cardinality of the difference (andnot) of two bitmaps.
 
-### andWith
+### andInPlace
 
 Intersects this bitmap with another.
 Removes the elements from this bitmap that don't exists in the other.
@@ -452,7 +452,7 @@ The provided bitmap is not modified.
 
 -   `other` **[RoaringBitmap32](#roaringbitmap32)** 
 
-### orWith
+### orInPlace
 
 Adds the element of the other bitmap into this bitmap.
 Stores the result in this bitmap.
@@ -462,7 +462,7 @@ The provided bitmap is not modified.
 
 -   `other` **[RoaringBitmap32](#roaringbitmap32)** 
 
-### xorWith
+### xorInPlace
 
 Computes the difference between two bitmaps.
 Stores the result in this bitmap.
@@ -472,7 +472,7 @@ The provided bitmap is not modified.
 
 -   `other` **[RoaringBitmap32](#roaringbitmap32)** 
 
-### andNotWith
+### andNotInPlace
 
 Compute the difference between this and the provided bitmap,
 writing the result in the current bitmap.

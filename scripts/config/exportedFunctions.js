@@ -1,5 +1,4 @@
 const exportedFunctions = [
-  '__errno_location',
   '_malloc',
   '_free',
 

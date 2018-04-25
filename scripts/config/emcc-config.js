@@ -7,7 +7,7 @@ function buildEmccArgs() {
 
   // optimizations
   args.push('-O3')
-  args.push('--llvm-lto', '3')
+  args.push('--llvm-lto', '2')
   args.push(
     '--llvm-opts',
     JSON.stringify([

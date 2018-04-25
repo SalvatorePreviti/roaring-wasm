@@ -545,7 +545,7 @@ class RoaringBitmap32 {
    * @param {RoaringBitmap32} other
    * @memberof RoaringBitmap32
    */
-  public andWith(other: RoaringBitmap32): void {
+  public andInPlace(other: RoaringBitmap32): void {
     _roaring_bitmap_and_inplace(_getPtr(this), _getPtr(other))
   }
 
@@ -557,7 +557,7 @@ class RoaringBitmap32 {
    * @param {RoaringBitmap32} other
    * @memberof RoaringBitmap32
    */
-  public orWith(other: RoaringBitmap32): void {
+  public orInPlace(other: RoaringBitmap32): void {
     _roaring_bitmap_or_inplace(_getPtr(this), _getPtr(other))
   }
 
@@ -569,7 +569,7 @@ class RoaringBitmap32 {
    * @param {RoaringBitmap32} other
    * @memberof RoaringBitmap32
    */
-  public xorWith(other: RoaringBitmap32): void {
+  public xorInPlace(other: RoaringBitmap32): void {
     _roaring_bitmap_xor_inplace(_getPtr(this), _getPtr(other))
   }
 
@@ -581,7 +581,7 @@ class RoaringBitmap32 {
    * @param {RoaringBitmap32} other
    * @memberof RoaringBitmap32
    */
-  public andNotWith(other: RoaringBitmap32): void {
+  public andNotInPlace(other: RoaringBitmap32): void {
     _roaring_bitmap_andnot_inplace(_getPtr(this), _getPtr(other))
   }
 
