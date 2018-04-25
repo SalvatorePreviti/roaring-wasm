@@ -1,8 +1,8 @@
 const exportedFunctions = [
+  '__errno_location',
   '_malloc',
   '_free',
-  '_get_sizeof_roaring_bitmap_t',
-  '_roaring_bitmap_create_js',
+
   '_roaring_bitmap_free',
   '_roaring_bitmap_get_cardinality',
   '_roaring_bitmap_is_empty',
@@ -30,6 +30,9 @@ const exportedFunctions = [
   '_roaring_bitmap_andnot_inplace',
   '_roaring_bitmap_intersect',
   '_roaring_bitmap_jaccard_index',
+
+  '_get_sizeof_roaring_bitmap_t',
+  '_roaring_bitmap_create_js',
 
   '_roaring_bitmap_add_checked_js',
   '_roaring_bitmap_remove_checked_js',

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const exportedFunctions = require('./exportedFunctions')
+
 function buildEmccArgs() {
   const args = []
 
@@ -89,11 +90,22 @@ function buildEmccClosureArgs() {
   return args
 }
 
+function buildCflags() {
+  const args = []
+  args.push('-O3')
+  args.push('-Wall')
+  args.push('-Wno-error=unused-local-typedefs')
+  args.push('-flto=full')
+  args.push('-ffast-math')
+  return args
+}
+
 const config = {
   out: 'dist/lib/roaring-wasm/roaring-wasm-module.js',
   args: buildEmccArgs(),
   closureArgs: buildEmccClosureArgs(),
-  files: ['src/cpp/CRoaringUnityBuild/roaring.c', 'src/cpp/roaring-js.c']
+  cflags: buildCflags(),
+  files: ['src/cpp/roaring.c', 'src/cpp/roaring-js.c']
 }
 
 module.exports = config

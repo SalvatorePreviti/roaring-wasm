@@ -1,9 +1,4 @@
-#include <math.h>
-#include <stdlib.h>
-
-#define printf(...)
-#define fprintf(...)
-#define assert(...)
+#include "global.h"
 
 #include "CRoaringUnityBuild/roaring.h"
 

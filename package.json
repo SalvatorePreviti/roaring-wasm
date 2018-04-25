@@ -14,7 +14,9 @@
     "type": "git",
     "url": "git+https://github.com/SalvatorePreviti/roaring-wasm.git"
   },
-  "keywords": ["roaring"],
+  "keywords": [
+    "roaring"
+  ],
   "engines": {
     "node": ">=8.10.0"
   },
