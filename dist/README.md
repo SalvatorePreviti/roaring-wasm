@@ -154,7 +154,7 @@ the RoaringBitmap32 when not needed anymore to release WASM memory.
 
 **Parameters**
 
--   `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) \| [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The buffer to deserialize
+-   `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The buffer to deserialize
 -   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, deserialization is compatible with the Java and Go versions of the library.
     If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
@@ -167,7 +167,7 @@ Throws an error if deserialization failed.
 
 **Parameters**
 
--   `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) \| [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** 
+-   `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** 
 -   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, deserialization is compatible with the Java and Go versions of the library.
     If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
@@ -180,7 +180,7 @@ The returned buffer is automatically garbage collected.
 
 **Parameters**
 
--   `values` **([RoaringUint32Array](#roaringuint32array) \| [Uint32Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array) | ReadonlyArray&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)> | [Set](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Set)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** 
+-   `values` **([RoaringUint32Array](#roaringuint32array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** 
 -   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, serialization is compatible with the Java and Go versions of the library.
     If false, serialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
@@ -193,7 +193,7 @@ The array can be very big, be careful when you use this function.
 
 **Parameters**
 
--   `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) \| [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The buffer to deserialize.
+-   `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The buffer to deserialize.
 -   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, deserialization is compatible with the Java and Go versions of the library.
     If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
@@ -206,7 +206,7 @@ The array can be very big, be careful when you use this function.
 
 **Parameters**
 
--   `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) \| [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The buffer to deserialize.
+-   `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The buffer to deserialize.
 -   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, deserialization is compatible with the Java and Go versions of the library.
     If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
@@ -272,7 +272,7 @@ Inserting ordered or partially ordered arrays is faster.
 
 **Parameters**
 
--   `values` **([RoaringUint32Array](#roaringuint32array) \| [Uint32Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array) | ReadonlyArray&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)> | [Set](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Set)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The values to add.
+-   `values` **([RoaringUint32Array](#roaringuint32array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The values to add.
 
 ### remove
 

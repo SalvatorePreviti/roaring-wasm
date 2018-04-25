@@ -140,7 +140,7 @@ class RoaringUint32Array implements Iterable<number> {
    * If the parameter is an Iterable, it creates a copy of the given iterable.
    *
    * @constructor
-   * @param {(number | RoaringUint32Array | Uint32Array | ReadonlyArray<number>)} lengthOrArray Length of the array to allocate or the array to copy
+   * @param {(number | Iterable<number>)} lengthOrArray Length of the array to allocate or the array to copy
    * @memberof RoaringUint32Array
    */
   public constructor(lengthOrArray: number | Iterable<number>, _pointer?: number) {

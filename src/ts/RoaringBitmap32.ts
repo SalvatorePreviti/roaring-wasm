@@ -62,10 +62,10 @@ class RoaringBitmap32 {
    * The roaring bitmap allocates in WASM memory, remember to dispose
    * the RoaringBitmap32 when not needed anymore to release WASM memory.
    * @constructor
-   * @param { Set<number> | RoaringUint32Array | Uint32Array | ReadonlyArray<number>} values The values to add
+   * @param {(RoaringUint32Array | Iterable<number>)} values The values to add
    * @memberof RoaringBitmap32
    */
-  public constructor(values?: RoaringUint32Array | Uint32Array | ReadonlyArray<number> | Set<number>) {
+  public constructor(values?: RoaringUint32Array | Iterable<number>) {
     this._ptr = 0
 
     if (values) {
@@ -85,13 +85,13 @@ class RoaringBitmap32 {
    * the RoaringBitmap32 when not needed anymore to release WASM memory.
    *
    * @static
-   * @param {(RoaringUint8Array | Uint8Array | number[])} buffer The buffer to deserialize
+   * @param {(RoaringUint8Array | Uint8Array | Iterable<number>)} buffer The buffer to deserialize
    * @param {boolean} [portable=false] If true, deserialization is compatible with the Java and Go versions of the library.
    * If false, deserialization is compatible with the C version of the library. Default is false.
    * @returns {RoaringBitmap32} The reulting bitmap. Remember to dispose the instance when finished using it.
    * @memberof RoaringBitmap32
    */
-  public static deserialize(buffer: RoaringUint8Array | Uint8Array | number[], portable: boolean = false): RoaringBitmap32 {
+  public static deserialize(buffer: RoaringUint8Array | Uint8Array | Iterable<number>, portable: boolean = false): RoaringBitmap32 {
     const bitmap = new RoaringBitmap32()
     try {
       bitmap.deserialize(buffer, portable)
@@ -107,16 +107,13 @@ class RoaringBitmap32 {
    * The returned buffer is automatically garbage collected.
    *
    * @static
-   * @param {(RoaringUint32Array | Uint32Array | ReadonlyArray<number> | Set<number>)} values
+   * @param {(RoaringUint32Array | Iterable<number>)} values
    * @param {boolean} [portable=false] If true, serialization is compatible with the Java and Go versions of the library.
    * If false, serialization is compatible with the C version of the library. Default is false.
    * @returns {Buffer} The NodeJS buffer containing the serialized data.
    * @memberof RoaringBitmap32
    */
-  public static serializeArrayToNewBuffer(
-    values: RoaringUint32Array | Uint32Array | ReadonlyArray<number> | Set<number>,
-    portable: boolean = false
-  ): Buffer {
+  public static serializeArrayToNewBuffer(values: RoaringUint32Array | Iterable<number>, portable: boolean = false): Buffer {
     const bitmap = new RoaringBitmap32(values)
     try {
       bitmap.optimize()
@@ -131,13 +128,13 @@ class RoaringBitmap32 {
    * The array can be very big, be careful when you use this function.
    *
    * @static
-   * @param {(RoaringUint8Array | Uint8Array | number[])} buffer The buffer to deserialize.
+   * @param {(RoaringUint8Array | Uint8Array | Iterable<number>)} buffer The buffer to deserialize.
    * @param {boolean} [portable=false] If true, deserialization is compatible with the Java and Go versions of the library.
    * If false, deserialization is compatible with the C version of the library. Default is false.
    * @returns {number[]} All the values in the bitmap.
    * @memberof RoaringBitmap32
    */
-  public static deserializeToArray(buffer: RoaringUint8Array | Uint8Array | number[], portable: boolean = false): number[] {
+  public static deserializeToArray(buffer: RoaringUint8Array | Uint8Array | Iterable<number>, portable: boolean = false): number[] {
     const bitmap = new RoaringBitmap32()
     try {
       bitmap.deserialize(buffer, portable)
@@ -152,13 +149,13 @@ class RoaringBitmap32 {
    * The array can be very big, be careful when you use this function.
    *
    * @static
-   * @param {(RoaringUint8Array | Uint8Array | number[])} buffer The buffer to deserialize.
+   * @param {(RoaringUint8Array | Uint8Array | Iterable<number>)} buffer The buffer to deserialize.
    * @param {boolean} [portable=false] If true, deserialization is compatible with the Java and Go versions of the library.
    * If false, deserialization is compatible with the C version of the library. Default is false.
    * @returns {number[]} All the values in the bitmap.
    * @memberof RoaringBitmap32
    */
-  public static deserializeToSet(buffer: RoaringUint8Array | Uint8Array | number[], portable: boolean = false): Set<number> {
+  public static deserializeToSet(buffer: RoaringUint8Array | Uint8Array | Iterable<number>, portable: boolean = false): Set<number> {
     const bitmap = new RoaringBitmap32()
     try {
       bitmap.deserialize(buffer, portable)
@@ -260,10 +257,10 @@ class RoaringBitmap32 {
    * Using this is faster than calling add() multiple times.
    * Inserting ordered or partially ordered arrays is faster.
    *
-   * @param {RoaringUint32Array | Uint32Array | ReadonlyArray<number> | Set<number>} values The values to add.
+   * @param {(RoaringUint32Array | Iterable<number>)} values The values to add.
    * @memberof RoaringBitmap32
    */
-  public addMany(values: RoaringUint32Array | Uint32Array | ReadonlyArray<number> | Set<number>): void {
+  public addMany(values: RoaringUint32Array | Iterable<number>): void {
     if (values instanceof RoaringUint32Array) {
       if (values.length > 0) {
         _roaring_bitmap_add_many(_getPtr(this), values.length, values.byteOffset)
@@ -694,13 +691,13 @@ class RoaringBitmap32 {
    * Reads a bitmap from a serialized version.
    * Throws an error if deserialization failed.
    *
-   * @param {(RoaringUint8Array | Uint8Array | number[])} buffer
+   * @param {(RoaringUint8Array | Uint8Array | Iterable<number>)} buffer
    * @param {boolean} [portable=false] If true, deserialization is compatible with the Java and Go versions of the library.
    * If false, deserialization is compatible with the C version of the library. Default is false.
    * @returns {void}
    * @memberof RoaringBitmap32
    */
-  public deserialize(buffer: RoaringUint8Array | Uint8Array | number[], portable: boolean = false): void {
+  public deserialize(buffer: RoaringUint8Array | Uint8Array | Iterable<number>, portable: boolean = false): void {
     if (!(buffer instanceof RoaringUint8Array)) {
       if (typeof buffer === 'number') {
         throw new TypeError('deserialize expects an array of bytes')
