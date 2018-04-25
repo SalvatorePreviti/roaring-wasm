@@ -25,6 +25,7 @@
     "no-bitwise": false,
     "no-non-null-assertion": false,
     "typedef": false,
-    "promise-function-async": false
+    "promise-function-async": false,
+    "no-function-expression": false
   }
 }
