@@ -14,7 +14,15 @@ function randomRoaringUint32Array(size, maxValue, seed = 18397123) {
   return new RoaringUint32Array(set)
 }
 
-const src = randomRoaringUint32Array(400000, 0xffffff)
+let src
+
+logging.time('random data', () => {
+  src = randomRoaringUint32Array(1000000, 0xffffff)
+})
+
+logging.time(`sort`, () => {
+  src.asTypedArray().sort()
+})
 
 const bitmap = new RoaringBitmap32()
 
@@ -26,5 +34,11 @@ let buf
 
 logging.time('serialize', () => {
   buf = bitmap.serializeToRoaringUint8Array()
-  logging.log(buf.byteLength, 'bytes')
+  logging.log('*', buf.byteLength, 'bytes serialized')
+})
+
+logging.time('dispose', () => {
+  src.dispose()
+  buf.dispose()
+  bitmap.dispose()
 })
