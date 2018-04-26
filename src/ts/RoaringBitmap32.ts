@@ -201,7 +201,7 @@ class RoaringBitmap32 {
    * @memberof RoaringBitmap32
    */
   public throwIfDisposed(): void | never {
-    if (!this._ptr) {
+    if (typeof this._ptr !== 'number') {
       _throwDisposed()
     }
   }
