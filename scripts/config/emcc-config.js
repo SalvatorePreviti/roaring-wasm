@@ -53,6 +53,8 @@ function buildEmccArgs() {
 
   // settings
 
+  args.push('--pre-js', 'src/cpp/pre-js.js')
+
   args.push('--memory-init-file', '1')
 
   args.push('-s', 'BINARYEN=1')
@@ -87,6 +89,7 @@ function buildEmccClosureArgs() {
   args.push('--assume_function_wrapper')
   args.push('--manage_closure_dependencies')
   args.push('--use_types_for_optimization')
+  args.push('--jscomp_off=checkVars')
   return args
 }
 

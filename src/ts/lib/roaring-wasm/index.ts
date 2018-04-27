@@ -56,15 +56,33 @@ type RoaringWasm = {
   _roaring_bitmap_native_serialize_js(roaring: number): number
 }
 
+/**
+ * The emcc module.
+ * @ignore
+ */
+class RoaringWasmModule {
+  public noExitRuntime: boolean = true
+}
+
 function loadRoaringWasm(): RoaringWasm {
   //const cwd = typeof process === 'object' && typeof process.cwd === 'function' && process.cwd()
 
   const roaringWasmModule = require('./roaring-wasm-module')
 
-  const m = {
-    noExitRuntime: true,
-    locateFile(file: any) {
-      return typeof __dirname === 'string' && __dirname ? `${__dirname}/${file}` : file
+  const isNode =
+    typeof __dirname === 'string' &&
+    typeof process === 'object' &&
+    typeof process.versions === 'object' &&
+    process.versions.node !== undefined
+
+  const m: any = new RoaringWasmModule()
+  if (isNode) {
+    m.ENVIRONMENT = 'NODE'
+  }
+
+  if (typeof __dirname === 'string' && __dirname) {
+    m.locateFile = function locateFile(file: any) {
+      return `${__dirname}/${file}`
     }
   }
 

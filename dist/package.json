@@ -1,6 +1,6 @@
 {
   "name": "roaring-wasm",
-  "version": "0.1.15",
+  "version": "0.1.17",
   "description": "WebAssembly port of Roaring Bitmaps for NodeJS",
   "author": "Salvatore Previti",
   "license": "Apache-2.0",
