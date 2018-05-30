@@ -73,10 +73,12 @@ function buildEmccArgs() {
 
   // optimizations
   args.push('-s', 'EVAL_CTORS=1')
-  args.push('-s', 'ASSERTIONS=0')
   args.push('-s', 'AGGRESSIVE_VARIABLE_ELIMINATION=1')
 
-  //args.push('-s', 'WARN_UNALIGNED=1')
+  args.push('-s', 'ASSERTIONS=0')
+  args.push('-s', 'SAFE_HEAP=0')
+  args.push('-s', 'SAFE_HEAP_LOG=0')
+  args.push('-s', 'WARN_UNALIGNED=0')
 
   return args
 }

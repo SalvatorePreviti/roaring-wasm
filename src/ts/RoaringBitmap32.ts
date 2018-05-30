@@ -722,9 +722,21 @@ class RoaringBitmap32 {
   }
 }
 
+function _throwGetPtrTypeError(): never {
+  throw new TypeError('RoaringBitmap32 expected')
+}
+
+function _throwAllocationError(): never {
+  throw new Error('Failed to allocate RoaringBitmap32')
+}
+
+function _throwDisposed() {
+  throw new TypeError('RoaringBitmap32 was disposed')
+}
+
 function _getPtr(bitmap: RoaringBitmap32): number {
   if (!(bitmap instanceof RoaringBitmap32)) {
-    throw new TypeError('RoaringBitmap32 expected')
+    _throwGetPtrTypeError()
   }
 
   let ptr = (bitmap as any)._ptr
@@ -736,16 +748,12 @@ function _getPtr(bitmap: RoaringBitmap32): number {
   if (ptr === 0) {
     ptr = _roaring_bitmap_create_js(0) >>> 0
     if (!ptr) {
-      throw new Error('Failed to allocate RoaringBitmap32')
+      _throwAllocationError()
     }
     ;(bitmap as any)._ptr = ptr
   }
 
   return ptr
-}
-
-function _throwDisposed() {
-  throw new TypeError('RoaringBitmap32 was disposed')
 }
 
 export = RoaringBitmap32

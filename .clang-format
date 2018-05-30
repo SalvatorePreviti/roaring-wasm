@@ -2,6 +2,9 @@ BasedOnStyle: Chromium
 IndentWidth: 2
 ColumnLimit: 160
 UseTab: Never
+
+Language: Cpp
+
 AlignAfterOpenBracket: DontAlign
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
