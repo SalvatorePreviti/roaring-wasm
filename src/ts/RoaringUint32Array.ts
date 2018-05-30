@@ -346,7 +346,7 @@ Object.defineProperties(RoaringUint32Array.prototype, {
     enumerable: false
   },
   size: {
-    value: function getSize(this: RoaringUint32Array) {
+    get: function getSize(this: RoaringUint32Array) {
       return this.length
     },
     configurable: false,
