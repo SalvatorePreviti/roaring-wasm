@@ -333,7 +333,7 @@ Object.defineProperties(RoaringUint8Array.prototype, {
     enumerable: false
   },
   size: {
-    value: function getSize(this: RoaringUint8Array) {
+    get: function getSize(this: RoaringUint8Array) {
       return this.length
     },
     configurable: false,
