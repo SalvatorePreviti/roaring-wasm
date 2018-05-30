@@ -17,3 +17,6 @@ PointerAlignment: Middle
 BinPackArguments: true
 MaxEmptyLinesToKeep: 1
 BreakConstructorInitializers: AfterColon
+
+Language: JavaScript
+DisableFormat: true

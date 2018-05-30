@@ -6,8 +6,11 @@
   "tslint.autoFixOnSave": true,
   "prettier.eslintIntegration": false,
   "prettier.parser": "babylon",
+  "prettier.semi": false,
   "prettier.requireConfig": true,
   "jest.autoEnable": false,
+  "clang-format.language.javascript.enable": false,
+  "clang-format.language.typescript.enable": false,
   "files.associations": {
     ".envrc": "shellscript",
     "*.idl": "avro",

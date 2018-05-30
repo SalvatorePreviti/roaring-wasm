@@ -5,7 +5,14 @@
   "author": "Salvatore Previti",
   "license": "Apache-2.0",
   "homepage": "https://github.com/SalvatorePreviti/roaring-wasm",
-  "keywords": ["roaring", "CRoaring", "WASM", "WebAssembly", "emscripten", "lambda"],
+  "keywords": [
+    "roaring",
+    "CRoaring",
+    "WASM",
+    "WebAssembly",
+    "emscripten",
+    "lambda"
+  ],
   "bugs": {
     "url": "https://github.com/SalvatorePreviti/roaring-wasm/issues"
   },
