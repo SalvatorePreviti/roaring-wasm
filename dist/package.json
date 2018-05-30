@@ -1,18 +1,11 @@
 {
   "name": "roaring-wasm",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "WebAssembly port of Roaring Bitmaps for NodeJS",
   "author": "Salvatore Previti",
   "license": "Apache-2.0",
   "homepage": "https://github.com/SalvatorePreviti/roaring-wasm",
-  "keywords": [
-    "roaring",
-    "CRoaring",
-    "WASM",
-    "WebAssembly",
-    "emscripten",
-    "lambda"
-  ],
+  "keywords": ["roaring", "CRoaring", "WASM", "WebAssembly", "emscripten", "lambda"],
   "bugs": {
     "url": "https://github.com/SalvatorePreviti/roaring-wasm/issues"
   },
