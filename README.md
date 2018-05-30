@@ -86,6 +86,8 @@ On a \*nix machine, run `sh source .envrc` to initialize paths, nvm (if present)
 To compile, run test and generate the documentation
 
 ```
+git submodule update --init --recursive
+
 npm start
 ```
 
