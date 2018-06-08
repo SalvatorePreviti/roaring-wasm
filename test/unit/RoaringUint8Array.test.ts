@@ -126,7 +126,9 @@ describe('RoaringUint8Array', () => {
     it('throws if disposed', () => {
       const t = new RoaringUint8Array(4)
       t.dispose()
-      expect(() => t.throwIfDisposed()).toThrow()
+      expect(() => {
+        t.throwIfDisposed()
+      }).toThrow()
     })
   })
 })
