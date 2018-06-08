@@ -10,7 +10,7 @@ Implementation of all features is not complete.
 For a complete native implementation, much faster and easier to use than this package, you can use:
 
 - [roaring](https://www.npmjs.com/package/roaring) - NodeJS Roaring bitmaps as a native addon. https://github.com/SalvatorePreviti/roaring-node
-- [roaring-aws](https://www.npmjs.com/package/roaring-aws) - NodeJS roaring bitmaps precompiled for AWS Lambda (Serverless compatible). ttps://github.com/SalvatorePreviti/roaring-node-aws
+- [roaring-aws](https://www.npmjs.com/package/roaring-aws) - NodeJS roaring bitmaps precompiled for AWS Lambda (Serverless compatible). https://github.com/SalvatorePreviti/roaring-node-aws
 
 ## motivation
 
