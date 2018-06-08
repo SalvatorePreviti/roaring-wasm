@@ -4,6 +4,14 @@ WebAssembly port of [Roaring Bitmaps](http://roaringbitmap.org) for NodeJS. It i
 
 Roaring bitmaps are compressed bitmaps. They can be hundreds of times faster.
 
+## NOTE
+
+Implementation of all features is not complete.
+For a complete native implementation, much faster and easier to use than this package, you can use:
+
+- [roaring](https://www.npmjs.com/package/roaring) - NodeJS Roaring bitmaps as a native addon. https://github.com/SalvatorePreviti/roaring-node
+- [roaring-aws](https://www.npmjs.com/package/roaring-aws) - NodeJS roaring bitmaps precompiled for AWS Lambda (Serverless compatible). ttps://github.com/SalvatorePreviti/roaring-node-aws
+
 ## motivation
 
 This project was born to use Roaring WASM in AWS Lambdas without the need to compile a node-gyp module.
@@ -24,19 +32,19 @@ Code sample:
 // create this file as demo.js
 // type node demo.js or nodejs demo.js depending on your system
 
-var roaring = require("roaring-wasm");
+var roaring = require('roaring-wasm')
 
 var bitmap1 = new roaring.RoaringBitmap32()
 bitmap1.addMany([1, 2, 3, 4, 5, 100, 1000])
-console.log("bitmap1.toSet():",bitmap1.toSet())
+console.log('bitmap1.toSet():', bitmap1.toSet())
 
 var bitmap2 = new roaring.RoaringBitmap32()
 bitmap2.addMany([3, 4, 1000])
-console.log("bitmap2.toSet():",bitmap1.toSet())
+console.log('bitmap2.toSet():', bitmap1.toSet())
 
 var bitmap3 = new roaring.RoaringBitmap32()
-console.log("bitmap1.cardinality():", bitmap1.cardinality())
-console.log("bitmap2.contains(3):",bitmap2.contains(3))
+console.log('bitmap1.cardinality():', bitmap1.cardinality())
+console.log('bitmap2.contains(3):', bitmap2.contains(3))
 
 bitmap3.add(111)
 bitmap3.add(544)
@@ -44,9 +52,9 @@ bitmap3.orInPlace(bitmap1)
 bitmap1.optimize()
 console.log(bitmap3.toString())
 
-console.log("bitmap3.toArray():",bitmap3.toArray())
-console.log("bitmap3.maximum():",bitmap3.maximum())
-console.log("bitmap3.rank(100):",bitmap3.rank(100))
+console.log('bitmap3.toArray():', bitmap3.toArray())
+console.log('bitmap3.maximum():', bitmap3.maximum())
+console.log('bitmap3.rank(100):', bitmap3.rank(100))
 
 bitmap1.dispose()
 bitmap2.dispose()
@@ -69,9 +77,9 @@ AWS Lambda - <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-han
 
 # licenses
 
-* This package is provided as open source software using Apache License.
+- This package is provided as open source software using Apache License.
 
-* CRoaring is provided as open source software using Apache License.
+- CRoaring is provided as open source software using Apache License.
 
 # API
 
