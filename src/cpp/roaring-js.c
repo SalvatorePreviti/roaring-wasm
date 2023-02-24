@@ -140,7 +140,7 @@ int roaring_bitmap_native_serialize_js(roaring_bitmap_js_t * b) {
     roaring_bitmap_to_uint32_array(&b->b, (uint32_t *)(serialized + 1 + sizeof(uint32_t)));
     serializedsize = bufsize;
   } else {
-    bufsize = portablesize;
+    bufsize = portablesize + 1;
     serialized = (char *)malloc(bufsize);
     if (serialized == NULL) {
       return 504;  // Failed to allocate memory
