@@ -20,7 +20,7 @@ function emcc(files) {
     cwd: root,
     env: Object.assign({}, process.env, {
       EMCC_CLOSURE_ARGS: `${emccConfig.closureArgs.join(' ')} ${process.env.EMCC_CLOSURE_ARGS || ''}`,
-      EMMAKEN_CFLAGS: `${emccConfig.cflags.join(' ')} ${process.env.EMCC_CLOSURE_ARGS || ''}`,
+      EMCC_CFLAGS: `${emccConfig.cflags.join(' ')} ${process.env.EMCC_CLOSURE_ARGS || ''}`,
       EMMAKEN_CXXFLAGS: `${emccConfig.cflags.join(' ')} ${process.env.EMCC_CLOSURE_ARGS || ''}`
     })
   })
