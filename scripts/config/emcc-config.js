@@ -54,6 +54,7 @@ function buildEmccArgs() {
   // settings
 
   args.push('--pre-js', 'src/cpp/pre-js.js')
+  args.push('--post-js', 'src/cpp/post-js.js')
 
   args.push('--memory-init-file', '1')
 
@@ -89,7 +90,7 @@ function buildEmccClosureArgs() {
   args.push('--compilation_level', 'ADVANCED_OPTIMIZATIONS')
   args.push('--module_resolution', 'NODE')
   args.push('--assume_function_wrapper')
-  args.push('--manage_closure_dependencies')
+  args.push('--dependency_mode', 'PRUNE_LEGACY')
   args.push('--use_types_for_optimization')
   args.push('--jscomp_off=checkVars')
   return args
