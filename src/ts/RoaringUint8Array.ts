@@ -1,4 +1,4 @@
-import roaringWasm = require('./lib/roaring-wasm')
+import roaringWasm = require("./lib/roaring-wasm");
 
 /**
  * Array of bytes allocted directly in roaring library WASM memory.
@@ -17,7 +17,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @type {typeof Uint8Array}
    * @memberof RoaringUint8Array
    */
-  public static readonly TypedArray: typeof Uint8Array = Uint8Array
+  public static readonly TypedArray: typeof Uint8Array = Uint8Array;
 
   /**
    * The size in bytes of each element in the array.
@@ -29,7 +29,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @type {number}
    * @memberof RoaringUint8Array
    */
-  public static readonly BYTES_PER_ELEMENT: 1 = 1
+  public static readonly BYTES_PER_ELEMENT: 1 = 1 as const;
 
   /**
    * The type of typed array used by this class.
@@ -41,7 +41,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @memberof RoaringUint8Array
    */
   public get TypedArray(): typeof Uint8Array {
-    return Uint8Array
+    return Uint8Array;
   }
 
   /**
@@ -54,7 +54,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @memberof RoaringUint8Array
    */
   public get BYTES_PER_ELEMENT(): 1 {
-    return 1
+    return 1;
   }
 
   /**
@@ -69,7 +69,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @memberof RoaringUint8Array
    */
   public get buffer(): ArrayBuffer {
-    return roaringWasm.wasmMemory.buffer
+    return roaringWasm.wasmMemory.buffer;
   }
 
   /**
@@ -81,7 +81,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @memberof RoaringUint8Array
    */
   public get isDisposed(): boolean {
-    return !this.byteOffset
+    return !this.byteOffset;
   }
 
   /**
@@ -94,7 +94,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @memberof RoaringUint8Array
    */
   public get byteLength(): number {
-    return this.length
+    return this.length;
   }
 
   /**
@@ -109,7 +109,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @memberof RoaringUint8Array
    */
   public get heap(): Uint8Array {
-    return roaringWasm.HEAPU8
+    return roaringWasm.HEAPU8;
   }
 
   /**
@@ -119,7 +119,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @type {number}
    * @memberof RoaringUint8Array
    */
-  public readonly byteOffset: number
+  public readonly byteOffset: number;
 
   /**
    * Number of elements allocated in this array.
@@ -129,7 +129,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @type {number}
    * @memberof RoaringUint8Array
    */
-  public readonly length: number
+  public readonly length: number;
 
   /**
    * Allocates an array in the roaring WASM heap.
@@ -144,39 +144,39 @@ class RoaringUint8Array implements Iterable<number> {
    * @memberof RoaringUint8Array
    */
   public constructor(lengthOrArray: number | Iterable<number>, _pointer?: number) {
-    this.byteOffset = 0
-    this.length = 0
+    this.byteOffset = 0;
+    this.length = 0;
 
-    let length: number
-    if (typeof lengthOrArray === 'number') {
-      length = lengthOrArray
-    } else if (lengthOrArray !== null && typeof lengthOrArray === 'object') {
-      length = (lengthOrArray as any).length
-      if (typeof length !== 'number') {
-        const copy = new Uint8Array(lengthOrArray)
-        lengthOrArray = copy
-        length = copy.length
+    let length: number;
+    if (typeof lengthOrArray === "number") {
+      length = lengthOrArray;
+    } else if (lengthOrArray !== null && typeof lengthOrArray === "object") {
+      length = (lengthOrArray as unknown as ArrayLike<number>).length;
+      if (typeof length !== "number") {
+        const copy = new Uint8Array(lengthOrArray);
+        lengthOrArray = copy;
+        length = copy.length;
       }
     } else {
-      throw new TypeError('Invalid argument')
+      throw new TypeError("Invalid argument");
     }
 
     if (length > 0) {
       if (_pointer === undefined) {
-        _pointer = roaringWasm._malloc(length)
+        _pointer = roaringWasm._malloc(length);
       }
       if (!_pointer) {
-        throw new Error(`RoaringUint8Array failed to allocate ${length} bytes`)
+        throw new Error(`RoaringUint8Array failed to allocate ${length} bytes`);
       }
-      this.byteOffset = _pointer
-      this.length = length
+      this.byteOffset = _pointer;
+      this.length = length;
 
-      if (typeof lengthOrArray !== 'number') {
+      if (typeof lengthOrArray !== "number") {
         try {
-          this.set(lengthOrArray)
+          this.set(lengthOrArray);
         } catch (error) {
-          this.dispose()
-          throw error
+          this.dispose();
+          throw error;
         }
       }
     }
@@ -190,14 +190,14 @@ class RoaringUint8Array implements Iterable<number> {
    * @memberof RoaringUint8Array
    */
   public dispose(): boolean {
-    const ptr = this.byteOffset
+    const ptr = this.byteOffset;
     if (ptr) {
-      ;(this as { byteOffset: number }).byteOffset = 0
-      ;(this as { length: number }).length = 0
-      roaringWasm._free(ptr)
-      return true
+      (this as { byteOffset: number }).byteOffset = 0;
+      (this as { length: number }).length = 0;
+      roaringWasm._free(ptr);
+      return true;
     }
-    return false
+    return false;
   }
 
   /**
@@ -210,7 +210,7 @@ class RoaringUint8Array implements Iterable<number> {
    */
   public throwIfDisposed(): void | never {
     if (this.isDisposed) {
-      throw new TypeError('RoaringUint8Array is disposed')
+      throw new TypeError("RoaringUint8Array is disposed");
     }
   }
 
@@ -222,24 +222,24 @@ class RoaringUint8Array implements Iterable<number> {
    */
   public set(array: Iterable<number>, offset: number = 0): this {
     if (!Number.isInteger(offset) || offset < 0) {
-      throw new TypeError(`Invalid offset ${offset}`)
+      throw new TypeError(`Invalid offset ${offset}`);
     }
 
     if (array instanceof RoaringUint8Array) {
-      array = array.asTypedArray()
+      array = array.asTypedArray();
     }
 
-    const length = (array as any).length
-    if (typeof length !== 'number') {
-      return this.set(new Uint8Array(array))
+    const length = (array as unknown as ArrayLike<number>).length;
+    if (typeof length !== "number") {
+      return this.set(new Uint8Array(array));
     }
 
     if (offset + length > this.length) {
-      throw new TypeError(`Invalid offset ${offset}`)
+      throw new TypeError(`Invalid offset ${offset}`);
     }
 
-    this.heap.set(array as any, this.byteOffset + offset)
-    return this
+    this.heap.set(array as unknown as ArrayLike<number>, this.byteOffset + offset);
+    return this;
   }
 
   /**
@@ -251,7 +251,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @memberof RoaringUint8Array
    */
   public asTypedArray(): Uint8Array {
-    return new Uint8Array(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length)
+    return new Uint8Array(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length);
   }
 
   /**
@@ -263,7 +263,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @memberof RoaringUint8Array
    */
   public asNodeBuffer(): Buffer {
-    return Buffer.from(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length)
+    return Buffer.from(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length);
   }
 
   /**
@@ -274,9 +274,9 @@ class RoaringUint8Array implements Iterable<number> {
    * @memberof RoaringUint8Array
    */
   public toTypedArray(): Uint8Array {
-    const array = new Uint8Array(this.length)
-    array.set(this.asTypedArray())
-    return array
+    const array = new Uint8Array(this.length);
+    array.set(this.asTypedArray());
+    return array;
   }
 
   /**
@@ -287,7 +287,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @memberof RoaringUint8Array
    */
   public toNodeBuffer(): Buffer {
-    return Buffer.from(this.asNodeBuffer())
+    return Buffer.from(this.asNodeBuffer());
   }
 
   /**
@@ -297,7 +297,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @memberof RoaringUint8Array
    */
   public toArray(): number[] {
-    return Array.from(this.asTypedArray())
+    return Array.from(this.asTypedArray());
   }
 
   /**
@@ -305,7 +305,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @memberof RoaringUint8Array
    */
   public toString(): string {
-    return this.asTypedArray().toString()
+    return this.asTypedArray().toString();
   }
 
   /**
@@ -315,7 +315,7 @@ class RoaringUint8Array implements Iterable<number> {
    * @memberof RoaringUint8Array
    */
   public [Symbol.iterator](): IterableIterator<number> {
-    return this.asTypedArray()[Symbol.iterator]()
+    return this.asTypedArray()[Symbol.iterator]();
   }
 }
 
@@ -324,28 +324,28 @@ Object.defineProperties(RoaringUint8Array.prototype, {
     value: Uint8Array,
     writable: false,
     configurable: false,
-    enumerable: false
+    enumerable: false,
   },
   BYTES_PER_ELEMENT: {
     value: 1,
     writable: false,
     configurable: false,
-    enumerable: false
+    enumerable: false,
   },
   size: {
     get: function getSize(this: RoaringUint8Array) {
-      return this.length
+      return this.length;
     },
     configurable: false,
-    enumerable: false
+    enumerable: false,
   },
   toJSON: {
     value: function arrayToJSON(this: RoaringUint8Array) {
-      return this.asTypedArray()
+      return this.asTypedArray();
     },
     configurable: true,
-    enumerable: false
-  }
-})
+    enumerable: false,
+  },
+});
 
-export = RoaringUint8Array
+export = RoaringUint8Array;

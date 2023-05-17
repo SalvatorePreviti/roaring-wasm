@@ -27,31 +27,31 @@ Code sample:
 
 var roaring = require("roaring-wasm");
 
-var bitmap1 = new roaring.RoaringBitmap32()
-bitmap1.addMany([1, 2, 3, 4, 5, 100, 1000])
-console.log("bitmap1.toSet():",bitmap1.toSet())
+var bitmap1 = new roaring.RoaringBitmap32();
+bitmap1.addMany([1, 2, 3, 4, 5, 100, 1000]);
+console.log("bitmap1.toSet():", bitmap1.toSet());
 
-var bitmap2 = new roaring.RoaringBitmap32()
-bitmap2.addMany([3, 4, 1000])
-console.log("bitmap2.toSet():",bitmap1.toSet())
+var bitmap2 = new roaring.RoaringBitmap32();
+bitmap2.addMany([3, 4, 1000]);
+console.log("bitmap2.toSet():", bitmap1.toSet());
 
-var bitmap3 = new roaring.RoaringBitmap32()
-console.log("bitmap1.cardinality():", bitmap1.cardinality())
-console.log("bitmap2.contains(3):",bitmap2.contains(3))
+var bitmap3 = new roaring.RoaringBitmap32();
+console.log("bitmap1.cardinality():", bitmap1.cardinality());
+console.log("bitmap2.contains(3):", bitmap2.contains(3));
 
-bitmap3.add(111)
-bitmap3.add(544)
-bitmap3.orInPlace(bitmap1)
-bitmap1.optimize()
-console.log(bitmap3.toString())
+bitmap3.add(111);
+bitmap3.add(544);
+bitmap3.orInPlace(bitmap1);
+bitmap1.optimize();
+console.log(bitmap3.toString());
 
-console.log("bitmap3.toArray():",bitmap3.toArray())
-console.log("bitmap3.maximum():",bitmap3.maximum())
-console.log("bitmap3.rank(100):",bitmap3.rank(100))
+console.log("bitmap3.toArray():", bitmap3.toArray());
+console.log("bitmap3.maximum():", bitmap3.maximum());
+console.log("bitmap3.rank(100):", bitmap3.rank(100));
 
-bitmap1.dispose()
-bitmap2.dispose()
-bitmap3.dispose()
+bitmap1.dispose();
+bitmap2.dispose();
+bitmap3.dispose();
 ```
 
 ## references
@@ -70,9 +70,9 @@ AWS Lambda - <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-han
 
 # licenses
 
--   This package is provided as open source software using Apache License.
+- This package is provided as open source software using Apache License.
 
--   CRoaring is provided as open source software using Apache License.
+- CRoaring is provided as open source software using Apache License.
 
 # API
 
@@ -80,122 +80,122 @@ AWS Lambda - <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-han
 
 ### Table of Contents
 
--   [RoaringBitmap32](#roaringbitmap32)
-    -   [xorCardinality](#xorcardinality)
-        -   [Parameters](#parameters)
-    -   [deserialize](#deserialize)
-        -   [Parameters](#parameters-1)
-    -   [deserialize](#deserialize-1)
-        -   [Parameters](#parameters-2)
-    -   [serializeArrayToNewBuffer](#serializearraytonewbuffer)
-        -   [Parameters](#parameters-3)
-    -   [deserializeToArray](#deserializetoarray)
-        -   [Parameters](#parameters-4)
-    -   [deserializeToSet](#deserializetoset)
-        -   [Parameters](#parameters-5)
-    -   [isDisposed](#isdisposed)
-    -   [dispose](#dispose)
-    -   [throwIfDisposed](#throwifdisposed)
-    -   [cardinality](#cardinality)
-    -   [isEmpty](#isempty)
-    -   [add](#add)
-        -   [Parameters](#parameters-6)
-    -   [addChecked](#addchecked)
-        -   [Parameters](#parameters-7)
-    -   [addMany](#addmany)
-        -   [Parameters](#parameters-8)
-    -   [remove](#remove)
-        -   [Parameters](#parameters-9)
-    -   [removeChecked](#removechecked)
-        -   [Parameters](#parameters-10)
-    -   [maximum](#maximum)
-    -   [minimum](#minimum)
-    -   [contains](#contains)
-        -   [Parameters](#parameters-11)
-    -   [isSubset](#issubset)
-        -   [Parameters](#parameters-12)
-    -   [isStrictSubset](#isstrictsubset)
-        -   [Parameters](#parameters-13)
-    -   [toRoaringUint32Array](#toroaringuint32array)
-    -   [toArray](#toarray)
-    -   [toSet](#toset)
-    -   [toUint32Array](#touint32array)
-    -   [equals](#equals)
-        -   [Parameters](#parameters-14)
-    -   [flipRange](#fliprange)
-        -   [Parameters](#parameters-15)
-    -   [optimize](#optimize)
-    -   [select](#select)
-        -   [Parameters](#parameters-16)
-    -   [andCardinality](#andcardinality)
-        -   [Parameters](#parameters-17)
-    -   [orCardinality](#orcardinality)
-        -   [Parameters](#parameters-18)
-    -   [andNotCardinality](#andnotcardinality)
-        -   [Parameters](#parameters-19)
-    -   [andInPlace](#andinplace)
-        -   [Parameters](#parameters-20)
-    -   [orInPlace](#orinplace)
-        -   [Parameters](#parameters-21)
-    -   [xorInPlace](#xorinplace)
-        -   [Parameters](#parameters-22)
-    -   [andNotInPlace](#andnotinplace)
-        -   [Parameters](#parameters-23)
-    -   [rank](#rank)
-        -   [Parameters](#parameters-24)
-    -   [intersects](#intersects)
-        -   [Parameters](#parameters-25)
-    -   [jaccardIndex](#jaccardindex)
-        -   [Parameters](#parameters-26)
-    -   [getSerializationSizeInBytes](#getserializationsizeinbytes)
-        -   [Parameters](#parameters-27)
-    -   [serializeToRoaringUint8Array](#serializetoroaringuint8array)
-        -   [Parameters](#parameters-28)
-    -   [serializeToUint8Array](#serializetouint8array)
-        -   [Parameters](#parameters-29)
-    -   [serializeToNodeBuffer](#serializetonodebuffer)
-        -   [Parameters](#parameters-30)
--   [RoaringUint32Array](#roaringuint32array)
-    -   [TypedArray](#typedarray)
-    -   [TypedArray](#typedarray-1)
-    -   [BYTES_PER_ELEMENT](#bytes_per_element)
-    -   [BYTES_PER_ELEMENT](#bytes_per_element-1)
-    -   [buffer](#buffer)
-    -   [isDisposed](#isdisposed-1)
-    -   [byteLength](#bytelength)
-    -   [heap](#heap)
-    -   [dispose](#dispose-1)
-    -   [throwIfDisposed](#throwifdisposed-1)
-    -   [set](#set)
-        -   [Parameters](#parameters-31)
-    -   [asTypedArray](#astypedarray)
-    -   [asNodeBuffer](#asnodebuffer)
-    -   [toTypedArray](#totypedarray)
-    -   [toNodeBuffer](#tonodebuffer)
-    -   [toArray](#toarray-1)
-    -   [toSet](#toset-1)
-    -   [toString](#tostring)
-    -   [iterator](#iterator)
--   [RoaringUint8Array](#roaringuint8array)
-    -   [TypedArray](#typedarray-2)
-    -   [TypedArray](#typedarray-3)
-    -   [BYTES_PER_ELEMENT](#bytes_per_element-2)
-    -   [BYTES_PER_ELEMENT](#bytes_per_element-3)
-    -   [buffer](#buffer-1)
-    -   [isDisposed](#isdisposed-2)
-    -   [byteLength](#bytelength-1)
-    -   [heap](#heap-1)
-    -   [dispose](#dispose-2)
-    -   [throwIfDisposed](#throwifdisposed-2)
-    -   [set](#set-1)
-        -   [Parameters](#parameters-32)
-    -   [asTypedArray](#astypedarray-1)
-    -   [asNodeBuffer](#asnodebuffer-1)
-    -   [toTypedArray](#totypedarray-1)
-    -   [toNodeBuffer](#tonodebuffer-1)
-    -   [toArray](#toarray-2)
-    -   [toString](#tostring-1)
-    -   [iterator](#iterator-1)
+- [RoaringBitmap32](#roaringbitmap32)
+  - [xorCardinality](#xorcardinality)
+    - [Parameters](#parameters)
+  - [deserialize](#deserialize)
+    - [Parameters](#parameters-1)
+  - [deserialize](#deserialize-1)
+    - [Parameters](#parameters-2)
+  - [serializeArrayToNewBuffer](#serializearraytonewbuffer)
+    - [Parameters](#parameters-3)
+  - [deserializeToArray](#deserializetoarray)
+    - [Parameters](#parameters-4)
+  - [deserializeToSet](#deserializetoset)
+    - [Parameters](#parameters-5)
+  - [isDisposed](#isdisposed)
+  - [dispose](#dispose)
+  - [throwIfDisposed](#throwifdisposed)
+  - [cardinality](#cardinality)
+  - [isEmpty](#isempty)
+  - [add](#add)
+    - [Parameters](#parameters-6)
+  - [addChecked](#addchecked)
+    - [Parameters](#parameters-7)
+  - [addMany](#addmany)
+    - [Parameters](#parameters-8)
+  - [remove](#remove)
+    - [Parameters](#parameters-9)
+  - [removeChecked](#removechecked)
+    - [Parameters](#parameters-10)
+  - [maximum](#maximum)
+  - [minimum](#minimum)
+  - [contains](#contains)
+    - [Parameters](#parameters-11)
+  - [isSubset](#issubset)
+    - [Parameters](#parameters-12)
+  - [isStrictSubset](#isstrictsubset)
+    - [Parameters](#parameters-13)
+  - [toRoaringUint32Array](#toroaringuint32array)
+  - [toArray](#toarray)
+  - [toSet](#toset)
+  - [toUint32Array](#touint32array)
+  - [equals](#equals)
+    - [Parameters](#parameters-14)
+  - [flipRange](#fliprange)
+    - [Parameters](#parameters-15)
+  - [optimize](#optimize)
+  - [select](#select)
+    - [Parameters](#parameters-16)
+  - [andCardinality](#andcardinality)
+    - [Parameters](#parameters-17)
+  - [orCardinality](#orcardinality)
+    - [Parameters](#parameters-18)
+  - [andNotCardinality](#andnotcardinality)
+    - [Parameters](#parameters-19)
+  - [andInPlace](#andinplace)
+    - [Parameters](#parameters-20)
+  - [orInPlace](#orinplace)
+    - [Parameters](#parameters-21)
+  - [xorInPlace](#xorinplace)
+    - [Parameters](#parameters-22)
+  - [andNotInPlace](#andnotinplace)
+    - [Parameters](#parameters-23)
+  - [rank](#rank)
+    - [Parameters](#parameters-24)
+  - [intersects](#intersects)
+    - [Parameters](#parameters-25)
+  - [jaccardIndex](#jaccardindex)
+    - [Parameters](#parameters-26)
+  - [getSerializationSizeInBytes](#getserializationsizeinbytes)
+    - [Parameters](#parameters-27)
+  - [serializeToRoaringUint8Array](#serializetoroaringuint8array)
+    - [Parameters](#parameters-28)
+  - [serializeToUint8Array](#serializetouint8array)
+    - [Parameters](#parameters-29)
+  - [serializeToNodeBuffer](#serializetonodebuffer)
+    - [Parameters](#parameters-30)
+- [RoaringUint32Array](#roaringuint32array)
+  - [TypedArray](#typedarray)
+  - [TypedArray](#typedarray-1)
+  - [BYTES_PER_ELEMENT](#bytes_per_element)
+  - [BYTES_PER_ELEMENT](#bytes_per_element-1)
+  - [buffer](#buffer)
+  - [isDisposed](#isdisposed-1)
+  - [byteLength](#bytelength)
+  - [heap](#heap)
+  - [dispose](#dispose-1)
+  - [throwIfDisposed](#throwifdisposed-1)
+  - [set](#set)
+    - [Parameters](#parameters-31)
+  - [asTypedArray](#astypedarray)
+  - [asNodeBuffer](#asnodebuffer)
+  - [toTypedArray](#totypedarray)
+  - [toNodeBuffer](#tonodebuffer)
+  - [toArray](#toarray-1)
+  - [toSet](#toset-1)
+  - [toString](#tostring)
+  - [iterator](#iterator)
+- [RoaringUint8Array](#roaringuint8array)
+  - [TypedArray](#typedarray-2)
+  - [TypedArray](#typedarray-3)
+  - [BYTES_PER_ELEMENT](#bytes_per_element-2)
+  - [BYTES_PER_ELEMENT](#bytes_per_element-3)
+  - [buffer](#buffer-1)
+  - [isDisposed](#isdisposed-2)
+  - [byteLength](#bytelength-1)
+  - [heap](#heap-1)
+  - [dispose](#dispose-2)
+  - [throwIfDisposed](#throwifdisposed-2)
+  - [set](#set-1)
+    - [Parameters](#parameters-32)
+  - [asTypedArray](#astypedarray-1)
+  - [asNodeBuffer](#asnodebuffer-1)
+  - [toTypedArray](#totypedarray-1)
+  - [toNodeBuffer](#tonodebuffer-1)
+  - [toArray](#toarray-2)
+  - [toString](#tostring-1)
+  - [iterator](#iterator-1)
 
 ## RoaringBitmap32
 
@@ -211,7 +211,7 @@ Both bitmaps are unchanged.
 
 #### Parameters
 
--   `other` **[RoaringBitmap32](#roaringbitmap32)** 
+- `other` **[RoaringBitmap32](#roaringbitmap32)**
 
 Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** Cardinality of the symmetric difference (xor) of two bitmaps.
 
@@ -224,9 +224,9 @@ the RoaringBitmap32 when not needed anymore to release WASM memory.
 
 #### Parameters
 
--   `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The buffer to deserialize
--   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, deserialization is compatible with the Java and Go versions of the library.
-    If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
+- `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The buffer to deserialize
+- `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, deserialization is compatible with the Java and Go versions of the library.
+  If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
 Returns **[RoaringBitmap32](#roaringbitmap32)** The reulting bitmap. Remember to dispose the instance when finished using it.
 
@@ -237,11 +237,11 @@ Throws an error if deserialization failed.
 
 #### Parameters
 
--   `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** 
--   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, deserialization is compatible with the Java and Go versions of the library.
-    If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
+- `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)**
+- `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, deserialization is compatible with the Java and Go versions of the library.
+  If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
-Returns **void** 
+Returns **void**
 
 ### serializeArrayToNewBuffer
 
@@ -250,9 +250,9 @@ The returned buffer is automatically garbage collected.
 
 #### Parameters
 
--   `values` **([RoaringUint32Array](#roaringuint32array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** 
--   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, serialization is compatible with the Java and Go versions of the library.
-    If false, serialization is compatible with the C version of the library. Default is false. (optional, default `false`)
+- `values` **([RoaringUint32Array](#roaringuint32array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)**
+- `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, serialization is compatible with the Java and Go versions of the library.
+  If false, serialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
 Returns **[Buffer](https://nodejs.org/api/buffer.html)** The NodeJS buffer containing the serialized data.
 
@@ -263,9 +263,9 @@ The array can be very big, be careful when you use this function.
 
 #### Parameters
 
--   `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The buffer to deserialize.
--   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, deserialization is compatible with the Java and Go versions of the library.
-    If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
+- `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The buffer to deserialize.
+- `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, deserialization is compatible with the Java and Go versions of the library.
+  If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
 Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** All the values in the bitmap.
 
@@ -276,9 +276,9 @@ The array can be very big, be careful when you use this function.
 
 #### Parameters
 
--   `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The buffer to deserialize.
--   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, deserialization is compatible with the Java and Go versions of the library.
-    If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
+- `buffer` **([RoaringUint8Array](#roaringuint8array) \| [Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The buffer to deserialize.
+- `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, deserialization is compatible with the Java and Go versions of the library.
+  If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
 Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** All the values in the bitmap.
 
@@ -299,7 +299,7 @@ Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 Throws an exception if this object was disposed before.
 
-Returns **(void | never)** 
+Returns **(void | never)**
 
 ### cardinality
 
@@ -320,7 +320,7 @@ Values are unique, this function does nothing if the value already exists.
 
 #### Parameters
 
--   `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 32 bit unsigned integer to add in the set.
+- `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 32 bit unsigned integer to add in the set.
 
 ### addChecked
 
@@ -330,7 +330,7 @@ Values are unique, this function does nothing and returns false if the value alr
 
 #### Parameters
 
--   `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 32 bit unsigned integer to add in the set.
+- `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 32 bit unsigned integer to add in the set.
 
 Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if the bitmap changed, false if not.
 
@@ -342,7 +342,7 @@ Inserting ordered or partially ordered arrays is faster.
 
 #### Parameters
 
--   `values` **([RoaringUint32Array](#roaringuint32array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The values to add.
+- `values` **([RoaringUint32Array](#roaringuint32array) | Iterable&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>)** The values to add.
 
 ### remove
 
@@ -351,7 +351,7 @@ If the value does not exists, this function does nothing.
 
 #### Parameters
 
--   `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to remove.
+- `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to remove.
 
 ### removeChecked
 
@@ -361,7 +361,7 @@ If the value does not exists, this function does nothing and returns false.
 
 #### Parameters
 
--   `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 32 bit unsigned integer to remove from the set.
+- `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 32 bit unsigned integer to remove from the set.
 
 Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if the bitmap changed, false if not.
 
@@ -385,7 +385,7 @@ Checks whether the given value is contained in the set.
 
 #### Parameters
 
--   `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to look for.
+- `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to look for.
 
 Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if value exists in the set, false if not.
 
@@ -395,9 +395,9 @@ Returns true if the bitmap is subset of the other.
 
 #### Parameters
 
--   `other` **[RoaringBitmap32](#roaringbitmap32)** the other bitmap
+- `other` **[RoaringBitmap32](#roaringbitmap32)** the other bitmap
 
-Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
+Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)**
 
 ### isStrictSubset
 
@@ -405,7 +405,7 @@ Returns true if this bitmap is strict subset of the other.
 
 #### Parameters
 
--   `other` **[RoaringBitmap32](#roaringbitmap32)** The other bitmap
+- `other` **[RoaringBitmap32](#roaringbitmap32)** The other bitmap
 
 Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if this bitmap is a strict subset of other
 
@@ -445,7 +445,7 @@ Checks wether two roaring bitmap contains the same data.
 
 #### Parameters
 
--   `other` **[RoaringBitmap32](#roaringbitmap32)** 
+- `other` **[RoaringBitmap32](#roaringbitmap32)**
 
 Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if the bitmaps contains the same data, false if not.
 
@@ -456,8 +456,8 @@ Areas outside the range are passed through unchanged.
 
 #### Parameters
 
--   `start` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** Range start.
--   `end` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** Range end.
+- `start` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** Range start.
+- `end` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** Range end.
 
 ### optimize
 
@@ -474,7 +474,7 @@ Otherwise, it returns NaN.
 
 #### Parameters
 
--   `rank` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** Element rank
+- `rank` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** Element rank
 
 Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** element or NaN
 
@@ -485,7 +485,7 @@ Both bitmaps are unchanged.
 
 #### Parameters
 
--   `other` **[RoaringBitmap32](#roaringbitmap32)** 
+- `other` **[RoaringBitmap32](#roaringbitmap32)**
 
 Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** Cardinality of the intersection between two bitmaps.
 
@@ -496,7 +496,7 @@ Both bitmaps are unchanged.
 
 #### Parameters
 
--   `other` **[RoaringBitmap32](#roaringbitmap32)** 
+- `other` **[RoaringBitmap32](#roaringbitmap32)**
 
 Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** Cardinality of the union of two bitmaps.
 
@@ -507,7 +507,7 @@ Both bitmaps are unchanged.
 
 #### Parameters
 
--   `other` **[RoaringBitmap32](#roaringbitmap32)** 
+- `other` **[RoaringBitmap32](#roaringbitmap32)**
 
 Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** Cardinality of the difference (andnot) of two bitmaps.
 
@@ -520,7 +520,7 @@ The provided bitmap is not modified.
 
 #### Parameters
 
--   `other` **[RoaringBitmap32](#roaringbitmap32)** 
+- `other` **[RoaringBitmap32](#roaringbitmap32)**
 
 ### orInPlace
 
@@ -530,7 +530,7 @@ The provided bitmap is not modified.
 
 #### Parameters
 
--   `other` **[RoaringBitmap32](#roaringbitmap32)** 
+- `other` **[RoaringBitmap32](#roaringbitmap32)**
 
 ### xorInPlace
 
@@ -540,7 +540,7 @@ The provided bitmap is not modified.
 
 #### Parameters
 
--   `other` **[RoaringBitmap32](#roaringbitmap32)** 
+- `other` **[RoaringBitmap32](#roaringbitmap32)**
 
 ### andNotInPlace
 
@@ -550,7 +550,7 @@ The provided bitmap is not modified.
 
 #### Parameters
 
--   `other` **[RoaringBitmap32](#roaringbitmap32)** 
+- `other` **[RoaringBitmap32](#roaringbitmap32)**
 
 ### rank
 
@@ -558,7 +558,7 @@ Returns the number of integers that are smaller or equal to the given value.
 
 #### Parameters
 
--   `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to rank
+- `value` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The value to rank
 
 Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The number of values smaller than the given value
 
@@ -568,7 +568,7 @@ Check whether the two bitmaps intersect (have at least one element in common).
 
 #### Parameters
 
--   `other` **[RoaringBitmap32](#roaringbitmap32)** The other bitmap.
+- `other` **[RoaringBitmap32](#roaringbitmap32)** The other bitmap.
 
 Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** True if the two bitmaps intersects, false if not.
 
@@ -582,7 +582,7 @@ The Jaccard index is undefined if both bitmaps are empty.
 
 #### Parameters
 
--   `other`  
+- `other`
 
 Returns **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The Jaccard index
 
@@ -592,8 +592,8 @@ How many bytes are required to serialize this bitmap.
 
 #### Parameters
 
--   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, deserialization is compatible with the Java and Go versions of the library.
-    If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
+- `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, deserialization is compatible with the Java and Go versions of the library.
+  If false, deserialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
 ### serializeToRoaringUint8Array
 
@@ -604,8 +604,8 @@ it need to be freed manually calling dispose().
 
 #### Parameters
 
--   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, serialization is compatible with the Java and Go versions of the library.
-    If false, serialization is compatible with the C version of the library. Default is false. (optional, default `false`)
+- `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, serialization is compatible with the Java and Go versions of the library.
+  If false, serialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
 Returns **[RoaringUint8Array](#roaringuint8array)** The RoaringUint8Array. Remember to manually dispose to free the memory.
 
@@ -616,8 +616,8 @@ The returned array is automatically garbage collected and there is no need to be
 
 #### Parameters
 
--   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, serialization is compatible with the Java and Go versions of the library.
-    If false, serialization is compatible with the C version of the library. Default is false. (optional, default `false`)
+- `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, serialization is compatible with the Java and Go versions of the library.
+  If false, serialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
 Returns **[Uint8Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array)** The Uint8Array that contains the serialized bitmap
 
@@ -628,8 +628,8 @@ The returned buffer is automatically garbage collected and there is no need to b
 
 #### Parameters
 
--   `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, serialization is compatible with the Java and Go versions of the library.
-    If false, serialization is compatible with the C version of the library. Default is false. (optional, default `false`)
+- `portable` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** If true, serialization is compatible with the Java and Go versions of the library.
+  If false, serialization is compatible with the C version of the library. Default is false. (optional, default `false`)
 
 Returns **[Buffer](https://nodejs.org/api/buffer.html)** The NodeJS Buffer that contains the serialized bitmap
 
@@ -704,7 +704,7 @@ Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 Throws an error if the memory was freed.
 
-Returns **(void | never)** 
+Returns **(void | never)**
 
 ### set
 
@@ -712,8 +712,8 @@ Writes the given array at the specified position
 
 #### Parameters
 
--   `array`  A typed or untyped array of values to set.
--   `offset`  The index in the current array at which the values are to be written.
+- `array` A typed or untyped array of values to set.
+- `offset` The index in the current array at which the values are to be written.
 
 ### asTypedArray
 
@@ -765,7 +765,7 @@ Returns a string representation of an array.
 
 Iterator that iterates through all values in the array.
 
-Returns **IterableIterator&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 
+Returns **IterableIterator&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>**
 
 ## RoaringUint8Array
 
@@ -838,7 +838,7 @@ Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 Throws an error if the memory was freed.
 
-Returns **(void | never)** 
+Returns **(void | never)**
 
 ### set
 
@@ -846,8 +846,8 @@ Writes the given array at the specified position
 
 #### Parameters
 
--   `array`  A typed or untyped array of values to set.
--   `offset`  The index in the current array at which the values are to be written.
+- `array` A typed or untyped array of values to set.
+- `offset` The index in the current array at which the values are to be written.
 
 ### asTypedArray
 
@@ -893,4 +893,4 @@ Returns a string representation of an array.
 
 Iterator that iterates through all values in the array.
 
-Returns **IterableIterator&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** 
+Returns **IterableIterator&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>**

@@ -1,35 +1,63 @@
 {
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.quickSuggestions": {
+      "comments": true,
+      "other": true,
+      "strings": true
+    }
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.quickSuggestions": {
+      "comments": true,
+      "other": true,
+      "strings": true
+    }
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true,
+    "source.fixAll.eslint": true
+  },
+  "[c]": {
+    "editor.defaultFormatter": "xaver.clang-format"
+  },
+  "[cpp]": {
+    "editor.defaultFormatter": "xaver.clang-format"
+  },
   "editor.detectIndentation": false,
   "editor.formatOnSave": true,
+  "editor.lineNumbers": "on",
   "editor.tabSize": 2,
-  "eslint.autoFixOnSave": true,
-  "tslint.autoFixOnSave": true,
-  "prettier.eslintIntegration": false,
-  "prettier.parser": "babylon",
-  "prettier.semi": false,
-  "prettier.requireConfig": true,
-  "jest.autoEnable": false,
-  "clang-format.language.javascript.enable": false,
-  "clang-format.language.typescript.enable": false,
-  "files.associations": {
-    ".envrc": "shellscript",
-    "*.idl": "avro",
-    "__bit_reference": "c",
-    "__functional_base": "c",
-    "algorithm": "c",
-    "atomic": "c",
-    "bitset": "c",
-    "chrono": "c",
-    "deque": "c",
-    "functional": "c",
-    "iterator": "c",
-    "limits": "c",
-    "locale": "c",
-    "memory": "c",
-    "ratio": "c",
-    "system_error": "c",
-    "tuple": "c",
-    "type_traits": "c",
-    "vector": "c"
-  }
+  "eslint.codeActionsOnSave.mode": "all",
+  "eslint.format.enable": true,
+  "eslint.lintTask.enable": true,
+  "eslint.validate": [],
+  "javascript.format.enable": true,
+  "javascript.format.semicolons": "insert",
+  "typescript.format.enable": true,
+  "typescript.format.semicolons": "insert",
+  "files.eol": "\n"
 }

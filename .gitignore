@@ -8,8 +8,6 @@ src/**/*.o
 
 temp
 
-src/cpp/CRoaringUnityBuild
-
 # Logs
 logs
 *.log

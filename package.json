@@ -18,7 +18,7 @@
     "roaring"
   ],
   "engines": {
-    "node": ">=8.10.0"
+    "node": ">=18.16.0"
   },
   "author": "Salvatore Previti",
   "license": "Apache-2.0",
@@ -29,30 +29,41 @@
   "_moduleAliases": {
     "roaring-wasm": "dist"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
   "devDependencies": {
-    "@types/jest": "^23.3.6",
-    "@types/node": "^10.12.0",
-    "@types/webassembly-js-api": "0.0.1",
-    "chalk": "^2.4.1",
-    "del": "^3.0.0",
-    "delete-empty": "^2.0.0",
-    "documentation": "^8.1.2",
-    "eslint": "^5.7.0",
-    "eslint-config-prettier": "^3.1.0",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jest": "^21.25.1",
-    "eslint-plugin-node": "^7.0.1",
-    "globby": "^8.0.1",
-    "hoek": "^5.0.4",
-    "idisposable": "^0.1.4",
-    "jest": "^23.6.0",
-    "jest-config": "^23.6.0",
-    "mkdirp": "^0.5.1",
-    "prettier": "^1.14.3",
-    "ts-jest": "^23.10.4",
-    "tslint": "^5.11.0",
-    "tslint-config-prettier": "^1.15.0",
-    "tslint-microsoft-contrib": "^5.2.1",
-    "typescript": "^3.1.3"
+    "@balsamic/eslint-config": "^0.4.1",
+    "@octokit/rest": "^19.0.8",
+    "@types/chai": "^4.3.5",
+    "@types/chai-as-promised": "^7.1.5",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^20.1.7",
+    "@typescript-eslint/eslint-plugin": "^5.59.6",
+    "@typescript-eslint/parser": "^5.59.6",
+    "benchmark": "^2.1.4",
+    "chai": "^4.3.7",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^8.40.0",
+    "eslint-plugin-chai-expect": "^3.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-json": "^3.1.0",
+    "eslint-plugin-node": "^11.1.0",
+    "fastbitset": "^0.4.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.2",
+    "mocha": "^10.2.0",
+    "prettier": "^2.8.8",
+    "pretty-quick": "^3.1.3",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.5.0",
+    "typedoc": "^0.24.7",
+    "typescript": "^5.0.4",
+    "del": "^7.0.0",
+    "delete-empty": "^3.0.0",
+    "globby": "^13.1.4",
+    "idisposable": "^0.2.0"
   }
 }

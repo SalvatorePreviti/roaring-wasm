@@ -1,4 +1,4 @@
-import roaringWasm = require('./lib/roaring-wasm')
+import roaringWasm = require("./lib/roaring-wasm");
 
 /**
  * Array of unsigned 32 bit integers allocted directly in roaring library WASM memory.
@@ -17,7 +17,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @type {typeof Uint32Array}
    * @memberof RoaringUint32Array
    */
-  public static readonly TypedArray: typeof Uint32Array = Uint32Array
+  public static readonly TypedArray: typeof Uint32Array = Uint32Array;
 
   /**
    * The size in bytes of each element in the array.
@@ -29,7 +29,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @type {number}
    * @memberof RoaringUint32Array
    */
-  public static readonly BYTES_PER_ELEMENT: 4 = 4
+  public static readonly BYTES_PER_ELEMENT: 4 = 4 as const;
 
   /**
    * The type of typed array used by this class.
@@ -41,7 +41,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public get TypedArray(): typeof Uint32Array {
-    return Uint32Array
+    return Uint32Array;
   }
 
   /**
@@ -54,7 +54,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public get BYTES_PER_ELEMENT(): 4 {
-    return 4
+    return 4;
   }
 
   /**
@@ -69,7 +69,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public get buffer(): ArrayBuffer {
-    return roaringWasm.wasmMemory.buffer
+    return roaringWasm.wasmMemory.buffer;
   }
 
   /**
@@ -81,7 +81,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public get isDisposed(): boolean {
-    return !this.byteOffset
+    return !this.byteOffset;
   }
 
   /**
@@ -94,7 +94,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public get byteLength(): number {
-    return this.length * 4
+    return this.length * 4;
   }
 
   /**
@@ -109,7 +109,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public get heap(): Uint32Array {
-    return roaringWasm.HEAPU32
+    return roaringWasm.HEAPU32;
   }
 
   /**
@@ -119,7 +119,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @type {number}
    * @memberof RoaringUint32Array
    */
-  public readonly byteOffset: number
+  public readonly byteOffset: number;
 
   /**
    * Number of elements allocated in this array.
@@ -129,7 +129,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @type {number}
    * @memberof RoaringUint32Array
    */
-  public readonly length: number
+  public readonly length: number;
 
   /**
    * Allocates an array in the roaring WASM heap.
@@ -144,43 +144,43 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public constructor(lengthOrArray: number | Iterable<number>, _pointer?: number) {
-    this.byteOffset = 0
-    this.length = 0
+    this.byteOffset = 0;
+    this.length = 0;
 
-    let length: number
-    if (typeof lengthOrArray === 'number') {
-      length = lengthOrArray
-    } else if (lengthOrArray !== null && typeof lengthOrArray === 'object') {
-      length = (lengthOrArray as any).length
-      if (typeof length !== 'number') {
-        const copy = new Uint32Array(lengthOrArray)
-        lengthOrArray = copy
-        length = copy.length
+    let length: number;
+    if (typeof lengthOrArray === "number") {
+      length = lengthOrArray;
+    } else if (lengthOrArray !== null && typeof lengthOrArray === "object") {
+      length = (lengthOrArray as unknown as ArrayLike<number>).length;
+      if (typeof length !== "number") {
+        const copy = new Uint32Array(lengthOrArray);
+        lengthOrArray = copy;
+        length = copy.length;
       }
     } else {
-      throw new TypeError('Invalid argument')
+      throw new TypeError("Invalid argument");
     }
 
     if (length > 0) {
       if (_pointer === undefined) {
-        _pointer = roaringWasm._malloc(length * 4)
+        _pointer = roaringWasm._malloc(length * 4);
       }
       if (!_pointer) {
-        throw new Error(`RoaringUint32Array failed to allocate ${length * 4} bytes`)
+        throw new Error(`RoaringUint32Array failed to allocate ${length * 4} bytes`);
       }
-      this.byteOffset = _pointer
-      this.length = length
+      this.byteOffset = _pointer;
+      this.length = length;
 
       try {
         if ((_pointer & 3) !== 0) {
-          throw new Error('RoaringUint32Array allocation failed, allocated memory is not aligned correctly')
+          throw new Error("RoaringUint32Array allocation failed, allocated memory is not aligned correctly");
         }
-        if (typeof lengthOrArray !== 'number') {
-          this.set(lengthOrArray)
+        if (typeof lengthOrArray !== "number") {
+          this.set(lengthOrArray);
         }
       } catch (error) {
-        this.dispose()
-        throw error
+        this.dispose();
+        throw error;
       }
     }
   }
@@ -193,14 +193,14 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public dispose(): boolean {
-    const ptr = this.byteOffset
+    const ptr = this.byteOffset;
     if (ptr) {
-      ;(this as { byteOffset: number }).byteOffset = 0
-      ;(this as { length: number }).length = 0
-      roaringWasm._free(ptr)
-      return true
+      (this as { byteOffset: number }).byteOffset = 0;
+      (this as { length: number }).length = 0;
+      roaringWasm._free(ptr);
+      return true;
     }
-    return false
+    return false;
   }
 
   /**
@@ -213,7 +213,7 @@ class RoaringUint32Array implements Iterable<number> {
    */
   public throwIfDisposed(): void | never {
     if (this.isDisposed) {
-      throw new TypeError('RoaringUint32Array is disposed')
+      throw new TypeError("RoaringUint32Array is disposed");
     }
   }
 
@@ -225,24 +225,24 @@ class RoaringUint32Array implements Iterable<number> {
    */
   public set(array: Iterable<number>, offset: number = 0): this {
     if (!Number.isInteger(offset) || offset < 0) {
-      throw new TypeError(`Invalid offset ${offset}`)
+      throw new TypeError(`Invalid offset ${offset}`);
     }
 
     if (array instanceof RoaringUint32Array) {
-      array = array.asTypedArray()
+      array = array.asTypedArray();
     }
 
-    const length = (array as any).length
-    if (typeof length !== 'number') {
-      return this.set(new Uint32Array(array))
+    const length = (array as unknown as ArrayLike<unknown>).length;
+    if (typeof length !== "number") {
+      return this.set(new Uint32Array(array));
     }
 
     if (offset + length > this.length) {
-      throw new TypeError(`Invalid offset ${offset}`)
+      throw new TypeError(`Invalid offset ${offset}`);
     }
 
-    this.heap.set(array as any, this.byteOffset / 4 + offset)
-    return this
+    this.heap.set(array as unknown as ArrayLike<number>, this.byteOffset / 4 + offset);
+    return this;
   }
 
   /**
@@ -254,7 +254,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public asTypedArray(): Uint32Array {
-    return new Uint32Array(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length)
+    return new Uint32Array(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length);
   }
 
   /**
@@ -266,7 +266,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public asNodeBuffer(): Buffer {
-    return Buffer.from(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length)
+    return Buffer.from(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length);
   }
 
   /**
@@ -277,9 +277,9 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public toTypedArray(): Uint32Array {
-    const array = new Uint32Array(this.length)
-    array.set(this.asTypedArray())
-    return array
+    const array = new Uint32Array(this.length);
+    array.set(this.asTypedArray());
+    return array;
   }
 
   /**
@@ -290,7 +290,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public toNodeBuffer(): Buffer {
-    return Buffer.from(this.asNodeBuffer())
+    return Buffer.from(this.asNodeBuffer());
   }
 
   /**
@@ -300,7 +300,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public toArray(): number[] {
-    return Array.from(this.asTypedArray())
+    return Array.from(this.asTypedArray());
   }
 
   /**
@@ -310,7 +310,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public toSet(): Set<number> {
-    return new Set<number>(this.asTypedArray())
+    return new Set<number>(this.asTypedArray());
   }
 
   /**
@@ -318,7 +318,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public toString(): string {
-    return this.asTypedArray().toString()
+    return this.asTypedArray().toString();
   }
 
   /**
@@ -328,7 +328,7 @@ class RoaringUint32Array implements Iterable<number> {
    * @memberof RoaringUint32Array
    */
   public [Symbol.iterator](): IterableIterator<number> {
-    return this.asTypedArray()[Symbol.iterator]()
+    return this.asTypedArray()[Symbol.iterator]();
   }
 }
 
@@ -337,28 +337,28 @@ Object.defineProperties(RoaringUint32Array.prototype, {
     value: Uint32Array,
     writable: false,
     configurable: false,
-    enumerable: false
+    enumerable: false,
   },
   BYTES_PER_ELEMENT: {
     value: 4,
     writable: false,
     configurable: false,
-    enumerable: false
+    enumerable: false,
   },
   size: {
     get: function getSize(this: RoaringUint32Array) {
-      return this.length
+      return this.length;
     },
     configurable: false,
-    enumerable: false
+    enumerable: false,
   },
   toJSON: {
     value: function arrayToJSON(this: RoaringUint32Array) {
-      return this.asTypedArray()
+      return this.asTypedArray();
     },
     configurable: true,
-    enumerable: false
-  }
-})
+    enumerable: false,
+  },
+});
 
-export = RoaringUint32Array
+export = RoaringUint32Array;

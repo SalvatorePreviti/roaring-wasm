@@ -1,54 +1,54 @@
-const childProcess = require('child_process')
-const root = require('./root')
+const childProcess = require("child_process");
+const root = require("./root");
 
-function promisifyChildProcess(child, command = 'operation') {
+function promisifyChildProcess(child, command = "operation") {
   return new Promise((resolve, reject) => {
-    let errored = false
+    let errored = false;
 
     function handleError(error) {
       if (!errored) {
-        errored = true
+        errored = true;
         if (error instanceof Error) {
-          reject(error)
+          reject(error);
         } else {
-          if (typeof error === 'number') {
-            error = `ErrorCode:${error}`
+          if (typeof error === "number") {
+            error = `ErrorCode:${error}`;
           }
-          const e = new Error(`${command} failed. ${error}`)
-          e.stack = e.message
-          reject(e)
-          e.stack = e.message
+          const e = new Error(`${command} failed. ${error}`);
+          e.stack = e.message;
+          reject(e);
+          e.stack = e.message;
         }
       }
     }
 
     try {
-      if (typeof child === 'function') {
-        child = child()
+      if (typeof child === "function") {
+        child = child();
       }
 
-      child.on('error', handleError)
-      child.on('exit', error => {
+      child.on("error", handleError);
+      child.on("exit", (error) => {
         if (!errored) {
           if (error) {
-            handleError(error)
+            handleError(error);
           } else {
-            resolve()
+            resolve();
           }
         }
-      })
+      });
     } catch (error) {
-      handleError(error)
+      handleError(error);
     }
-  })
+  });
 }
 
-function spawnAsync(command, args = [], options = { stdio: 'inherit', cwd: root }) {
+function spawnAsync(command, args = [], options = { stdio: "inherit", cwd: root }) {
   return promisifyChildProcess(() => {
-    return childProcess.spawn(command, args, options)
-  })
+    return childProcess.spawn(command, args, options);
+  });
 }
 
-spawnAsync.promisifyChildProcess = promisifyChildProcess
+spawnAsync.promisifyChildProcess = promisifyChildProcess;
 
-module.exports = spawnAsync
+module.exports = spawnAsync;

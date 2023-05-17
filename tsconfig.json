@@ -1,19 +1,20 @@
 {
   "compilerOptions": {
     "allowJs": false,
-    "allowSyntheticDefaultImports": false,
+    "checkJs": false,
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "alwaysStrict": true,
     "baseUrl": ".",
-    "charset": "utf8",
     "declaration": true,
     "emitDecoratorMetadata": false,
-    "esModuleInterop": false,
     "experimentalDecorators": false,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": false,
-    "lib": ["esnext"],
+    "lib": ["esnext", "DOM"],
     "module": "commonjs",
     "moduleResolution": "node",
     "newLine": "LF",
@@ -22,21 +23,28 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noStrictGenericChecks": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "outDir": "dist",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "outDir": ".",
     "pretty": true,
-    "rootDir": "src/ts",
-    "strict": true,
     "removeComments": false,
+    "rootDir": ".",
+    "strict": true,
+    "skipLibCheck": false,
+    "skipDefaultLibCheck": false,
     "strictFunctionTypes": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
-    "target": "es2017"
+    "target": "ES2018",
+    "isolatedModules": true
   },
-  "exclude": ["**/node_modules", "**/.eslintcache", "**/dist", "temp"],
-  "include": ["src"],
+  "exclude": ["node_modules", "node_modules/**/*", ".eslintcache/**/*", "temp/**/*", "build/**/*"],
   "typeAcquisition": {
     "enable": true
+  },
+  "typedocOptions": {
+    "out": "docs",
+    "entryPoints": "src/index.tsx",
+    "exclude": ["test/**/*", "node_modules/**/*", "temp/**/*", "build/**/*", "docs/**/*"]
   }
 }

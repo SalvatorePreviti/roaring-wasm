@@ -32,33 +32,33 @@ Code sample:
 // create this file as demo.js
 // type node demo.js or nodejs demo.js depending on your system
 
-var roaring = require('roaring-wasm')
+var roaring = require("roaring-wasm");
 
-var bitmap1 = new roaring.RoaringBitmap32()
-bitmap1.addMany([1, 2, 3, 4, 5, 100, 1000])
-console.log('bitmap1.toSet():', bitmap1.toSet())
+var bitmap1 = new roaring.RoaringBitmap32();
+bitmap1.addMany([1, 2, 3, 4, 5, 100, 1000]);
+console.log("bitmap1.toSet():", bitmap1.toSet());
 
-var bitmap2 = new roaring.RoaringBitmap32()
-bitmap2.addMany([3, 4, 1000])
-console.log('bitmap2.toSet():', bitmap1.toSet())
+var bitmap2 = new roaring.RoaringBitmap32();
+bitmap2.addMany([3, 4, 1000]);
+console.log("bitmap2.toSet():", bitmap1.toSet());
 
-var bitmap3 = new roaring.RoaringBitmap32()
-console.log('bitmap1.cardinality():', bitmap1.cardinality())
-console.log('bitmap2.contains(3):', bitmap2.contains(3))
+var bitmap3 = new roaring.RoaringBitmap32();
+console.log("bitmap1.cardinality():", bitmap1.cardinality());
+console.log("bitmap2.contains(3):", bitmap2.contains(3));
 
-bitmap3.add(111)
-bitmap3.add(544)
-bitmap3.orInPlace(bitmap1)
-bitmap1.optimize()
-console.log(bitmap3.toString())
+bitmap3.add(111);
+bitmap3.add(544);
+bitmap3.orInPlace(bitmap1);
+bitmap1.optimize();
+console.log(bitmap3.toString());
 
-console.log('bitmap3.toArray():', bitmap3.toArray())
-console.log('bitmap3.maximum():', bitmap3.maximum())
-console.log('bitmap3.rank(100):', bitmap3.rank(100))
+console.log("bitmap3.toArray():", bitmap3.toArray());
+console.log("bitmap3.maximum():", bitmap3.maximum());
+console.log("bitmap3.rank(100):", bitmap3.rank(100));
 
-bitmap1.dispose()
-bitmap2.dispose()
-bitmap3.dispose()
+bitmap1.dispose();
+bitmap2.dispose();
+bitmap3.dispose();
 ```
 
 ## references
