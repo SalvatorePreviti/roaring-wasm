@@ -1,0 +1,28 @@
+name: CI
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: 'npm'
+      - name: Install emcc
+        uses: mymindstorm/setup-emsdk@v11
+        with:
+          version: 3.1.36
+      - name: Install binaryen
+        uses: jaxxstorm/action-install-gh-release@v1.10.0
+        with:
+          repo: WebAssembly/binaryen
+          platform: linux
+          arch: x86_64
+          tag: version_113
+          binaries-location: binaryen-version_113/bin
+      - run: npm ci
+      - run: npm run test
