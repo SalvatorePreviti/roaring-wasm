@@ -5,6 +5,8 @@
   "description": "Node JS porting of Roaring using WebAssembly",
   "main": "index.js",
   "scripts": {
+    "prepare": "husky install",
+    "lint": "node scripts/lint.js",
     "clean": "node scripts/clean.js",
     "build": "node scripts/build.js",
     "start": "node scripts/build.js",
@@ -18,7 +20,7 @@
     "roaring"
   ],
   "engines": {
-    "node": ">=18.16.0"
+    "node": ">=14"
   },
   "author": "Salvatore Previti",
   "license": "Apache-2.0",
@@ -46,13 +48,16 @@
     "benchmark": "^2.1.4",
     "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
+    "delete-empty": "^3.0.0",
     "eslint": "^8.40.0",
     "eslint-plugin-chai-expect": "^3.0.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-json": "^3.1.0",
     "eslint-plugin-node": "^11.1.0",
+    "fast-glob": "^3.2.12",
     "fastbitset": "^0.4.1",
     "husky": "^8.0.3",
+    "idisposable": "^0.2.0",
     "lint-staged": "^13.2.2",
     "mocha": "^10.2.0",
     "prettier": "^2.8.8",
@@ -60,10 +65,6 @@
     "ts-node": "^10.9.1",
     "tslib": "^2.5.0",
     "typedoc": "^0.24.7",
-    "typescript": "^5.0.4",
-    "del": "^7.0.0",
-    "delete-empty": "^3.0.0",
-    "globby": "^13.1.4",
-    "idisposable": "^0.2.0"
+    "typescript": "^5.0.4"
   }
 }

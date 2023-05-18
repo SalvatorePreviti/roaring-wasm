@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { isCI, forkAsync, spawnAsync, timed, runMain } = require("./lib/utils");
+const { ROOT_FOLDER, isCI, forkAsync, spawnAsync, timed, runMain } = require("./lib/utils");
 const { typecheck } = require("./typecheck.js");
 
 async function lint(args = process.argv.slice(2)) {
@@ -17,6 +17,7 @@ async function lint(args = process.argv.slice(2)) {
   let eslintPromise = timed(isFix ? "eslint fix" : "eslint check", () =>
     spawnAsync("npx", ["eslint", ".", "--no-error-on-unmatched-pattern", isFix ? "--fix" : "--max-warnings=0"], {
       title: isFix ? "eslint fix" : "eslint check",
+      cwd: ROOT_FOLDER,
       showStack: false,
     }),
   );
@@ -29,7 +30,9 @@ async function lint(args = process.argv.slice(2)) {
   }
 
   const prettierPromise = timed(isFix ? "prettier fix" : "prettier check", () =>
-    forkAsync(require.resolve("prettier/bin-prettier.js"), ["--loglevel=warn", isFix ? "--write" : "--check", "."]),
+    forkAsync(require.resolve("prettier/bin-prettier.js"), ["--loglevel=warn", isFix ? "--write" : "--check", "."], {
+      cwd: ROOT_FOLDER,
+    }),
   );
 
   await Promise.all([typecheckPromise, eslintPromise, prettierPromise]);

@@ -1,4 +1,4 @@
-import roaringWasm = require("./lib/roaring-wasm");
+import roaringWasm from "./lib/roaring-wasm";
 
 /**
  * Array of bytes allocted directly in roaring library WASM memory.
@@ -348,4 +348,4 @@ Object.defineProperties(RoaringUint8Array.prototype, {
   },
 });
 
-export = RoaringUint8Array;
+export default RoaringUint8Array;

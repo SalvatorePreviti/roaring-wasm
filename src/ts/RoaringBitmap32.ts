@@ -1,6 +1,6 @@
-import roaringWasm = require("./lib/roaring-wasm");
-import RoaringUint32Array = require("./RoaringUint32Array");
-import RoaringUint8Array = require("./RoaringUint8Array");
+import roaringWasm from "./lib/roaring-wasm";
+import RoaringUint32Array from "./RoaringUint32Array";
+import RoaringUint8Array from "./RoaringUint8Array";
 
 const {
   _roaring_bitmap_create_js,
@@ -768,4 +768,4 @@ function _getPtr(bitmap: RoaringBitmap32): number {
   return ptr!;
 }
 
-export = RoaringBitmap32;
+export default RoaringBitmap32;

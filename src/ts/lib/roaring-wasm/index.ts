@@ -1,3 +1,5 @@
+import roaring_wasm_module_init from "./roaring-wasm-module";
+
 type RoaringWasm = {
   readonly wasmMemory: WebAssembly.Memory;
 
@@ -62,43 +64,16 @@ type RoaringWasm = {
  */
 class RoaringWasmModule {
   public noExitRuntime: boolean = true;
-}
+  public roaring_bitmap_temp_offset: number;
 
-function loadRoaringWasm(): RoaringWasm {
-  // const cwd = typeof process === 'object' && typeof process.cwd === 'function' && process.cwd()
-
-  const roaringWasmModule = require("./roaring-wasm-module");
-
-  const isNode =
-    typeof __dirname === "string" &&
-    typeof process === "object" &&
-    typeof process.versions === "object" &&
-    process.versions.node !== undefined;
-
-  const m = new RoaringWasmModule() as RoaringWasmModule & {
-    ENVIRONMENT?: string;
-    locateFile?: (file: string) => string;
-  };
-  if (isNode) {
-    m.ENVIRONMENT = "NODE";
+  constructor() {
+    roaring_wasm_module_init(this);
+    this.roaring_bitmap_temp_offset = (this as unknown as RoaringWasm)._get_sizeof_roaring_bitmap_t();
   }
-
-  if (typeof __dirname === "string" && __dirname) {
-    m.locateFile = function locateFile(file) {
-      // eslint-disable-next-line node/no-path-concat
-      return `${__dirname}/${file}`;
-    };
-  }
-
-  const roaringWasm = roaringWasmModule(m) as RoaringWasm;
-
-  roaringWasm.roaring_bitmap_temp_offset = roaringWasm._get_sizeof_roaring_bitmap_t();
-
-  return roaringWasm;
 }
 
 /**
  * @module
  * Roaring WASM module instantiation
  */
-export = loadRoaringWasm();
+export = new RoaringWasmModule() as unknown as RoaringWasm;

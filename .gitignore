@@ -6,6 +6,8 @@ dist/**/*.wasm
 dist/**/*.wasm.pre
 src/**/*.o
 
+**/roaring-wasm-module.*
+
 temp
 
 # Logs

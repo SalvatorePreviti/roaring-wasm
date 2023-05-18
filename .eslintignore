@@ -2,6 +2,7 @@ temp
 dist
 src/cpp/**/*
 docs/**/*
+build/
 
 # dotfiles
 

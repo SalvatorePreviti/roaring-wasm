@@ -2,6 +2,7 @@ src/cpp/**/*
 docs/**/*
 submodules/**/*
 .clang-tidy
+build/
 
 # Dependencies and vendor
 vendor

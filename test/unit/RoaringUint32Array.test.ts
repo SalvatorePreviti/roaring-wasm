@@ -1,7 +1,7 @@
 import { expect } from "chai";
-import IDisposable = require("idisposable");
-import roaringWasm = require("../../src/ts/lib/roaring-wasm");
-import RoaringUint32Array = require("../../src/ts/RoaringUint32Array");
+import IDisposable from "idisposable";
+import roaringWasm from "../../src/ts/lib/roaring-wasm";
+import RoaringUint32Array from "../../src/ts/RoaringUint32Array";
 
 function sameInstance(a: any, b: any): boolean {
   return a === b;

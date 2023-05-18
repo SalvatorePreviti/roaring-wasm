@@ -1,7 +1,7 @@
 import { expect } from "chai";
-import IDisposable = require("idisposable");
-import RoaringBitmap32 = require("../../../src/ts/RoaringBitmap32");
-import RoaringUint32Array = require("../../../src/ts/RoaringUint32Array");
+import IDisposable from "idisposable";
+import RoaringBitmap32 from "../../../src/ts/RoaringBitmap32";
+import RoaringUint32Array from "../../../src/ts/RoaringUint32Array";
 
 describe("RoaringBitmap32", () => {
   describe("addChecked", () => {
@@ -55,7 +55,7 @@ describe("RoaringBitmap32", () => {
           bitmap.addMany(buffer);
           expect(buffer.isDisposed).eq(false);
           expect(buffer.toArray()).deep.eq(array);
-          expect(bitmap.toArray().sort()).eq(array);
+          expect(bitmap.toArray().sort()).deep.eq(array);
         });
       });
     });

@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import IDisposable = require("idisposable");
-import RoaringBitmap32 = require("../../../src/ts/RoaringBitmap32");
+import IDisposable from "idisposable";
+import RoaringBitmap32 from "../../../src/ts/RoaringBitmap32";
 
 describe("RoaringBitmap32 one element", () => {
   describe("read", () => {

@@ -25,10 +25,8 @@
     "noStrictGenericChecks": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "outDir": ".",
     "pretty": true,
     "removeComments": false,
-    "rootDir": ".",
     "strict": true,
     "skipLibCheck": false,
     "skipDefaultLibCheck": false,
@@ -38,13 +36,13 @@
     "target": "ES2018",
     "isolatedModules": true
   },
-  "exclude": ["node_modules", "node_modules/**/*", ".eslintcache/**/*", "temp/**/*", "build/**/*"],
+  "exclude": ["node_modules", "node_modules/**/*", ".eslintcache/**/*", "temp/**/*", "dist/**/*"],
   "typeAcquisition": {
     "enable": true
   },
   "typedocOptions": {
     "out": "docs",
     "entryPoints": "src/index.tsx",
-    "exclude": ["test/**/*", "node_modules/**/*", "temp/**/*", "build/**/*", "docs/**/*"]
+    "exclude": ["test/**/*", "node_modules/**/*", ".tmp/**/*", "temp/**/*", "dist/**/*", "docs/**/*"]
   }
 }

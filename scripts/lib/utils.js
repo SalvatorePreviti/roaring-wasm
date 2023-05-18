@@ -1,6 +1,7 @@
 const colors = require("chalk");
 const util = require("util");
 const path = require("path");
+const fs = require("fs");
 const { spawn, fork } = require("child_process");
 
 const ROOT_FOLDER = path.resolve(__dirname, "../../");
@@ -14,6 +15,8 @@ module.exports = {
   spawnAsync,
   forkAsync,
   logError,
+  getFileSizesAsync,
+  executablePathFromEnv,
   isCI: (!!process.env.CI && process.env.CI !== "false") || process.argv.includes("--ci"),
 };
 
@@ -21,7 +24,7 @@ function logError(e) {
   console.log(colors.redBright("❌ ", util.inspect(e, { colors: colors.level > 0 })));
 }
 
-function runMain(fn, title) {
+function runMain(fn, title = fn.title) {
   if (title) {
     console.log(colors.blueBright(`\n⬢ ${colors.cyanBright(title)}\n`));
   }
@@ -75,10 +78,10 @@ function runMain(fn, title) {
 }
 
 function timed(title, fn) {
-  if (fn === undefined && title) {
+  if (typeof title === "function" || typeof title === "object") {
     fn = title;
   }
-  if (!title) {
+  if (typeof title !== "string") {
     title = fn.name || "";
   }
   console.log(colors.cyan(`${colors.cyan("◆")} ${title}`) + colors.gray(" started..."));
@@ -155,4 +158,29 @@ function forkAsync(modulePath, args, options) {
       }
     });
   });
+}
+
+async function getFileSizesAsync(patterns) {
+  const files = await require("fast-glob")(patterns);
+  return Promise.all(
+    files.map(async (filePath) => {
+      const stats = await fs.promises.stat(filePath);
+      return {
+        path: path.relative(ROOT_FOLDER, filePath),
+        size: stats.size,
+        sizeString: `${(stats.size * 0.001).toFixed(1)}kb`,
+      };
+    }),
+  );
+}
+
+function executablePathFromEnv(envVariableName, subfolder, executableName) {
+  const v = process.env[envVariableName];
+  if (!v) {
+    return executableName;
+  }
+  if (subfolder) {
+    return path.resolve(path.join(v, subfolder, executableName));
+  }
+  return path.resolve(path.join(v, executableName));
 }

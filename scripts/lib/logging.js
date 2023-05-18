@@ -24,7 +24,7 @@ const logging = {
   },
 
   info(description) {
-    console.log(`${icons.info} ${chalk.cyan(description)}`);
+    console.log(`• ${chalk.cyan(description)}`);
   },
 
   success(description) {

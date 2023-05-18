@@ -1,4 +1,4 @@
-import roaringWasm = require("./lib/roaring-wasm");
+import roaringWasm from "./lib/roaring-wasm";
 
 /**
  * Array of unsigned 32 bit integers allocted directly in roaring library WASM memory.
@@ -361,4 +361,4 @@ Object.defineProperties(RoaringUint32Array.prototype, {
   },
 });
 
-export = RoaringUint32Array;
+export default RoaringUint32Array;
