@@ -5,10 +5,10 @@ dist/**/*.js
 dist/**/*.wasm
 dist/**/*.wasm.pre
 src/**/*.o
+docs/
+build/
 
 temp
-
-src/cpp/CRoaringUnityBuild
 
 # Logs
 logs

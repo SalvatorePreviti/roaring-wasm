@@ -1,20 +1,17 @@
 #!/usr/bin/env node
 
-const logging = require('./lib/logging')
-const spawnAsync = require('./lib/spawnAsync')
+const { forkAsync, timed, runMain, ROOT_FOLDER } = require("./lib/utils");
 
 async function compileTs() {
-  await logging.time('compile typescript', async () => {
-    await Promise.all([spawnAsync('tslint', ['-p', 'tsconfig.json', '-t', 'stylish']), spawnAsync('tsc', ['-p', 'tsconfig.json'])])
-    await Promise.all([spawnAsync('tslint', ['-p', 'test/tsconfig.json', '-t', 'stylish']), spawnAsync('tsc', ['-p', 'test/tsconfig.json'])])
-  })
-
-  await logging.time('prettify output', async () => {
-    await spawnAsync('eslint', ['--fix', 'dist/**/*.js'])
-    await spawnAsync('prettier', ['--write', 'dist/**/*.js', 'dist/**/*.ts', 'dist/**/*.json'])
-  })
+  await timed("compileTS", async () => {
+    await Promise.all([forkAsync(require.resolve("typescript/bin/tsc"), ["-p", "tsconfig-build.json"])], {
+      cwd: ROOT_FOLDER,
+    });
+  });
 }
 
-module.exports = compileTs
+module.exports = { compileTs };
 
-require('./lib/executableModule')(module)
+if (require.main === module) {
+  runMain(compileTs);
+}

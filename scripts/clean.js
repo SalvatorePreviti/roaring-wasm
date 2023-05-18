@@ -1,25 +1,39 @@
 #!/usr/bin/env node
 
-const path = require('path')
-const del = require('del')
-const deleteEmpty = require('delete-empty')
-const logging = require('./lib/logging')
-const root = require('./lib/root')
+const { ROOT_FOLDER, colors, runMain } = require("./lib/utils");
+
+const fs = require("fs");
+const path = require("path");
+const globby = require("fast-glob");
+const deleteEmpty = require("delete-empty");
 
 async function clean() {
-  const distFiles = ['*.js', '*.ts', '*.wasm'].map(x => path.join(root, 'dist', '**', x))
+  const distFiles = await globby(["*.js", "*.ts", "*.wasm"], { cwd: path.resolve(ROOT_FOLDER, "dist") });
 
-  const deletedFiles = (await del([...distFiles])).length
-  const deletedDirectories = (await deleteEmpty(path.join(root, 'dist'))).length
+  // Remove all distFiles
 
-  const message = `deleted ${deletedFiles} files, ${deletedDirectories} directories`
-  if (deletedFiles || deletedDirectories) {
-    logging.success(message)
-  } else {
-    logging.info(message)
+  let deletedFiles = 0;
+
+  const deleteFile = (file) =>
+    fs.promises
+      .unlink(path.join(ROOT_FOLDER, "dist", file))
+      .then(() => ++deletedFiles)
+      .catch(() => {});
+
+  const promises = [];
+  for (const file of distFiles) {
+    promises.push(deleteFile(file));
   }
+
+  await Promise.all(promises);
+
+  const deletedDirectories = (await deleteEmpty(path.resolve(ROOT_FOLDER, "dist"))).length;
+
+  console.log(`• ${colors.cyan(`deleted ${deletedFiles} files, ${deletedDirectories} directories`)}`);
 }
 
-module.exports = clean
+module.exports = { clean };
 
-require('./lib/executableModule')(module)
+if (require.main === module) {
+  runMain(clean);
+}

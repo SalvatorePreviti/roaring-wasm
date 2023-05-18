@@ -1,14 +1,20 @@
 #!/usr/bin/env node
 
-const logging = require('./lib/logging')
-const spawnAsync = require('./lib/spawnAsync')
+const { runMain, forkAsync } = require("./lib/utils");
 
-async function test() {
-  await logging.time('test', async () => {
-    await spawnAsync('jest')
-  })
+if (require.main === module) {
+  require("ts-node").register();
+
+  runMain(() => {
+    process.argv.push("test/**/*.test.ts");
+    process.argv.push("test/*.test.ts");
+
+    require("mocha/bin/mocha");
+  }, "test");
+} else {
+  module.exports = {
+    test() {
+      return forkAsync(__filename, []);
+    },
+  };
 }
-
-module.exports = test
-
-require('./lib/executableModule')(module)

@@ -1,24 +1,20 @@
 #!/usr/bin/env node
 
-const logging = require('./lib/logging')
-const clean = require('./clean')
-const compileWasm = require('./compile-wasm')
-const compileTs = require('./compile-ts')
-const doc = require('./doc')
-const test = require('./test')
+const { timed, runMain } = require("./lib/utils");
+const { clean } = require("./clean");
+const { compileWasm } = require("./compile-wasm");
+const { compileTs } = require("./compile-ts");
+const { test } = require("./test");
 
 async function build() {
-  await logging.time('build', async () => {
-    await clean()
-    await compileWasm()
-    await compileTs()
-    await test()
-    await doc()
-    logging.log()
-  })
-  logging.log()
+  await timed(clean);
+  await compileWasm();
+  await compileTs();
+  await timed(test);
 }
 
-module.exports = build
+module.exports = { build };
 
-require('./lib/executableModule')(module)
+if (require.main === module) {
+  runMain(build);
+}
