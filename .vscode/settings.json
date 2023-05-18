@@ -59,5 +59,6 @@
   "javascript.format.semicolons": "insert",
   "typescript.format.enable": true,
   "typescript.format.semicolons": "insert",
-  "files.eol": "\n"
+  "files.eol": "\n",
+  "cmake.sourceDirectory": "/Users/sp/my/roaring-wasm/submodules/CRoaring/src"
 }

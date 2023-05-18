@@ -6,16 +6,10 @@ Roaring bitmaps are compressed bitmaps. They can be hundreds of times faster.
 
 ## NOTE
 
-Implementation of all features is not complete.
-For a complete native implementation, much faster and easier to use than this package, you can use:
+Implementation of all features is not complete and not all features can be implemented.
 
-- [roaring](https://www.npmjs.com/package/roaring) - NodeJS Roaring bitmaps as a native addon. https://github.com/SalvatorePreviti/roaring-node
-- [roaring-aws](https://www.npmjs.com/package/roaring-aws) - NodeJS roaring bitmaps precompiled for AWS Lambda (Serverless compatible). https://github.com/SalvatorePreviti/roaring-node-aws
-
-## motivation
-
-This project was born to use Roaring WASM in AWS Lambdas without the need to compile a node-gyp module.
-AWS Lambda supports node 8.10 and supports WASM.
+This package is intended as a stripped down cross platform alternative to [roaring for NodeJS](https://www.npmjs.com/package/roaring) [repository](https://github.com/SalvatorePreviti/roaring-node) that can be used in the browser.
+The NodeJS version has a better API that fully leverages the v8 garbage collector and the native CPU SIMD instructions, and has also asynchronous operations.
 
 ## installation
 
@@ -61,21 +55,21 @@ bitmap2.dispose();
 bitmap3.dispose();
 ```
 
-## references
+## References
 
-This package - <https://www.npmjs.com/package/roaring-wasm>
+- [roaring for NodeJS](https://www.npmjs.com/package/roaring) [repository](https://github.com/SalvatorePreviti/roaring-node)
 
-Source code and build tools for this package - <https://github.com/SalvatorePreviti/roaring-wasm>
+- This package - <https://www.npmjs.com/package/roaring-wasm>
 
-Roaring Bitmaps - <http://roaringbitmap.org/>
+- Source code and build tools for this package - <https://github.com/SalvatorePreviti/roaring-wasm>
 
-Portable Roaring bitmaps in C - <https://github.com/RoaringBitmap/CRoaring>
+- Roaring Bitmaps - <http://roaringbitmap.org/>
 
-emscripten - <https://github.com/kripken/emscripten/wiki>
+- Portable Roaring bitmaps in C - <https://github.com/RoaringBitmap/CRoaring>
 
-AWS Lambda - <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-handler.html>
+- emscripten - <https://github.com/kripken/emscripten/wiki>
 
-# licenses
+# Licenses
 
 - This package is provided as open source software using Apache License.
 
@@ -83,22 +77,40 @@ AWS Lambda - <https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-han
 
 # API
 
-API documentation [dist/README.md](dist/README.md)
+See the [roaring module documentation](https://salvatorepreviti.github.io/roaring-wasm/modules.html)
+
+# Other
+
+Wanna play an open source game made by the author of this library? Try [Dante](https://github.com/SalvatorePreviti/js13k-2022)
 
 # Development, local building
 
 This project requires emsdk installed and activated. See <https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html>.
 
-On a \*nix machine, run `sh source .envrc` to initialize paths, nvm (if present) and emsdk.
-
-To compile, run test and generate the documentation
+On mac you can install emscripten with homebrew:
 
 ```
+brew install emscripten
+```
+
+To download the repository:
+
+```
+git clone https://github.com/SalvatorePreviti/roaring-wasm.git
+
+cd roaring-wasm
+
 git submodule update --init --recursive
 
-npm start
+npm install
+```
+
+To compile and run test
+
+```
+npm run build
 ```
 
 Output will be generated in the `dist` folder
 
-The build system was tried on MacOSX, is not tested/maintained for other system.
+The build system was tried on Linux and MacOSX, is not tested/maintained for other system or Windows.

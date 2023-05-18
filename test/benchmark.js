@@ -2,7 +2,7 @@
 
 const RoaringUint32Array = require("../dist/RoaringUint32Array");
 const RoaringBitmap32 = require("../dist/RoaringBitmap32");
-const logging = require("../scripts/lib/logging");
+const { timed } = require("../scripts/lib/utils");
 
 function randomRoaringUint32Array(size, maxValue, seed = 18397123) {
   const set = new Set();
@@ -16,28 +16,30 @@ function randomRoaringUint32Array(size, maxValue, seed = 18397123) {
 
 let src;
 
-logging.time("random data", () => {
+timed("random data", () => {
   src = randomRoaringUint32Array(1000000, 0xffffff);
 });
 
-logging.time(`sort`, () => {
+timed(`sort`, () => {
   src.asTypedArray().sort();
 });
 
 const bitmap = new RoaringBitmap32();
 
-logging.time(`add ${src.length} values`, () => {
+timed(`add ${src.length} values`, () => {
   bitmap.addMany(src);
 });
 
 let buf;
 
-logging.time("serialize", () => {
+timed("serialize", () => {
   buf = bitmap.serializeToRoaringUint8Array();
-  logging.log("*", buf.byteLength, "bytes serialized");
 });
 
-logging.time("dispose", () => {
+// eslint-disable-next-line no-console
+console.log("*", buf.byteLength, "bytes serialized");
+
+timed("dispose", () => {
   src.dispose();
   buf.dispose();
   bitmap.dispose();
