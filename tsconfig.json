@@ -42,7 +42,7 @@
   },
   "typedocOptions": {
     "out": "docs",
-    "entryPoints": "src/index.tsx",
+    "entryPoints": "src/ts/index.ts",
     "exclude": ["test/**/*", "node_modules/**/*", ".tmp/**/*", "temp/**/*", "dist/**/*", "docs/**/*"]
   }
 }
