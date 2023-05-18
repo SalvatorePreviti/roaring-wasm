@@ -6,8 +6,7 @@ dist/**/*.wasm
 dist/**/*.wasm.pre
 src/**/*.o
 docs/
-
-**/roaring-wasm-module.*
+build/
 
 temp
 
