@@ -7,10 +7,10 @@
   "scripts": {
     "prepare": "husky install",
     "lint": "node scripts/lint.js",
+    "lint:ci": "node scripts/lint.js --ci",
     "clean": "node scripts/clean.js",
     "build": "node scripts/build.js",
-    "start": "node scripts/build.js",
-    "test": "node scripts/build.js",
+    "test": "node scripts/test.js",
     "doc": "typedoc ./src/ts/index.ts"
   },
   "repository": {

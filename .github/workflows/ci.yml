@@ -19,11 +19,9 @@ jobs:
         with:
           version: 3.1.38
       - run: npm ci
-      - run: npm run lint -- --ci
-      - run: npm run test
-
-      - name: publish docs
-        run: npm run doc
+      - run: npm run lint:ci # run linting
+      - run: npm run build # build the library and run tests
+      - run: npm run doc # build the documentation
 
       - name: Deploy documentation 🚀
         if: github.ref == 'refs/heads/master'
