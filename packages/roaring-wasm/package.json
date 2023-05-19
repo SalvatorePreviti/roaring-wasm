@@ -25,6 +25,7 @@
   "main": "index.js",
   "typings": "index.d.ts",
   "type": "commonjs",
+  "sideEffects": false,
   "browser": {
     "./": "./browser/index.mjs",
     "./index": "./browser/index.mjs",
@@ -40,6 +41,8 @@
     "./browser/package.json": "./package.json"
   },
   "exports": {
+    "./index.wasm": "./index.wasm",
+    "./index.cjs": "./index.js",
     ".": {
       "browser": "./browser/index.mjs",
       "default": "./index.js"
@@ -52,13 +55,11 @@
       "browser": "./browser/index.mjs",
       "default": "./index.js"
     },
-    "./index.cjs": "./index.js",
     "./browser": "./browser/index.mjs",
     "./browser/index": "./browser/index.mjs",
     "./browser/index.js": "./browser/index.mjs",
     "./browser/index.mjs": "./browser/index.mjs",
     "./browser/index.wasm": "./index.wasm",
-    "./index.wasm": "./index.wasm",
     "./package.json": "./package.json"
   }
 }
