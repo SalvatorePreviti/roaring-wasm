@@ -11,7 +11,8 @@
     "clean": "node scripts/clean.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
-    "doc": "typedoc ./src/ts/index.ts"
+    "doc": "typedoc ./src/ts/index.ts",
+    "web-app": "vite --config ./test/web/vite.config.ts"
   },
   "repository": {
     "type": "git",
@@ -67,6 +68,8 @@
     "tslib": "^2.5.2",
     "tsup": "^6.7.0",
     "typedoc": "^0.24.7",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "vite": "^4.3.8",
+    "vite-plugin-node-polyfills": "^0.8.2"
   }
 }

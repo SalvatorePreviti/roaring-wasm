@@ -4,7 +4,7 @@ import roaringWasm from "./lib/roaring-wasm";
  * Array of unsigned 32 bit integers allocted directly in roaring library WASM memory.
  * Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
  */
-class RoaringUint32Array implements Iterable<number> {
+export class RoaringUint32Array implements Iterable<number> {
   /**
    * The type of typed array used by this class.
    * For RoaringUint32Array is Uint32Array.
@@ -288,5 +288,3 @@ Object.defineProperties(RoaringUint32Array.prototype, {
     enumerable: false,
   },
 });
-
-export default RoaringUint32Array;

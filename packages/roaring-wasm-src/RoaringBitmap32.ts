@@ -1,6 +1,6 @@
 import roaringWasm from "./lib/roaring-wasm";
-import RoaringUint32Array from "./RoaringUint32Array";
-import RoaringUint8Array from "./RoaringUint8Array";
+import { RoaringUint32Array } from "./RoaringUint32Array";
+import { RoaringUint8Array } from "./RoaringUint8Array";
 
 const {
   _roaring_bitmap_create_js,
@@ -51,7 +51,7 @@ const {
  * the RoaringBitmap32 when not needed anymore to release WASM memory.
  *
  */
-class RoaringBitmap32 {
+export class RoaringBitmap32 {
   private _ptr: number | undefined;
 
   /**
@@ -693,5 +693,3 @@ function _getPtr(bitmap: RoaringBitmap32): number {
 
   return ptr;
 }
-
-export default RoaringBitmap32;

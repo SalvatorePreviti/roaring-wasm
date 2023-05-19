@@ -23,7 +23,7 @@
     "node": ">=14"
   },
   "main": "index.js",
-  "typings": "index.d.ts",
+  "typings": "./index.d.ts",
   "type": "commonjs",
   "sideEffects": false,
   "scripts": {

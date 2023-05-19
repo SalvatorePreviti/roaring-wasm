@@ -12,7 +12,7 @@ const fs = require("fs");
 const globby = require("fast-glob");
 
 async function cleanDistFiles() {
-  const distFiles = await globby([`${removeTrailingSlash(ROARING_WASM_OUT_FOLDER)}/**/*.{js,mjs,cjs,ts,wasm}`], {
+  const distFiles = await globby([`${removeTrailingSlash(ROARING_WASM_OUT_FOLDER)}/**/*.{js,mjs,cjs,wasm}`], {
     ignore: ["**/node_modules/**"],
     cwd: ROOT_FOLDER,
     onlyFiles: true,

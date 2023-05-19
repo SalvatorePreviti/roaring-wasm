@@ -18,7 +18,6 @@ const { build: tsupBuild } = require("tsup");
 
 async function compileTs() {
   const outFastGlobOptions = { cwd: ROOT_FOLDER, ignore: ["**/node_modules/**"], onlyFiles: true };
-  const outputFilesPatterns = [`${removeTrailingSlash(ROARING_WASM_OUT_FOLDER)}/**/*.{js,mjs,cjs,ts,wasm}`];
 
   await cleanDistFiles();
 
@@ -118,7 +117,10 @@ async function compileTs() {
   // Print file sizes
 
   console.log();
-  for (const f of await getFileSizesAsync(outputFilesPatterns, outFastGlobOptions)) {
+  for (const f of await getFileSizesAsync(
+    [`${removeTrailingSlash(ROARING_WASM_OUT_FOLDER)}/**/*.{js,mjs,cjs,ts,wasm}`],
+    outFastGlobOptions,
+  )) {
     console.log(`${colors.magentaBright("•")} ${colors.green(f.path)} ${colors.cyanBright(`${f.sizeString}`)}`);
   }
   console.log();

@@ -1,9 +1,5 @@
-import RoaringBitmap32 from "./RoaringBitmap32";
-import RoaringUint32Array from "./RoaringUint32Array";
-import RoaringUint8Array from "./RoaringUint8Array";
+export * from "./RoaringBitmap32";
 
-/**
- * @module roaring-wasm
- * All exported types.
- */
-export { RoaringBitmap32, RoaringUint32Array, RoaringUint8Array };
+export * from "./RoaringUint32Array";
+
+export * from "./RoaringUint8Array";

@@ -4,7 +4,7 @@ import roaringWasm from "./lib/roaring-wasm";
  * Array of bytes allocted directly in roaring library WASM memory.
  * Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
  */
-class RoaringUint8Array implements Iterable<number> {
+export class RoaringUint8Array implements Iterable<number> {
   /**
    * The type of typed array used by this class.
    * For RoaringUint8Array is Uint8Array.
@@ -275,5 +275,3 @@ Object.defineProperties(RoaringUint8Array.prototype, {
     enumerable: false,
   },
 });
-
-export default RoaringUint8Array;
