@@ -18,9 +18,47 @@
     "type": "git",
     "url": "\"git+https://github.com/SalvatorePreviti/roaring-wasm.git\""
   },
-  "main": "index.js",
   "types": "index.d.ts",
   "engines": {
     "node": ">=14"
+  },
+  "main": "index.js",
+  "typings": "index.d.ts",
+  "type": "commonjs",
+  "browser": {
+    "./": "./browser/index.mjs",
+    "./index": "./browser/index.mjs",
+    "./index.js": "./browser/index.mjs",
+    "./index.mjs": "./browser/index.mjs",
+    "./index.wasm": "./index.wasm",
+    "./package.json": "./package.json",
+    "./browser": "./browser/index.mjs",
+    "./browser/index": "./browser/index.mjs",
+    "./browser/index.js": "./browser/index.mjs",
+    "./browser/index.mjs": "./browser/index.mjs",
+    "./browser/index.wasm": "./index.wasm",
+    "./browser/package.json": "./package.json"
+  },
+  "exports": {
+    ".": {
+      "browser": "./browser/index.mjs",
+      "default": "./index.js"
+    },
+    "./index": {
+      "browser": "./browser/index.mjs",
+      "default": "./index.js"
+    },
+    "./index.js": {
+      "browser": "./browser/index.mjs",
+      "default": "./index.js"
+    },
+    "./index.cjs": "./index.js",
+    "./browser": "./browser/index.mjs",
+    "./browser/index": "./browser/index.mjs",
+    "./browser/index.js": "./browser/index.mjs",
+    "./browser/index.mjs": "./browser/index.mjs",
+    "./browser/index.wasm": "./index.wasm",
+    "./index.wasm": "./index.wasm",
+    "./package.json": "./package.json"
   }
 }

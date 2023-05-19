@@ -36,12 +36,12 @@ const {
   _roaring_bitmap_remove_checked_js,
 
   _roaring_bitmap_portable_size_in_bytes,
-  _roaring_bitmap_portable_serialize_js,
-  _roaring_bitmap_portable_deserialize_js,
+  _roaring_bitmap_portable_serialize,
+  _roaring_bitmap_portable_deserialize,
 
-  _roaring_bitmap_native_size_in_bytes_js,
-  _roaring_bitmap_native_deserialize_js,
-  _roaring_bitmap_native_serialize_js,
+  _roaring_bitmap_size_in_bytes,
+  _roaring_bitmap_serialize,
+  _roaring_bitmap_deserialize,
 } = roaringWasm;
 
 /**
@@ -579,7 +579,7 @@ class RoaringBitmap32 {
    */
   public getSerializationSizeInBytes(portable: boolean = false): number {
     const ptr = _getPtr(this);
-    return portable ? _roaring_bitmap_portable_size_in_bytes(ptr) : _roaring_bitmap_native_size_in_bytes_js(ptr) >>> 0;
+    return portable ? _roaring_bitmap_portable_size_in_bytes(ptr) : _roaring_bitmap_size_in_bytes(ptr) >>> 0;
   }
 
   /**
@@ -594,12 +594,14 @@ class RoaringBitmap32 {
    */
   public serializeToRoaringUint8Array(portable: boolean = false): RoaringUint8Array {
     const ptr = _getPtr(this);
-    const code = portable ? _roaring_bitmap_portable_serialize_js(ptr) : _roaring_bitmap_native_serialize_js(ptr);
-    if (code !== 0) {
-      throw new Error(`RoaringBitmap32 serialization failed, code:${code}`);
+    const size = this.getSerializationSizeInBytes(portable);
+    const buf = roaringWasm._malloc(size);
+    if (portable) {
+      _roaring_bitmap_portable_serialize(ptr, buf);
+    } else {
+      _roaring_bitmap_serialize(ptr, buf);
     }
-    const tempPtr = (ptr + roaringWasm.roaring_bitmap_temp_offset) / 4;
-    return new RoaringUint8Array(roaringWasm.HEAPU32[tempPtr], roaringWasm.HEAPU32[tempPtr + 1]);
+    return new RoaringUint8Array(size, buf);
   }
 
   /**
@@ -649,7 +651,6 @@ class RoaringBitmap32 {
       if (typeof buffer === "number") {
         throw new TypeError("deserialize expects an array of bytes");
       }
-      _getPtr(this);
       const roaringArray = new RoaringUint8Array(buffer);
       try {
         this.deserialize(roaringArray);
@@ -659,13 +660,15 @@ class RoaringBitmap32 {
       return;
     }
 
-    const code = portable
-      ? _roaring_bitmap_portable_deserialize_js(_getPtr(this), buffer.byteOffset, buffer.length)
-      : _roaring_bitmap_native_deserialize_js(_getPtr(this), buffer.byteOffset, buffer.length);
+    const ptr = portable
+      ? _roaring_bitmap_portable_deserialize(buffer.byteOffset)
+      : _roaring_bitmap_deserialize(buffer.byteOffset);
 
-    if (code !== 0) {
-      throw new Error(`RoaringBitmap32 deserialization failed, code:${code}`);
+    if (ptr === null) {
+      throw new Error(`RoaringBitmap32 deserialization failed`);
     }
+
+    this._ptr = ptr;
   }
 }
 

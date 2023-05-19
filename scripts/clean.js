@@ -13,6 +13,7 @@ const globby = require("fast-glob");
 
 async function cleanDistFiles() {
   const distFiles = await globby([`${removeTrailingSlash(ROARING_WASM_OUT_FOLDER)}/**/*.{js,mjs,cjs,ts,wasm}`], {
+    ignore: ["**/node_modules/**"],
     cwd: ROOT_FOLDER,
     onlyFiles: true,
   });
@@ -32,7 +33,9 @@ async function cleanDistFiles() {
 
   await Promise.all(promises);
 
-  console.log(`• ${colors.cyan(`deleted ${deletedFiles} files`)}`);
+  if (deletedFiles) {
+    console.log(colors.yellow(`• cleaned ${deletedFiles} dist files`));
+  }
 
   return deletedFiles;
 }
@@ -55,11 +58,13 @@ async function clean() {
 
   await Promise.all(promises);
 
-  console.log(`• ${colors.cyan(`deleted ${deletedDirectories} directories`)}`);
+  if (deletedDirectories) {
+    console.log(colors.yellow(`• cleaned ${deletedDirectories} build directories`));
+  }
   console.log();
 }
 
-module.exports = { clean };
+module.exports = { cleanDistFiles, clean };
 
 if (require.main === module) {
   runMain(clean);

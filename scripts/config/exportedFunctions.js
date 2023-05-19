@@ -30,19 +30,18 @@ const exportedFunctions = [
   "_roaring_bitmap_intersect",
   "_roaring_bitmap_jaccard_index",
 
-  "_get_sizeof_roaring_bitmap_t",
   "_roaring_bitmap_create_js",
 
   "_roaring_bitmap_add_checked_js",
   "_roaring_bitmap_remove_checked_js",
 
   "_roaring_bitmap_portable_size_in_bytes",
-  "_roaring_bitmap_portable_serialize_js",
-  "_roaring_bitmap_portable_deserialize_js",
+  "_roaring_bitmap_portable_serialize",
+  "_roaring_bitmap_portable_deserialize",
 
-  "_roaring_bitmap_native_size_in_bytes_js",
-  "_roaring_bitmap_native_deserialize_js",
-  "_roaring_bitmap_native_serialize_js",
+  "_roaring_bitmap_size_in_bytes",
+  "_roaring_bitmap_serialize",
+  "_roaring_bitmap_deserialize",
 ];
 
 module.exports = exportedFunctions;

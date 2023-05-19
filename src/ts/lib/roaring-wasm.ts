@@ -10,11 +10,8 @@ type RoaringWasm = {
   readonly HEAPF32: Float32Array;
   readonly HEAPF64: Float64Array;
 
-  roaring_bitmap_temp_offset: number;
-
   _malloc(size: number): number;
   _free(pointer: number): void;
-  _get_sizeof_roaring_bitmap_t(): number;
   _roaring_bitmap_create_js(initialCapacity: number): number;
   _roaring_bitmap_free(roaring: number): void;
   _roaring_bitmap_get_cardinality(roaring: number): number;
@@ -48,30 +45,16 @@ type RoaringWasm = {
   _roaring_bitmap_remove_checked_js(roaring: number, value: number): boolean;
 
   _roaring_bitmap_portable_size_in_bytes(roaring: number): number;
-  _roaring_bitmap_portable_serialize_js(roaring: number): number;
-  _roaring_bitmap_portable_deserialize_js(roaring: number, buf: number, size: number): number;
+  _roaring_bitmap_portable_serialize(roaring: number, buf: number): number;
+  _roaring_bitmap_portable_deserialize(buf: number): number;
 
-  _roaring_bitmap_native_size_in_bytes_js(roaring: number): number;
-  _roaring_bitmap_native_deserialize_js(roaring: number, buf: number, size: number): number;
-  _roaring_bitmap_native_serialize_js(roaring: number): number;
+  _roaring_bitmap_size_in_bytes(roaring: number): number;
+  _roaring_bitmap_serialize(roaring: number, buf: number): number;
+  _roaring_bitmap_deserialize(buf: number): number;
 };
-
-/**
- * The emcc module.
- * @ignore
- */
-class RoaringWasmModule {
-  public noExitRuntime: boolean = true;
-  public roaring_bitmap_temp_offset: number;
-
-  constructor() {
-    roaring_wasm_module_init(this);
-    this.roaring_bitmap_temp_offset = (this as unknown as RoaringWasm)._get_sizeof_roaring_bitmap_t();
-  }
-}
 
 /**
  * @module
  * Roaring WASM module instantiation
  */
-export = new RoaringWasmModule() as unknown as RoaringWasm;
+export = roaring_wasm_module_init<RoaringWasm>();
