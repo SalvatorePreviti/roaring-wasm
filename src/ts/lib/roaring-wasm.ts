@@ -1,8 +1,6 @@
 import roaring_wasm_module_init from "./roaring-wasm-module";
 
 type RoaringWasm = {
-  readonly wasmMemory: WebAssembly.Memory;
-
   readonly HEAP8: Int8Array;
   readonly HEAP16: Int16Array;
   readonly HEAP32: Int32Array;

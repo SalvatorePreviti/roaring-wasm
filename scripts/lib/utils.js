@@ -3,11 +3,9 @@ const util = require("util");
 const path = require("path");
 const fs = require("fs");
 const { spawn, fork } = require("child_process");
-
-const ROOT_FOLDER = path.resolve(__dirname, "../../");
+const { ROOT_FOLDER } = require("../config/paths");
 
 module.exports = {
-  ROOT_FOLDER,
   colors,
   timed,
   runMain,
@@ -17,6 +15,8 @@ module.exports = {
   logError,
   getFileSizesAsync,
   executablePathFromEnv,
+  prettyElapsedTime,
+  removeTrailingSlash,
   isCI: (!!process.env.CI && process.env.CI !== "false") || process.argv.includes("--ci"),
 };
 
@@ -160,9 +160,9 @@ function forkAsync(modulePath, args, options) {
   });
 }
 
-async function getFileSizesAsync(patterns) {
-  const files = await require("fast-glob")(patterns);
-  return Promise.all(
+async function getFileSizesAsync(patterns, options) {
+  const files = await require("fast-glob")(patterns, options);
+  const result = Promise.all(
     files.map(async (filePath) => {
       const stats = await fs.promises.stat(filePath);
       return {
@@ -172,6 +172,7 @@ async function getFileSizesAsync(patterns) {
       };
     }),
   );
+  return (await result).sort((a, b) => b.size - a.size || a.path.localeCompare(b.path));
 }
 
 function executablePathFromEnv(envVariableName, subfolder, executableName) {
@@ -183,4 +184,18 @@ function executablePathFromEnv(envVariableName, subfolder, executableName) {
     return path.resolve(path.join(v, subfolder, executableName));
   }
   return path.resolve(path.join(v, executableName));
+}
+
+function prettyElapsedTime(elapsed) {
+  if (elapsed < 1000) {
+    return `${elapsed.toFixed(0)}ms`;
+  }
+  return `${(elapsed / 1000).toFixed(2)}s`;
+}
+
+function removeTrailingSlash(s) {
+  if (s && s.length > 1 && (s.endsWith("/") || s.endsWith("\\"))) {
+    return s.slice(0, -1);
+  }
+  return s;
 }

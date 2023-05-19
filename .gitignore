@@ -1,12 +1,13 @@
 # compilation output
 
-dist/**/*.ts
-dist/**/*.js
-dist/**/*.wasm
-dist/**/*.wasm.pre
-src/**/*.o
+packages/roaring-wasm/**/*.*ts
+packages/roaring-wasm/**/*.*js
+packages/roaring-wasm/**/*.wasm
+**/*.o
 docs/
 build/
+
+roaring-wasm-module
 
 temp
 

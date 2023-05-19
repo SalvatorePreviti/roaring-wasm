@@ -1,22 +1,27 @@
 #!/usr/bin/env node
 
-const { ROOT_FOLDER, colors, runMain } = require("./lib/utils");
+const { colors, runMain, removeTrailingSlash } = require("./lib/utils");
+const {
+  ROOT_FOLDER,
+  ROARING_WASM_OUT_FOLDER,
+  ROARING_WASM_EMCC_BUILD_FOLDER,
+  ROARING_WASM_SRC_WASM_MODULE_OUT_FOLDER,
+} = require("./config/paths");
 
 const fs = require("fs");
-const path = require("path");
 const globby = require("fast-glob");
-const deleteEmpty = require("delete-empty");
 
-async function clean() {
-  const distFiles = await globby(["*.js", "*.ts", "*.wasm"], { cwd: path.resolve(ROOT_FOLDER, "dist") });
-
-  // Remove all distFiles
+async function cleanDistFiles() {
+  const distFiles = await globby([`${removeTrailingSlash(ROARING_WASM_OUT_FOLDER)}/**/*.{js,mjs,cjs,ts,wasm}`], {
+    cwd: ROOT_FOLDER,
+    onlyFiles: true,
+  });
 
   let deletedFiles = 0;
 
   const deleteFile = (file) =>
     fs.promises
-      .unlink(path.join(ROOT_FOLDER, "dist", file))
+      .unlink(file)
       .then(() => ++deletedFiles)
       .catch(() => {});
 
@@ -27,9 +32,31 @@ async function clean() {
 
   await Promise.all(promises);
 
-  const deletedDirectories = (await deleteEmpty(path.resolve(ROOT_FOLDER, "dist"))).length;
+  console.log(`• ${colors.cyan(`deleted ${deletedFiles} files`)}`);
 
-  console.log(`• ${colors.cyan(`deleted ${deletedFiles} files, ${deletedDirectories} directories`)}`);
+  return deletedFiles;
+}
+
+async function clean() {
+  console.log();
+  const promises = [];
+
+  let deletedDirectories = 0;
+
+  const deleteDir = (dir) =>
+    fs.promises
+      .rm(dir, { force: true, recursive: true })
+      .then(() => ++deletedDirectories)
+      .catch(() => {});
+
+  promises.push(cleanDistFiles());
+  promises.push(deleteDir(ROARING_WASM_EMCC_BUILD_FOLDER));
+  promises.push(deleteDir(ROARING_WASM_SRC_WASM_MODULE_OUT_FOLDER));
+
+  await Promise.all(promises);
+
+  console.log(`• ${colors.cyan(`deleted ${deletedDirectories} directories`)}`);
+  console.log();
 }
 
 module.exports = { clean };

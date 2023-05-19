@@ -1,8 +1,11 @@
 temp
-dist
+packages/roaring-wasm/**/*.*ts
+packages/roaring-wasm/**/*.*js
 src/cpp/**/*
 docs/**/*
 build/
+
+roaring-wasm-module
 
 # dotfiles
 
