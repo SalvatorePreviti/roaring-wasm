@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "allowJs": false,
+    "noEmit": true,
+    "outDir": "build/tsc",
+    "pretty": true
+  },
+  "include": ["."],
+  "exclude": ["node_modules/**/*"]
+}

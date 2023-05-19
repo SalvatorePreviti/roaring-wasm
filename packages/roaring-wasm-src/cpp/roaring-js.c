@@ -1,7 +1,7 @@
 #include "global.h"
 
-#include "../../submodules/CRoaring/include/roaring/roaring.h"
-#include "../../submodules/CRoaring/include/roaring/roaring_array.h"
+#include "submodules/CRoaring/include/roaring/roaring.h"
+#include "submodules/CRoaring/include/roaring/roaring_array.h"
 
 #ifndef CROARING_SERIALIZATION_ARRAY_UINT32
 #  define CROARING_SERIALIZATION_ARRAY_UINT32 1
@@ -38,8 +38,7 @@ bool roaring_bitmap_optimize_js(roaring_bitmap_t * bitmap) {
 }
 
 roaring_bitmap_t * roaring_bitmap_create_js(uint32_t capacity) {
-  if (capacity < 4)
-    capacity = 4;
+  if (capacity < 4) capacity = 4;
 
   return roaring_bitmap_create_with_capacity(capacity);
 }

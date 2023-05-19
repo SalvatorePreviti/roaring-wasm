@@ -1,0 +1,19 @@
+{
+  "name": "roaring-wasm-src",
+  "private": true,
+  "version": "0.0.0",
+  "description": "source code for roaring-wasm package",
+  "author": "Salvatore Previti",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/SalvatorePreviti/roaring-wasm",
+  "bugs": {
+    "url": "https://github.com/SalvatorePreviti/roaring-wasm/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "\"git+https://github.com/SalvatorePreviti/roaring-wasm.git\""
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}

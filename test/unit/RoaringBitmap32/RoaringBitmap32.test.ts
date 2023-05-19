@@ -1,7 +1,6 @@
 import { expect } from "chai";
 import IDisposable from "idisposable";
-import RoaringBitmap32 from "../../../src/ts/RoaringBitmap32";
-import RoaringUint32Array from "../../../src/ts/RoaringUint32Array";
+import { RoaringBitmap32, RoaringUint32Array } from "roaring-wasm-src";
 
 describe("RoaringBitmap32", () => {
   describe("addChecked", () => {

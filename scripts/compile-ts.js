@@ -28,7 +28,7 @@ async function compileTs() {
     splitting: false,
     sourcemap: false,
     clean: false,
-    tsconfig: "tsconfig-build.json",
+    tsconfig: path.resolve(ROARING_WASM_SRC_FOLDER, "tsconfig-build.json"),
     config: false,
     treeshake: true,
     minify: "terser",

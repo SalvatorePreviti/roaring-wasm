@@ -4,6 +4,8 @@
       "name": "Mac",
       "includePath": [
         "${workspaceFolder}",
+        "${workspaceFolder}/submodules/CRoaring/include",
+        "${env:EMSDK}/upstream/emscripten/system/include",
         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
         "/usr/local/include",
         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"
@@ -13,6 +15,8 @@
       "browse": {
         "path": [
           "${workspaceFolder}",
+          "${workspaceFolder}/submodules/CRoaring/include",
+          "${env:EMSDK}/upstream/emscripten/system/include",
           "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
           "/usr/local/include",
           "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"
@@ -28,18 +32,35 @@
     },
     {
       "name": "Linux",
-      "includePath": ["/usr/include", "/usr/local/include", "${workspaceFolder}"],
+      "includePath": [
+        "${workspaceFolder}",
+        "${workspaceFolder}/submodules/CRoaring/include",
+        "${env:EMSDK}/upstream/emscripten/system/include",
+        "/usr/include",
+        "/usr/local/include"
+      ],
       "defines": [],
       "intelliSenseMode": "clang-x64",
       "browse": {
-        "path": ["/usr/include", "/usr/local/include", "${workspaceFolder}"],
+        "path": [
+          "${workspaceFolder}",
+          "${workspaceFolder}/submodules/CRoaring/include",
+          "${env:EMSDK}/upstream/emscripten/system/include",
+          "/usr/include",
+          "/usr/local/include"
+        ],
         "limitSymbolsToIncludedHeaders": true,
         "databaseFilename": ""
       }
     },
     {
       "name": "Win32",
-      "includePath": ["C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include", "${workspaceFolder}"],
+      "includePath": [
+        "${workspaceFolder}",
+        "${workspaceFolder}/submodules/CRoaring/include",
+        "${env:EMSDK}/upstream/emscripten/system/include",
+        "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include"
+      ],
       "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
       "intelliSenseMode": "msvc-x64",
       "browse": {

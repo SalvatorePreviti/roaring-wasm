@@ -26,6 +26,9 @@
   "typings": "index.d.ts",
   "type": "commonjs",
   "sideEffects": false,
+  "scripts": {
+    "prepack": "node ../../scripts/test.js --test-package"
+  },
   "browser": {
     "./": "./browser/index.mjs",
     "./index": "./browser/index.mjs",

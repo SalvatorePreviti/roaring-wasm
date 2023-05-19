@@ -60,5 +60,9 @@
   "typescript.format.enable": true,
   "typescript.format.semicolons": "insert",
   "files.eol": "\n",
-  "cmake.sourceDirectory": "/Users/sp/my/roaring-wasm/submodules/CRoaring/src"
+  "cmake.sourceDirectory": "/Users/sp/my/roaring-wasm/submodules/CRoaring/src",
+  "files.associations": {
+    "roaring.h": "c",
+    "roaring_array.h": "c"
+  }
 }
