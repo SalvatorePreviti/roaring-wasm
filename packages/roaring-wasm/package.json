@@ -46,16 +46,19 @@
     ".": {
       "types": "./index.d.ts",
       "browser": "./browser/index.mjs",
+      "deno": "./browser/index.mjs",
       "default": "./index.js"
     },
     "./index": {
       "types": "./index.d.ts",
       "browser": "./browser/index.mjs",
+      "deno": "./browser/index.mjs",
       "default": "./index.js"
     },
     "./index.js": {
       "types": "./index.d.ts",
       "browser": "./browser/index.mjs",
+      "deno": "./browser/index.mjs",
       "default": "./index.js"
     },
     "./browser": "./browser/index.mjs",
