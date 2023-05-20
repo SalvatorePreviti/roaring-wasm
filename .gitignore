@@ -123,3 +123,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+/test-results/
+/playwright-report/
+/playwright/.cache/

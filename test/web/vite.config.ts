@@ -3,24 +3,14 @@ import { defineConfig } from "vite";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 export default defineConfig({
-  root: resolve(__dirname),
-
-  define: {
-    "process.env": {},
-  },
-
   clearScreen: false,
 
-  // resolve: {
-  //   alias: [
-  //     // "roaring-wasm-src/lib/roaring-wasm-module/index.js": resolve(ROARING_WASM_EMCC_BUILD_FOLDER, "index.browser.js"),
-  //     { find: /,*(\/lib\/roaring-wasm-module\/index.js)$/, replacement: "/lib/roaring-wasm-module/index.browser.js" },
-  //   ],
-  // },
-
+  root: resolve(__dirname),
+  define: { "process.env": {} },
   plugins: [nodePolyfills()],
-
   server: {
     port: 3000,
+    host: "127.0.0.1",
+    strictPort: true,
   },
 });
