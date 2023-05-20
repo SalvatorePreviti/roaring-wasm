@@ -1,16 +1,14 @@
 #!/usr/bin/env node
 
 const { timed, runMain } = require("./lib/utils");
-const { clean } = require("./clean");
 const { compileWasm } = require("./compile-wasm");
 const { compileTs } = require("./compile-ts");
 const { test } = require("./test");
 
 async function build() {
-  await timed(clean);
-  await compileWasm();
-  await compileTs();
-  await timed(test);
+  await timed("compileWasm", compileWasm);
+  await timed("compileTs", compileTs);
+  await timed("test", () => test(["--test-package"]));
 }
 
 module.exports = { build };

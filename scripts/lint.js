@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-const { ROOT_FOLDER, isCI, forkAsync, spawnAsync, timed, runMain } = require("./lib/utils");
+const { isCI, forkAsync, spawnAsync, timed, runMain } = require("./lib/utils");
 const { typecheck } = require("./typecheck.js");
+const { ROOT_FOLDER } = require("./config/paths");
 
 async function lint(args = process.argv.slice(2)) {
   const isFix = (args.includes("--fix") || !isCI) && !args.includes("--no-fix");

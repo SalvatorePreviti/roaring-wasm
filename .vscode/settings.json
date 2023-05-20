@@ -17,6 +17,10 @@
       "strings": true
     }
   },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
   "[html]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
@@ -59,5 +63,11 @@
   "javascript.format.semicolons": "insert",
   "typescript.format.enable": true,
   "typescript.format.semicolons": "insert",
-  "files.eol": "\n"
+  "files.eol": "\n",
+  "cmake.sourceDirectory": "/Users/sp/my/roaring-wasm/submodules/CRoaring/src",
+  "files.associations": {
+    "roaring.h": "c",
+    "roaring_array.h": "c",
+    "global.h": "c"
+  }
 }

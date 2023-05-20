@@ -1,44 +1,25 @@
-import roaringWasm from "./lib/roaring-wasm";
+import { roaringWasm } from "./lib/roaring-wasm";
 
 /**
  * Array of unsigned 32 bit integers allocted directly in roaring library WASM memory.
  * Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
- *
- * @class RoaringUint32Array
  */
-class RoaringUint32Array implements Iterable<number> {
+export class RoaringUint32Array implements Iterable<number> {
   /**
    * The type of typed array used by this class.
    * For RoaringUint32Array is Uint32Array.
-   *
-   * @static
-   * @property
-   * @readonly
-   * @type {typeof Uint32Array}
-   * @memberof RoaringUint32Array
    */
   public static readonly TypedArray: typeof Uint32Array = Uint32Array;
 
   /**
    * The size in bytes of each element in the array.
    * For RoaringUint32Array is always 4
-   *
-   * @static
-   * @property
-   * @readonly
-   * @type {number}
-   * @memberof RoaringUint32Array
    */
   public static readonly BYTES_PER_ELEMENT: 4 = 4 as const;
 
   /**
    * The type of typed array used by this class.
    * For RoaringUint32Array is Uint32Array.
-   *
-   * @readonly
-   * @property
-   * @type {typeof Uint32Array}
-   * @memberof RoaringUint32Array
    */
   public get TypedArray(): typeof Uint32Array {
     return Uint32Array;
@@ -47,11 +28,6 @@ class RoaringUint32Array implements Iterable<number> {
   /**
    * The size in bytes of each element in the array.
    * For RoaringUint32Array is always 4
-   *
-   * @readonly
-   * @property
-   * @type {number}
-   * @memberof RoaringUint32Array
    */
   public get BYTES_PER_ELEMENT(): 4 {
     return 4;
@@ -62,23 +38,13 @@ class RoaringUint32Array implements Iterable<number> {
    * Note that the buffer may become invalid if the WASM allocated memory grows.
    * When the WASM grows the preallocated memory this property will return the new allocated buffer.
    * Use the returned buffer for short periods of time.
-   *
-   * @readonly
-   * @property
-   * @type {ArrayBuffer}
-   * @memberof RoaringUint32Array
    */
   public get buffer(): ArrayBuffer {
-    return roaringWasm.wasmMemory.buffer;
+    return roaringWasm.HEAPU8.buffer;
   }
 
   /**
    * Returns true if this object was deallocated.
-   *
-   * @readonly
-   * @property
-   * @type {boolean}
-   * @memberof RoaringUint32Array
    */
   public get isDisposed(): boolean {
     return !this.byteOffset;
@@ -87,11 +53,6 @@ class RoaringUint32Array implements Iterable<number> {
   /**
    * The length in bytes of the array.
    * For RoaringUint32Array it is equal to this.length * 4
-   *
-   * @readonly
-   * @property
-   * @type {number}
-   * @memberof RoaringUint32Array
    */
   public get byteLength(): number {
     return this.length * 4;
@@ -102,11 +63,6 @@ class RoaringUint32Array implements Iterable<number> {
    * Note that the buffer may become invalid if the WASM allocated memory grows.
    * When the WASM grows the preallocated memory this property will return the new allocated buffer.
    * Use the returned array for short periods of time.
-   *
-   * @readonly
-   * @property
-   * @type {TypedArray}
-   * @memberof RoaringUint32Array
    */
   public get heap(): Uint32Array {
     return roaringWasm.HEAPU32;
@@ -114,20 +70,11 @@ class RoaringUint32Array implements Iterable<number> {
 
   /**
    * The offset in bytes of the array (the location of the first byte in WASM memory).
-   * @readonly
-   * @property
-   * @type {number}
-   * @memberof RoaringUint32Array
    */
   public readonly byteOffset: number;
 
   /**
    * Number of elements allocated in this array.
-   *
-   * @readonly
-   * @property
-   * @type {number}
-   * @memberof RoaringUint32Array
    */
   public readonly length: number;
 
@@ -139,9 +86,7 @@ class RoaringUint32Array implements Iterable<number> {
    * If the parameter is a number, it creates a new uninitialized array of the given length.
    * If the parameter is an Iterable, it creates a copy of the given iterable.
    *
-   * @constructor
-   * @param {(number | Iterable<number>)} lengthOrArray Length of the array to allocate or the array to copy
-   * @memberof RoaringUint32Array
+   * @param lengthOrArray - Length of the array to allocate or the array to copy
    */
   public constructor(lengthOrArray: number | Iterable<number>, _pointer?: number) {
     this.byteOffset = 0;
@@ -189,8 +134,7 @@ class RoaringUint32Array implements Iterable<number> {
    * Frees the allocated memory.
    * Is safe to call this method more than once.
    *
-   * @returns {boolean} True if memory gets freed during this call, false if not.
-   * @memberof RoaringUint32Array
+   * @returns True if memory gets freed during this call, false if not.
    */
   public dispose(): boolean {
     const ptr = this.byteOffset;
@@ -205,11 +149,6 @@ class RoaringUint32Array implements Iterable<number> {
 
   /**
    * Throws an error if the memory was freed.
-   *
-   * @readonly
-   * @property
-   * @returns {(void | never)}
-   * @memberof RoaringUint32Array
    */
   public throwIfDisposed(): void | never {
     if (this.isDisposed) {
@@ -219,9 +158,8 @@ class RoaringUint32Array implements Iterable<number> {
 
   /**
    * Writes the given array at the specified position
-   * @param array A typed or untyped array of values to set.
-   * @param offset The index in the current array at which the values are to be written.
-   * @memberof RoaringUint32Array
+   * @param array - A typed or untyped array of values to set.
+   * @param offset - The index in the current array at which the values are to be written.
    */
   public set(array: Iterable<number>, offset: number = 0): this {
     if (!Number.isInteger(offset) || offset < 0) {
@@ -250,11 +188,10 @@ class RoaringUint32Array implements Iterable<number> {
    * Note that the buffer may point to an outdated WASM memory if the WASM allocated memory grows while using the returned buffer.
    * Use the returned array for short periods of time.
    *
-   * @returns {Uint32Array} A new typed array that shares the memory with this array.
-   * @memberof RoaringUint32Array
+   * @returns A new typed array that shares the memory with this array.
    */
   public asTypedArray(): Uint32Array {
-    return new Uint32Array(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length);
+    return new Uint32Array(roaringWasm.HEAPU8.buffer, this.byteOffset, this.length);
   }
 
   /**
@@ -262,19 +199,20 @@ class RoaringUint32Array implements Iterable<number> {
    * Note that the buffer may point to an outdated WASM memory if the WASM allocated memory grows while using the returned buffer.
    * Use the returned array for short periods of time.
    *
-   * @returns {Buffer} A new instance of NodeJS Buffer
-   * @memberof RoaringUint32Array
+   * @returns A new instance of NodeJS Buffer
    */
   public asNodeBuffer(): Buffer {
-    return Buffer.from(roaringWasm.wasmMemory.buffer, this.byteOffset, this.length);
+    if (typeof Buffer === "undefined") {
+      return roaringWasm.HEAPU8.subarray(this.byteOffset, this.byteOffset + this.length) as Buffer;
+    }
+    return Buffer.from(roaringWasm.HEAPU8.buffer, this.byteOffset, this.length);
   }
 
   /**
    * Copies the content of this buffer to a typed array.
    * The returned array is garbage collected and don't need to be disposed manually.
    *
-   * @returns {TypedArray} A new typed array that contains a copy of this buffer
-   * @memberof RoaringUint32Array
+   * @returns A new typed array that contains a copy of this buffer
    */
   public toTypedArray(): Uint32Array {
     const array = new Uint32Array(this.length);
@@ -286,18 +224,19 @@ class RoaringUint32Array implements Iterable<number> {
    * Copies the content of this buffer to a NodeJS Buffer.
    * The returned buffer is garbage collected and don't need to be disposed manually.
    *
-   * @returns {Buffer} A new instance of NodeJS Buffer that contains a copy of this buffer
-   * @memberof RoaringUint32Array
+   * @returns A new instance of NodeJS Buffer that contains a copy of this buffer
    */
   public toNodeBuffer(): Buffer {
+    if (typeof Buffer === "undefined") {
+      return roaringWasm.HEAPU8.slice(this.byteOffset, this.byteOffset + this.length) as Buffer;
+    }
     return Buffer.from(this.asNodeBuffer());
   }
 
   /**
    * Copies the content of this typed array into a new JS array of numbers and returns it.
    *
-   * @returns {number[]} A new array.
-   * @memberof RoaringUint32Array
+   * @returns A new array.
    */
   public toArray(): number[] {
     return Array.from(this.asTypedArray());
@@ -306,8 +245,7 @@ class RoaringUint32Array implements Iterable<number> {
   /**
    * Copies the content of this typed array into a new JS Set<number> and returns it.
    *
-   * @returns {number[]} A new array.
-   * @memberof RoaringUint32Array
+   * @returns A new array.
    */
   public toSet(): Set<number> {
     return new Set<number>(this.asTypedArray());
@@ -315,7 +253,6 @@ class RoaringUint32Array implements Iterable<number> {
 
   /**
    * Returns a string representation of an array.
-   * @memberof RoaringUint32Array
    */
   public toString(): string {
     return this.asTypedArray().toString();
@@ -323,9 +260,6 @@ class RoaringUint32Array implements Iterable<number> {
 
   /**
    * Iterator that iterates through all values in the array.
-   *
-   * @returns {IterableIterator<number>}
-   * @memberof RoaringUint32Array
    */
   public [Symbol.iterator](): IterableIterator<number> {
     return this.asTypedArray()[Symbol.iterator]();
@@ -360,5 +294,3 @@ Object.defineProperties(RoaringUint32Array.prototype, {
     enumerable: false,
   },
 });
-
-export default RoaringUint32Array;

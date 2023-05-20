@@ -3,6 +3,10 @@ docs/**/*
 submodules/**/*
 .clang-tidy
 build/
+packages/roaring-wasm/**/*.*ts
+packages/roaring-wasm/**/*.*js
+
+roaring-wasm-module
 
 # Dependencies and vendor
 vendor

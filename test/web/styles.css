@@ -1,0 +1,33 @@
+#progress {
+  margin: 10px;
+  padding: 8px;
+  border-radius: 10px;
+  border: 2px solid #05a;
+  color: gray;
+  background: #111;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 20px;
+  line-height: 32px;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+#progress.passed {
+  color: #0f0;
+  background-color: #121;
+}
+
+#progress button {
+  color: #fff;
+  border: none;
+  padding: 5px 6px;
+  margin-left: 32px;
+  background: transparent;
+  text-decoration: none;
+  font-family: "Courier New", Courier, monospace;
+}
+
+#progress.failed {
+  color: #f55;
+  background-color: #300;
+}

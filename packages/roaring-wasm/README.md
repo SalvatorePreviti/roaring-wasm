@@ -111,6 +111,6 @@ To compile and run test
 npm run build
 ```
 
-Output will be generated in the `packages/roaring-wasm` folder
+Output will be generated in the `dist` folder
 
 The build system was tried on Linux and MacOSX, is not tested/maintained for other system or Windows.

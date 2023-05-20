@@ -1,8 +1,6 @@
 import roaring_wasm_module_init from "./roaring-wasm-module";
 
-type RoaringWasm = {
-  readonly wasmMemory: WebAssembly.Memory;
-
+export type RoaringWasm = {
   readonly HEAP8: Int8Array;
   readonly HEAP16: Int16Array;
   readonly HEAP32: Int32Array;
@@ -55,20 +53,35 @@ type RoaringWasm = {
   _roaring_bitmap_deserialize(buf: number): number;
 };
 
-/**
- * The emcc module.
- * @ignore
- */
-class RoaringWasmModule {
-  public noExitRuntime: boolean = true;
+const _loadedModule = roaring_wasm_module_init<RoaringWasm>();
+let _initializePromise: Promise<void>;
 
-  constructor() {
-    roaring_wasm_module_init(this);
-  }
+export let roaringWasm: RoaringWasm;
+
+/**
+ * In browser, roaring library initialization is done asynchronously, this method returns true after roaring library WASM is initialized.
+ * The library cannot be used until this function returns true.
+ * You can await initialization with roaringLibraryInitialize function that returns a promise.
+ * @returns true if roaring library WASM is initialized.
+ */
+export const roaringLibraryIsReady = (): boolean => !!roaringWasm;
+
+/**
+ * In browser, roaring library initialization is done asynchronously, this method returns a promise that resolves when roaring library WASM is initialized.
+ * The library cannot be used until this promise is resolved.
+ * @returns a promise that resolves when roaring library WASM is initialized.
+ * @example
+ * await roaringLibraryInitialize();
+ * const bitmap = new RoaringBitmap32([123]);
+ * console.log(bitmap.toArray()); // [123]
+ */
+export const roaringLibraryInitialize = (): Promise<void> => _initializePromise;
+
+if (typeof (_loadedModule as { then?: unknown }).then === "function") {
+  _initializePromise = (_loadedModule as Promise<RoaringWasm>).then((m) => {
+    roaringWasm = m;
+  });
+} else {
+  roaringWasm = _loadedModule as RoaringWasm;
+  _initializePromise = Promise.resolve();
 }
-
-/**
- * @module
- * Roaring WASM module instantiation
- */
-export = new RoaringWasmModule() as unknown as RoaringWasm;
