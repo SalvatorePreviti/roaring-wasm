@@ -78,7 +78,8 @@ async function compileWasm() {
   const emccPath = executablePathFromEnv("EMSCRIPTEN", null, "emcc");
 
   const emccFlags = [];
-  emccFlags.push(`-I${path.resolve(ROOT_FOLDER, "submodules/CRoaring/include")}`);
+  emccFlags.push(`-I${ROOT_FOLDER}`);
+  emccFlags.push("-Isubmodules/CRoaring/include");
   emccFlags.push("-O3");
   emccFlags.push("-g0");
 

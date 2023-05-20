@@ -1,7 +1,7 @@
 #include "global.h"
 
-#include "submodules/CRoaring/include/roaring/roaring.h"
-#include "submodules/CRoaring/include/roaring/roaring_array.h"
+#include <submodules/CRoaring/include/roaring/roaring.h>
+#include <submodules/CRoaring/include/roaring/roaring_array.h>
 
 #ifndef CROARING_SERIALIZATION_ARRAY_UINT32
 #  define CROARING_SERIALIZATION_ARRAY_UINT32 1

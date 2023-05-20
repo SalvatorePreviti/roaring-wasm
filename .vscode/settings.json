@@ -67,6 +67,7 @@
   "cmake.sourceDirectory": "/Users/sp/my/roaring-wasm/submodules/CRoaring/src",
   "files.associations": {
     "roaring.h": "c",
-    "roaring_array.h": "c"
+    "roaring_array.h": "c",
+    "global.h": "c"
   }
 }

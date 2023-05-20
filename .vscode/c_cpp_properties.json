@@ -5,10 +5,7 @@
       "includePath": [
         "${workspaceFolder}",
         "${workspaceFolder}/submodules/CRoaring/include",
-        "${env:EMSDK}/upstream/emscripten/system/include",
-        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
-        "/usr/local/include",
-        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"
+        "${env:EMSDK}/upstream/emscripten/system/include"
       ],
       "defines": [],
       "intelliSenseMode": "clang-x64",
@@ -16,10 +13,7 @@
         "path": [
           "${workspaceFolder}",
           "${workspaceFolder}/submodules/CRoaring/include",
-          "${env:EMSDK}/upstream/emscripten/system/include",
-          "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1",
-          "/usr/local/include",
-          "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include"
+          "${env:EMSDK}/upstream/emscripten/system/include"
         ],
         "limitSymbolsToIncludedHeaders": true,
         "databaseFilename": ""
