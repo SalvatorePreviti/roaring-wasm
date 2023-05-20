@@ -26,17 +26,20 @@ Code sample:
 // create this file as demo.js
 // type node demo.js or nodejs demo.js depending on your system
 
-var roaring = require("roaring-wasm");
+import { RoaringBitmap32 } from 'roaring-wasm';
 
-var bitmap1 = new roaring.RoaringBitmap32();
+// This is needed in browser (and in this case we are using top level await), in nodejs this is not required.
+await roaringLibraryInitialize();
+
+var bitmap1 = new RoaringBitmap32();
 bitmap1.addMany([1, 2, 3, 4, 5, 100, 1000]);
 console.log("bitmap1.toSet():", bitmap1.toSet());
 
-var bitmap2 = new roaring.RoaringBitmap32();
+var bitmap2 = new RoaringBitmap32();
 bitmap2.addMany([3, 4, 1000]);
 console.log("bitmap2.toSet():", bitmap1.toSet());
 
-var bitmap3 = new roaring.RoaringBitmap32();
+var bitmap3 = new RoaringBitmap32();
 console.log("bitmap1.cardinality():", bitmap1.cardinality());
 console.log("bitmap2.contains(3):", bitmap2.contains(3));
 
