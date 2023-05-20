@@ -22,15 +22,12 @@
   "engines": {
     "node": ">=14"
   },
+  "sideEffects": false,
+  "type": "commonjs",
   "main": "index.js",
   "typings": "./index.d.ts",
-  "type": "commonjs",
-  "sideEffects": false,
-  "scripts": {
-    "prepack": "node ../../scripts/test.js --test-package"
-  },
   "browser": {
-    "./": "./browser/index.mjs",
+    ".": "./browser/index.mjs",
     "./index": "./browser/index.mjs",
     "./index.js": "./browser/index.mjs",
     "./index.mjs": "./browser/index.mjs",
@@ -47,14 +44,17 @@
     "./index.wasm": "./index.wasm",
     "./index.cjs": "./index.js",
     ".": {
+      "types": "./index.d.ts",
       "browser": "./browser/index.mjs",
       "default": "./index.js"
     },
     "./index": {
+      "types": "./index.d.ts",
       "browser": "./browser/index.mjs",
       "default": "./index.js"
     },
     "./index.js": {
+      "types": "./index.d.ts",
       "browser": "./browser/index.mjs",
       "default": "./index.js"
     },
@@ -64,5 +64,8 @@
     "./browser/index.mjs": "./browser/index.mjs",
     "./browser/index.wasm": "./index.wasm",
     "./package.json": "./package.json"
+  },
+  "scripts": {
+    "prepack": "node ../../scripts/test.js --test-package"
   }
 }

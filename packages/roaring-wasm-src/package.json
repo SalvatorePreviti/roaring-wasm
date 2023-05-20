@@ -15,5 +15,8 @@
   },
   "engines": {
     "node": ">=14"
+  },
+  "browser": {
+    "./lib/roaring-wasm-module/index.js": "./lib/roaring-wasm-module/index.browser.mjs"
   }
 }

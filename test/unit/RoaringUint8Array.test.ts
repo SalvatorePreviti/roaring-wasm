@@ -1,13 +1,15 @@
 import { expect } from "chai";
 import IDisposable from "idisposable";
-import roaringWasm from "../../packages/roaring-wasm-src/lib/roaring-wasm";
-import { RoaringUint8Array } from "roaring-wasm-src";
+import { roaringWasm } from "../../packages/roaring-wasm-src/lib/roaring-wasm";
+import { RoaringUint8Array, roaringLibraryInitialize } from "roaring-wasm-src";
 
 function sameInstance(a: any, b: any): boolean {
   return a === b;
 }
 
 describe("RoaringUint8Array", () => {
+  before(roaringLibraryInitialize);
+
   it("allows creating empty arrays", () => {
     IDisposable.using(new RoaringUint8Array(0), (p) => {
       expect(p.length).eq(0);

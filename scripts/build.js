@@ -6,9 +6,9 @@ const { compileTs } = require("./compile-ts");
 const { test } = require("./test");
 
 async function build() {
-  await timed(compileWasm);
-  await timed(compileTs);
-  await timed(test);
+  await timed("compileWasm", compileWasm);
+  await timed("compileTs", compileTs);
+  await timed("test", () => test(["--test-package"]));
 }
 
 module.exports = { build };

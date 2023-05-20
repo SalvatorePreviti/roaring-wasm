@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
-const path = require("path");
-const fs = require("fs");
-const { ROARING_WASM_OUT_FOLDER, ROOT_FOLDER } = require("./config/paths");
+const { ROOT_FOLDER } = require("./config/paths");
 const { runMain, forkAsync } = require("./lib/utils");
 
 if (require.main === module) {
@@ -14,11 +12,7 @@ if (require.main === module) {
     process.argv.push("--recursive");
     process.argv.push("test/unit/**/*.test.ts");
 
-    if (
-      process.argv.includes("--test-package") ||
-      (fs.existsSync(path.resolve(ROARING_WASM_OUT_FOLDER, "index.js")) &&
-        fs.existsSync(path.resolve(ROARING_WASM_OUT_FOLDER, "index.wasm")))
-    ) {
+    if (process.argv.includes("--test-package")) {
       process.argv.push("test/package-test/*.test.ts");
     }
 
@@ -26,8 +20,8 @@ if (require.main === module) {
   }, "test");
 } else {
   module.exports = {
-    test() {
-      return forkAsync(__filename, [], { stdio: "inherit", cwd: ROOT_FOLDER });
+    test(args = []) {
+      return forkAsync(__filename, args, { stdio: "inherit", cwd: ROOT_FOLDER });
     },
   };
 }

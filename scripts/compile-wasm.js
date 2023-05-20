@@ -33,8 +33,9 @@ function buildLinkArgs(environment) {
 
   linkargs.push("-s", `EXPORTED_FUNCTIONS=${JSON.stringify(exportedFunctions)}`);
   linkargs.push("-s", "INCOMING_MODULE_JS_API=[]");
-  linkargs.push("-s", "BINARYEN_ASYNC_COMPILATION=0");
-  linkargs.push("-s", "BINARYEN_METHOD='native-wasm'");
+
+  linkargs.push("-s", `WASM_ASYNC_COMPILATION=${environment === "browser" ? "1" : "0"}`);
+
   linkargs.push("-s", "ALLOW_MEMORY_GROWTH=1");
   linkargs.push("-s", "DISABLE_EXCEPTION_CATCHING=1");
   linkargs.push("-s", "INVOKE_RUN=1");
@@ -47,9 +48,8 @@ function buildLinkArgs(environment) {
   linkargs.push("-s", "ABORTING_MALLOC=0");
   linkargs.push("-s", "SUPPORT_LONGJMP=0");
   linkargs.push("-s", "EXPORT_NAME=roaring_wasm");
-  linkargs.push("-s", "USE_CLOSURE_COMPILER=1");
   linkargs.push("-s", "MIN_NODE_VERSION=160000");
-  linkargs.push("-s", `ENVIRONMENT=${environment === "browser" ? "web" : "node"}`);
+  linkargs.push("-s", `ENVIRONMENT=${environment === "browser" ? "web,worker" : "node"}`);
 
   if (environment === "browser") {
     linkargs.push("-s", "USE_ES6_IMPORT_META=0");
@@ -67,7 +67,7 @@ function buildLinkArgs(environment) {
 
   // js settings
   linkargs.push("--output_eol", "linux");
-  linkargs.push("--closure", "1");
+  linkargs.push("--closure", "0");
 
   return linkargs;
 }

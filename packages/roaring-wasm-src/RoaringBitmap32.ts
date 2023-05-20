@@ -1,48 +1,6 @@
-import roaringWasm from "./lib/roaring-wasm";
+import { roaringWasm } from "./lib/roaring-wasm";
 import { RoaringUint32Array } from "./RoaringUint32Array";
 import { RoaringUint8Array } from "./RoaringUint8Array";
-
-const {
-  _roaring_bitmap_create_js,
-  _roaring_bitmap_free,
-  _roaring_bitmap_get_cardinality,
-  _roaring_bitmap_is_empty,
-  _roaring_bitmap_add,
-  _roaring_bitmap_add_many,
-  _roaring_bitmap_remove,
-  _roaring_bitmap_maximum,
-  _roaring_bitmap_minimum,
-  _roaring_bitmap_contains,
-  _roaring_bitmap_is_subset,
-  _roaring_bitmap_is_strict_subset,
-  _roaring_bitmap_to_uint32_array,
-  _roaring_bitmap_equals,
-  _roaring_bitmap_flip_inplace,
-  _roaring_bitmap_optimize_js,
-  _roaring_bitmap_select_js,
-  _roaring_bitmap_and_cardinality,
-  _roaring_bitmap_or_cardinality,
-  _roaring_bitmap_andnot_cardinality,
-  _roaring_bitmap_xor_cardinality,
-  _roaring_bitmap_rank,
-  _roaring_bitmap_and_inplace,
-  _roaring_bitmap_or_inplace,
-  _roaring_bitmap_xor_inplace,
-  _roaring_bitmap_andnot_inplace,
-  _roaring_bitmap_intersect,
-  _roaring_bitmap_jaccard_index,
-
-  _roaring_bitmap_add_checked_js,
-  _roaring_bitmap_remove_checked_js,
-
-  _roaring_bitmap_portable_size_in_bytes,
-  _roaring_bitmap_portable_serialize,
-  _roaring_bitmap_portable_deserialize,
-
-  _roaring_bitmap_size_in_bytes,
-  _roaring_bitmap_serialize,
-  _roaring_bitmap_deserialize,
-} = roaringWasm;
 
 /**
  * A Roaring Bitmap that supports 32 bit unsigned integers.
@@ -179,7 +137,7 @@ export class RoaringBitmap32 {
   public dispose(): boolean {
     const ptr = this._ptr;
     if (ptr) {
-      _roaring_bitmap_free(ptr);
+      roaringWasm._roaring_bitmap_free(ptr);
       this._ptr = undefined;
       return true;
     }
@@ -200,7 +158,7 @@ export class RoaringBitmap32 {
    */
   public cardinality(): number {
     const ptr = this._ptr;
-    return ptr ? _roaring_bitmap_get_cardinality(ptr) >>> 0 : 0;
+    return ptr ? roaringWasm._roaring_bitmap_get_cardinality(ptr) >>> 0 : 0;
   }
 
   /**
@@ -208,7 +166,7 @@ export class RoaringBitmap32 {
    */
   public isEmpty(): boolean {
     const ptr = this._ptr;
-    return !ptr || !!_roaring_bitmap_is_empty(ptr);
+    return !ptr || !!roaringWasm._roaring_bitmap_is_empty(ptr);
   }
 
   /**
@@ -216,7 +174,7 @@ export class RoaringBitmap32 {
    * Values are unique, this function does nothing if the value already exists.
    */
   public add(value: number): void {
-    _roaring_bitmap_add(_getPtr(this), value);
+    roaringWasm._roaring_bitmap_add(_getPtr(this), value);
   }
 
   /**
@@ -228,7 +186,7 @@ export class RoaringBitmap32 {
    * @returns True if the bitmap changed, false if not.
    */
   public addChecked(value: number): boolean {
-    return !!_roaring_bitmap_add_checked_js(_getPtr(this), value);
+    return !!roaringWasm._roaring_bitmap_add_checked_js(_getPtr(this), value);
   }
 
   /**
@@ -241,13 +199,13 @@ export class RoaringBitmap32 {
   public addMany(values: RoaringUint32Array | Iterable<number>): void {
     if (values instanceof RoaringUint32Array) {
       if (values.length > 0) {
-        _roaring_bitmap_add_many(_getPtr(this), values.length, values.byteOffset);
+        roaringWasm._roaring_bitmap_add_many(_getPtr(this), values.length, values.byteOffset);
       }
     } else {
       const roaringArray = new RoaringUint32Array(values);
       try {
         if (roaringArray.length > 0) {
-          _roaring_bitmap_add_many(_getPtr(this), roaringArray.length, roaringArray.byteOffset);
+          roaringWasm._roaring_bitmap_add_many(_getPtr(this), roaringArray.length, roaringArray.byteOffset);
         }
       } finally {
         roaringArray.dispose();
@@ -262,7 +220,7 @@ export class RoaringBitmap32 {
    * @param value - The value to remove.
    */
   public remove(value: number): void {
-    _roaring_bitmap_remove(_getPtr(this), value);
+    roaringWasm._roaring_bitmap_remove(_getPtr(this), value);
   }
 
   /**
@@ -274,7 +232,7 @@ export class RoaringBitmap32 {
    * @returns True if the bitmap changed, false if not.
    */
   public removeChecked(value: number): boolean {
-    return !!_roaring_bitmap_remove_checked_js(_getPtr(this), value);
+    return !!roaringWasm._roaring_bitmap_remove_checked_js(_getPtr(this), value);
   }
 
   /**
@@ -284,7 +242,7 @@ export class RoaringBitmap32 {
    * @returns The maximum 32 bit unsigned integer or 0 if empty.
    */
   public maximum(): number {
-    return _roaring_bitmap_maximum(_getPtr(this)) >>> 0;
+    return roaringWasm._roaring_bitmap_maximum(_getPtr(this)) >>> 0;
   }
 
   /**
@@ -294,7 +252,7 @@ export class RoaringBitmap32 {
    * @returns The minimum 32 bit unsigned integer or 0xFFFFFFFF if empty.
    */
   public minimum(): number {
-    return _roaring_bitmap_minimum(_getPtr(this)) >>> 0;
+    return roaringWasm._roaring_bitmap_minimum(_getPtr(this)) >>> 0;
   }
 
   /**
@@ -304,7 +262,7 @@ export class RoaringBitmap32 {
    * @returns True if value exists in the set, false if not.
    */
   public contains(value: number): boolean {
-    return !!_roaring_bitmap_contains(_getPtr(this), value);
+    return !!roaringWasm._roaring_bitmap_contains(_getPtr(this), value);
   }
 
   /**
@@ -314,7 +272,7 @@ export class RoaringBitmap32 {
    * @returns true if the bitmap is subset of the other.
    */
   public isSubset(other: RoaringBitmap32): boolean {
-    return !!_roaring_bitmap_is_subset(_getPtr(this), _getPtr(other));
+    return !!roaringWasm._roaring_bitmap_is_subset(_getPtr(this), _getPtr(other));
   }
 
   /**
@@ -324,7 +282,7 @@ export class RoaringBitmap32 {
    * @returns True if this bitmap is a strict subset of other
    */
   public isStrictSubset(other: RoaringBitmap32): boolean {
-    return !!_roaring_bitmap_is_strict_subset(_getPtr(this), _getPtr(other));
+    return !!roaringWasm._roaring_bitmap_is_strict_subset(_getPtr(this), _getPtr(other));
   }
 
   /**
@@ -337,10 +295,10 @@ export class RoaringBitmap32 {
    */
   public toRoaringUint32Array(): RoaringUint32Array {
     const ptr = _getPtr(this);
-    const cardinality = _roaring_bitmap_get_cardinality(ptr) >>> 0;
+    const cardinality = roaringWasm._roaring_bitmap_get_cardinality(ptr) >>> 0;
     const result = new RoaringUint32Array(cardinality);
     if (cardinality > 0) {
-      _roaring_bitmap_to_uint32_array(ptr, result.byteOffset);
+      roaringWasm._roaring_bitmap_to_uint32_array(ptr, result.byteOffset);
     }
     return result;
   }
@@ -408,7 +366,7 @@ export class RoaringBitmap32 {
     if (a === b) {
       return true;
     }
-    return !!_roaring_bitmap_equals(a, b);
+    return !!roaringWasm._roaring_bitmap_equals(a, b);
   }
 
   /**
@@ -424,7 +382,7 @@ export class RoaringBitmap32 {
     if (end > start) {
       return;
     }
-    _roaring_bitmap_flip_inplace(_getPtr(this), start, end);
+    roaringWasm._roaring_bitmap_flip_inplace(_getPtr(this), start, end);
   }
 
   /**
@@ -434,7 +392,7 @@ export class RoaringBitmap32 {
    * @returns True if something changed.
    */
   public optimize(): boolean {
-    return !!_roaring_bitmap_optimize_js(_getPtr(this));
+    return !!roaringWasm._roaring_bitmap_optimize_js(_getPtr(this));
   }
 
   /**
@@ -446,7 +404,7 @@ export class RoaringBitmap32 {
    * @returns element or NaN
    */
   public select(rank: number): number {
-    return _roaring_bitmap_select_js(_getPtr(this), rank);
+    return roaringWasm._roaring_bitmap_select_js(_getPtr(this), rank);
   }
 
   /**
@@ -457,7 +415,7 @@ export class RoaringBitmap32 {
    * @returns Cardinality of the intersection between two bitmaps.
    */
   public andCardinality(other: RoaringBitmap32): number {
-    return _roaring_bitmap_and_cardinality(_getPtr(this), _getPtr(other)) >>> 0;
+    return roaringWasm._roaring_bitmap_and_cardinality(_getPtr(this), _getPtr(other)) >>> 0;
   }
 
   /**
@@ -468,7 +426,7 @@ export class RoaringBitmap32 {
    * @returns Cardinality of the union of two bitmaps.
    */
   public orCardinality(other: RoaringBitmap32): number {
-    return _roaring_bitmap_or_cardinality(_getPtr(this), _getPtr(other)) >>> 0;
+    return roaringWasm._roaring_bitmap_or_cardinality(_getPtr(this), _getPtr(other)) >>> 0;
   }
 
   /**
@@ -479,7 +437,7 @@ export class RoaringBitmap32 {
    * @returns Cardinality of the difference (andnot) of two bitmaps.
    */
   public andNotCardinality(other: RoaringBitmap32): number {
-    return _roaring_bitmap_andnot_cardinality(_getPtr(this), _getPtr(other)) >>> 0;
+    return roaringWasm._roaring_bitmap_andnot_cardinality(_getPtr(this), _getPtr(other)) >>> 0;
   }
 
   /**
@@ -490,7 +448,7 @@ export class RoaringBitmap32 {
    * @returns Cardinality of the symmetric difference (xor) of two bitmaps.
    */
   public xorCardinality(other: RoaringBitmap32): number {
-    return _roaring_bitmap_xor_cardinality(_getPtr(this), _getPtr(other)) >>> 0;
+    return roaringWasm._roaring_bitmap_xor_cardinality(_getPtr(this), _getPtr(other)) >>> 0;
   }
 
   /**
@@ -502,7 +460,7 @@ export class RoaringBitmap32 {
    * @param other - The other bitmap.
    */
   public andInPlace(other: RoaringBitmap32): void {
-    _roaring_bitmap_and_inplace(_getPtr(this), _getPtr(other));
+    roaringWasm._roaring_bitmap_and_inplace(_getPtr(this), _getPtr(other));
   }
 
   /**
@@ -513,7 +471,7 @@ export class RoaringBitmap32 {
    * @param other - The other bitmap.
    */
   public orInPlace(other: RoaringBitmap32): void {
-    _roaring_bitmap_or_inplace(_getPtr(this), _getPtr(other));
+    roaringWasm._roaring_bitmap_or_inplace(_getPtr(this), _getPtr(other));
   }
 
   /**
@@ -524,7 +482,7 @@ export class RoaringBitmap32 {
    * @param other - The other bitmap.
    */
   public xorInPlace(other: RoaringBitmap32): void {
-    _roaring_bitmap_xor_inplace(_getPtr(this), _getPtr(other));
+    roaringWasm._roaring_bitmap_xor_inplace(_getPtr(this), _getPtr(other));
   }
 
   /**
@@ -535,7 +493,7 @@ export class RoaringBitmap32 {
    * @param other - The other bitmap.
    */
   public andNotInPlace(other: RoaringBitmap32): void {
-    _roaring_bitmap_andnot_inplace(_getPtr(this), _getPtr(other));
+    roaringWasm._roaring_bitmap_andnot_inplace(_getPtr(this), _getPtr(other));
   }
 
   /**
@@ -545,7 +503,7 @@ export class RoaringBitmap32 {
    * @returns The number of values smaller than the given value
    */
   public rank(value: number): number {
-    return _roaring_bitmap_rank(_getPtr(this), value) >>> 0;
+    return roaringWasm._roaring_bitmap_rank(_getPtr(this), value) >>> 0;
   }
 
   /**
@@ -555,7 +513,7 @@ export class RoaringBitmap32 {
    * @returns True if the two bitmaps intersects, false if not.
    */
   public intersects(other: RoaringBitmap32): boolean {
-    return !!_roaring_bitmap_intersect(_getPtr(this), _getPtr(other));
+    return !!roaringWasm._roaring_bitmap_intersect(_getPtr(this), _getPtr(other));
   }
 
   /**
@@ -568,7 +526,7 @@ export class RoaringBitmap32 {
    * @returns The Jaccard index
    */
   public jaccardIndex(other: RoaringBitmap32): number {
-    return _roaring_bitmap_jaccard_index(_getPtr(this), _getPtr(other));
+    return roaringWasm._roaring_bitmap_jaccard_index(_getPtr(this), _getPtr(other));
   }
 
   /**
@@ -579,7 +537,9 @@ export class RoaringBitmap32 {
    */
   public getSerializationSizeInBytes(portable: boolean = false): number {
     const ptr = _getPtr(this);
-    return portable ? _roaring_bitmap_portable_size_in_bytes(ptr) : _roaring_bitmap_size_in_bytes(ptr) >>> 0;
+    return portable
+      ? roaringWasm._roaring_bitmap_portable_size_in_bytes(ptr)
+      : roaringWasm._roaring_bitmap_size_in_bytes(ptr) >>> 0;
   }
 
   /**
@@ -597,9 +557,9 @@ export class RoaringBitmap32 {
     const size = this.getSerializationSizeInBytes(portable);
     const buf = roaringWasm._malloc(size);
     if (portable) {
-      _roaring_bitmap_portable_serialize(ptr, buf);
+      roaringWasm._roaring_bitmap_portable_serialize(ptr, buf);
     } else {
-      _roaring_bitmap_serialize(ptr, buf);
+      roaringWasm._roaring_bitmap_serialize(ptr, buf);
     }
     return new RoaringUint8Array(size, buf);
   }
@@ -661,8 +621,8 @@ export class RoaringBitmap32 {
     }
 
     const ptr = portable
-      ? _roaring_bitmap_portable_deserialize(buffer.byteOffset)
-      : _roaring_bitmap_deserialize(buffer.byteOffset);
+      ? roaringWasm._roaring_bitmap_portable_deserialize(buffer.byteOffset)
+      : roaringWasm._roaring_bitmap_deserialize(buffer.byteOffset);
 
     if (ptr === null) {
       throw new Error(`RoaringBitmap32 deserialization failed`);
@@ -684,7 +644,7 @@ function _getPtr(bitmap: RoaringBitmap32): number {
   }
 
   if (ptr === 0) {
-    ptr = _roaring_bitmap_create_js(0) >>> 0;
+    ptr = roaringWasm._roaring_bitmap_create_js(0) >>> 0;
     if (!ptr) {
       throw new Error("Failed to allocate RoaringBitmap32");
     }

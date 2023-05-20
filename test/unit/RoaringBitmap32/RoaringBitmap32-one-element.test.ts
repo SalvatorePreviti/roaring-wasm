@@ -1,8 +1,10 @@
 import { expect } from "chai";
 import IDisposable from "idisposable";
-import { RoaringBitmap32 } from "roaring-wasm-src";
+import { RoaringBitmap32, roaringLibraryInitialize } from "roaring-wasm-src";
 
 describe("RoaringBitmap32 one element", () => {
+  before(roaringLibraryInitialize);
+
   describe("read", () => {
     let instance: RoaringBitmap32;
 

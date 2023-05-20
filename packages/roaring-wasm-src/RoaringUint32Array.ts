@@ -1,4 +1,4 @@
-import roaringWasm from "./lib/roaring-wasm";
+import { roaringWasm } from "./lib/roaring-wasm";
 
 /**
  * Array of unsigned 32 bit integers allocted directly in roaring library WASM memory.
@@ -40,7 +40,7 @@ export class RoaringUint32Array implements Iterable<number> {
    * Use the returned buffer for short periods of time.
    */
   public get buffer(): ArrayBuffer {
-    return roaringWasm.HEAP8.buffer;
+    return roaringWasm.HEAPU8.buffer;
   }
 
   /**
@@ -191,7 +191,7 @@ export class RoaringUint32Array implements Iterable<number> {
    * @returns A new typed array that shares the memory with this array.
    */
   public asTypedArray(): Uint32Array {
-    return new Uint32Array(roaringWasm.HEAP8.buffer, this.byteOffset, this.length);
+    return new Uint32Array(roaringWasm.HEAPU8.buffer, this.byteOffset, this.length);
   }
 
   /**
@@ -202,7 +202,10 @@ export class RoaringUint32Array implements Iterable<number> {
    * @returns A new instance of NodeJS Buffer
    */
   public asNodeBuffer(): Buffer {
-    return Buffer.from(roaringWasm.HEAP8.buffer, this.byteOffset, this.length);
+    if (typeof Buffer === "undefined") {
+      return roaringWasm.HEAPU8.subarray(this.byteOffset, this.byteOffset + this.length) as Buffer;
+    }
+    return Buffer.from(roaringWasm.HEAPU8.buffer, this.byteOffset, this.length);
   }
 
   /**
@@ -224,6 +227,9 @@ export class RoaringUint32Array implements Iterable<number> {
    * @returns A new instance of NodeJS Buffer that contains a copy of this buffer
    */
   public toNodeBuffer(): Buffer {
+    if (typeof Buffer === "undefined") {
+      return roaringWasm.HEAPU8.slice(this.byteOffset, this.byteOffset + this.length) as Buffer;
+    }
     return Buffer.from(this.asNodeBuffer());
   }
 
