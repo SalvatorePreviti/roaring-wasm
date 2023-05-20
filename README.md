@@ -26,7 +26,7 @@ Code sample:
 // create this file as demo.js
 // type node demo.js or nodejs demo.js depending on your system
 
-import { RoaringBitmap32 } from 'roaring-wasm';
+import { RoaringBitmap32, roaringLibraryInitialize } from 'roaring-wasm';
 
 // This is needed in browser (and in this case we are using top level await), in nodejs this is not required.
 await roaringLibraryInitialize();
