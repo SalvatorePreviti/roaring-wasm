@@ -85,25 +85,43 @@ const exploreDir = async (dir) => {
   }
 };
 
-async function typecheckWorkspace(rootDir = ROOT_FOLDER) {
-  await exploreDir(path.resolve(rootDir));
+async function typecheck() {
+  await exploreDir(ROOT_FOLDER);
+
+  let errors = 0;
+  let warnings = 0;
 
   for (const project of projects) {
     const files = Array.from(project.files);
     const program = ts.createProgram(files, project.tsconfig.options);
-
     const diagnostics = ts.getPreEmitDiagnostics(program);
 
-    const host = ts.createCompilerHost(project.tsconfig.options);
     const formatHost = {
       getCanonicalFileName: (fileName) => fileName,
-      getCurrentDirectory: host.getCurrentDirectory,
+      getCurrentDirectory: () => ROOT_FOLDER,
       getNewLine: () => ts.sys.newLine,
     };
-    console.log(ts.formatDiagnosticsWithColorAndContext(diagnostics, formatHost));
+    const message = ts.formatDiagnosticsWithColorAndContext(diagnostics, formatHost);
+    console.log(message);
+
+    for (const diagnostic of diagnostics) {
+      if (diagnostic.category === ts.DiagnosticCategory.Error) {
+        ++errors;
+      } else if (diagnostic.category === ts.DiagnosticCategory.Warning) {
+        ++warnings;
+      }
+    }
+  }
+
+  if (errors || warnings) {
+    throw new Error(`Typecheck failed, ${errors} errors, ${warnings} warnings`);
   }
 }
 
+module.exports = {
+  typecheck,
+};
+
 if (require.main === module) {
-  runMain(typecheckWorkspace, "typecheck");
+  runMain(typecheck, "typecheck");
 }

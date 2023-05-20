@@ -23,35 +23,31 @@ const pass = () => {
   progressEl.innerHTML = '✅ &nbsp; <span id="completed-status" class="passed">All good!</span>';
 };
 
-async function runTests() {
-  try {
-    mocha.setup({ ui: "bdd" });
+try {
+  mocha.setup({ ui: "bdd" });
 
-    const tests = await import.meta.glob("../**/*.test.ts");
+  const tests = await import.meta.glob("../**/*.test.ts");
 
-    for (const path in tests) {
-      await tests[path]();
+  for (const path in tests) {
+    await tests[path]();
+  }
+
+  const runner = mocha.run();
+
+  runner.on("fail", () => {
+    ++failedTests;
+  });
+
+  runner.on("end", () => {
+    if (failedTests) {
+      fail("");
+    } else {
+      pass();
     }
-
-    const runner = mocha.run();
-
-    runner.on("fail", () => {
-      ++failedTests;
-    });
-
-    runner.on("end", () => {
-      if (failedTests) {
-        fail("");
-      } else {
-        pass();
-      }
-    });
-    setupCompleted = true;
-  } finally {
-    if (!setupCompleted) {
-      fail("Initialization failed");
-    }
+  });
+  setupCompleted = true;
+} finally {
+  if (!setupCompleted) {
+    fail("Initialization failed");
   }
 }
-
-void runTests();
