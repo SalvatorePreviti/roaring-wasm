@@ -1,5 +1,7 @@
 import { expect } from "chai";
 import IDisposable from "idisposable";
+
+// @ts-ignore
 import { RoaringBitmap32, RoaringUint8Array, RoaringUint32Array, roaringLibraryInitialize } from "roaring-wasm";
 
 /**

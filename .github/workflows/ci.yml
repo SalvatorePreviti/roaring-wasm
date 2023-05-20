@@ -21,6 +21,7 @@ jobs:
       - run: npm ci
       - run: npm run lint:ci # run linting
       - run: npm run build # build the library and run tests
+      - run: npm run lint:ci # re-run linting after build
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
