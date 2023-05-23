@@ -117,6 +117,6 @@ roaring_bitmap_t * roaring_bitmap_add_offset_js(const roaring_bitmap_t * input, 
   return roaring_bitmap_add_offset(input, (int64_t)offset);
 }
 
-double roaring_bitmap_shrink_to_fit_js(const roaring_bitmap_t * input) {
+double roaring_bitmap_shrink_to_fit_js(roaring_bitmap_t * input) {
   return input ? (double)roaring_bitmap_shrink_to_fit(input) : 0;
 }
