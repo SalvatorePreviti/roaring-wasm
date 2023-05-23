@@ -82,6 +82,10 @@ async function compileWasm() {
   emccFlags.push("-Isubmodules/CRoaring/include");
   emccFlags.push("-O3");
   emccFlags.push("-g0");
+  emccFlags.push("-msimd128");
+  emccFlags.push("-mavx");
+  emccFlags.push("-msse4.1");
+  emccFlags.push("-msse3");
 
   const cflags = [];
   cflags.push("-O3");
