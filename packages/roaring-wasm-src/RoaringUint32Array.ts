@@ -1,3 +1,4 @@
+import { RoaringArenaAlloc } from "./RoaringArenaAlloc";
 import { roaringWasm } from "./lib/roaring-wasm";
 
 /**
@@ -88,9 +89,10 @@ export class RoaringUint32Array implements Iterable<number> {
    *
    * @param lengthOrArray - Length of the array to allocate or the array to copy
    */
-  public constructor(lengthOrArray: number | Iterable<number>, _pointer?: number) {
+  public constructor(lengthOrArray: number | Iterable<number> | ArrayLike<number>, _pointer?: number) {
     this.byteOffset = 0;
     this.length = 0;
+    RoaringArenaAlloc.register(this);
 
     let length: number;
     if (typeof lengthOrArray === "number") {
@@ -98,7 +100,7 @@ export class RoaringUint32Array implements Iterable<number> {
     } else if (lengthOrArray !== null && typeof lengthOrArray === "object") {
       length = (lengthOrArray as unknown as ArrayLike<number>).length;
       if (typeof length !== "number") {
-        const copy = new Uint32Array(lengthOrArray);
+        const copy = new Uint32Array(lengthOrArray as Iterable<number>);
         lengthOrArray = copy;
         length = copy.length;
       }
@@ -121,7 +123,7 @@ export class RoaringUint32Array implements Iterable<number> {
           throw new Error("RoaringUint32Array allocation failed, allocated memory is not aligned correctly");
         }
         if (typeof lengthOrArray !== "number") {
-          this.set(lengthOrArray);
+          this.set(lengthOrArray as Iterable<number>);
         }
       } catch (error) {
         this.dispose();
@@ -287,8 +289,8 @@ Object.defineProperties(RoaringUint32Array.prototype, {
     enumerable: false,
   },
   toJSON: {
-    value: function arrayToJSON(this: RoaringUint32Array) {
-      return this.asTypedArray();
+    value() {
+      return {};
     },
     configurable: true,
     enumerable: false,

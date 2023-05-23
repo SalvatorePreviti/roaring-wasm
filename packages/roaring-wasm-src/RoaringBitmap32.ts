@@ -1,6 +1,38 @@
 import { roaringWasm } from "./lib/roaring-wasm";
 import { RoaringUint32Array } from "./RoaringUint32Array";
 import { RoaringUint8Array } from "./RoaringUint8Array";
+import { RoaringArenaAlloc } from "./RoaringArenaAlloc";
+
+const _clampToUint32 = (value: number): number => {
+  if (value < 0) {
+    return 0;
+  }
+  if (value > 0xffffffff) {
+    return 0xffffffff;
+  }
+  return value >>> 0;
+};
+
+const _getPtr = (bitmap: RoaringBitmap32): number => {
+  let ptr = (bitmap as unknown as { _ptr?: number | null | undefined })._ptr;
+
+  if (typeof ptr !== "number") {
+    throw new TypeError("RoaringBitmap32 expected");
+  }
+
+  if (ptr <= 0) {
+    if (ptr < 0) {
+      throw new TypeError("RoaringBitmap32 was disposed");
+    }
+    ptr = roaringWasm._roaring_bitmap_create_with_capacity(0) >>> 0;
+    if (!ptr) {
+      throw new Error("Failed to allocate RoaringBitmap32");
+    }
+    (bitmap as unknown as { _ptr?: number | null | undefined })._ptr = ptr;
+  }
+
+  return ptr;
+};
 
 /**
  * A Roaring Bitmap that supports 32 bit unsigned integers.
@@ -10,7 +42,7 @@ import { RoaringUint8Array } from "./RoaringUint8Array";
  *
  */
 export class RoaringBitmap32 {
-  private _ptr: number | undefined;
+  private _ptr: number | false;
 
   /**
    * Creates a new roaring bitmap adding the specified values.
@@ -19,8 +51,9 @@ export class RoaringBitmap32 {
    * the RoaringBitmap32 when not needed anymore to release WASM memory.
    * @param values - The values to add
    */
-  public constructor(values?: RoaringUint32Array | Iterable<number>) {
+  public constructor(values?: RoaringUint32Array | Iterable<number> | ArrayLike<number>) {
     this._ptr = 0;
+    RoaringArenaAlloc.register(this);
 
     if (values) {
       try {
@@ -30,6 +63,108 @@ export class RoaringBitmap32 {
         throw error;
       }
     }
+  }
+
+  /**
+   * Check whether a range of values from rangeStart (included) to rangeEnd (excluded) is present
+   *
+   * @param {number|undefined} rangeStart The start index (inclusive).
+   * @param {number|undefined} [rangeEnd] The end index (exclusive).
+   * @returns {boolean} True if the bitmap contains the whole range of values from rangeStart (included) to rangeEnd (excluded), false if not.
+   * @memberof ReadonlyRoaringBitmap32
+   */
+  public hasRange(rangeStart: number = 0, rangeEnd: number = 0x10000000): boolean {
+    return !!roaringWasm._roaring_bitmap_contains_range_js(this._ptr, rangeStart, rangeEnd);
+  }
+
+  /**
+   * Gets the cardinality (number of elements) between rangeStart (included) to rangeEnd (excluded) of the bitmap.
+   * Returns 0 if range is invalid or if no element was found in the given range.
+   *
+   * @param rangeStart - The start index (inclusive).
+   * @param rangeEnd - The end index (exclusive).
+   * @returns The number of elements between rangeStart (included) to rangeEnd (excluded).
+   */
+  public rangeCardinality(rangeStart: number = 0, rangeEnd: number = 0x10000000): number {
+    return roaringWasm._roaring_bitmap_range_cardinality_js(this._ptr, rangeStart, rangeEnd);
+  }
+
+  /**
+   * Creates a new bitmap that contains all the values in the interval: [rangeStart, rangeEnd).
+   * Is possible to specify the step parameter to have a non contiguous range.
+   *
+   * @static
+   * @param rangeStart The start index. Trimmed to 0.
+   * @param rangeEnd The end index. Trimmed to 4294967296.
+   * @param step The increment step, defaults to 1.
+   * @returns A new RoaringBitmap32 instance.
+   */
+  public static fromRange(rangeStart: number = 0, rangeEnd: number = 0x100000000, step: number = 1): RoaringBitmap32 {
+    const bitmap = new RoaringBitmap32();
+    bitmap._ptr = roaringWasm._roaring_bitmap_from_range_js(rangeStart, rangeEnd, _clampToUint32(step) || 1);
+    return bitmap;
+  }
+
+  /**
+   * Adds all the values in the interval: [rangeStart, rangeEnd).
+   *
+   * First element is included, last element is excluded.
+   * The number of added values is rangeEnd - rangeStart.
+   *
+   * Areas outside the range are passed through unchanged.
+   *
+   * @param rangeStart - The start index. Trimmed to 0.
+   * @param rangeEnd - The end index. Trimmed to 4294967296.
+   * @returns This RoaringBitmap32 instance.
+   */
+  public addRange(rangeStart: number = 0, rangeEnd: number = 0x100000000): this {
+    const ptr = this._ptr;
+    if (ptr) {
+      roaringWasm._roaring_bitmap_add_range_js(ptr, rangeStart, rangeEnd);
+    } else {
+      this._ptr = roaringWasm._roaring_bitmap_from_range_js(rangeStart, rangeEnd, 1);
+    }
+    return this;
+  }
+
+  /**
+   * Removes all the values in the interval: [rangeStart, rangeEnd).
+   *
+   * First element is included, last element is excluded.
+   * The number of renived values is rangeEnd - rangeStart.
+   *
+   * Areas outside the range are passed through unchanged.
+   * @param rangeStart - The start index. Trimmed to 0.
+   * @param rangeEnd - The end index. Trimmed to 4294967296.
+   * @returns This RoaringBitmap32 instance.
+   * @memberof RoaringBitmap32
+   */
+  public removeRange(rangeStart: number = 0, rangeEnd: number = 0x100000000): this {
+    roaringWasm._roaring_bitmap_remove_range_js(this._ptr, rangeStart, rangeEnd);
+    return this;
+  }
+
+  /**
+   * Negates (in place) the roaring bitmap within a specified interval: [rangeStart, rangeEnd).
+   *
+   * First element is included, last element is excluded.
+   * The number of negated values is rangeEnd - rangeStart.
+   *
+   * Areas outside the range are passed through unchanged.
+   *
+   * @param {number|undefined} rangeStart The start index. Trimmed to 0.
+   * @param {number|undefined} [rangeEnd] The end index. Trimmed to 4294967296.
+   * @returns {this} This RoaringBitmap32 instance.
+   * @memberof RoaringBitmap32
+   */
+  public flipRange(rangeStart: number = 0, rangeEnd: number = 0x100000000): this {
+    const ptr = this._ptr;
+    if (ptr) {
+      roaringWasm._roaring_bitmap_flip_range_inplace_js(ptr, rangeStart, rangeEnd);
+    } else {
+      this._ptr = roaringWasm._roaring_bitmap_from_range_js(rangeStart, rangeEnd, 1);
+    }
+    return this;
   }
 
   /**
@@ -124,6 +259,51 @@ export class RoaringBitmap32 {
   }
 
   /**
+   * Returns a new bitmap that is a copy of this bitmap, same as new RoaringBitmap32(copy)
+   * @returns A cloned RoaringBitmap32 instance
+   */
+  public clone(): RoaringBitmap32 {
+    const result = new RoaringBitmap32();
+    const ptr = this._ptr;
+    result._ptr = ptr ? roaringWasm._roaring_bitmap_copy(ptr) : 0;
+    return result;
+  }
+
+  /**
+   * Clears the bitmap, removing all values.
+   */
+  public clear(): void {
+    const ptr = this._ptr;
+    if (ptr) {
+      roaringWasm._roaring_bitmap_clear(ptr);
+    }
+  }
+
+  /**
+   * Overwrite the content of this bitmap with the content of another bitmap.
+   * @param other - The other bitmap to copy.
+   * @returns This RoaringBitmap32 instance.
+   */
+  public overwrite(other: RoaringBitmap32): this {
+    roaringWasm._roaring_bitmap_overwrite(_getPtr(this), _getPtr(other));
+    return this;
+  }
+
+  /**
+   * addOffset adds the value 'offset' to each and every value in a bitmap, generating a new bitmap in the process.
+   * If offset + element is outside of the range [0,2^32), that the element will be dropped.
+   *
+   * @param input - The input bitmap.
+   * @param offset - The offset to add to each element. Can be positive or negative.
+   * @returns A new bitmap with the offset added to each element.
+   */
+  public static addOffset(input: RoaringBitmap32, offset: number): RoaringBitmap32 {
+    const result = new RoaringBitmap32();
+    result._ptr = roaringWasm._roaring_bitmap_add_offset_js(input._ptr, offset);
+    return result;
+  }
+
+  /**
    * Returns true if this instance was disposed.
    */
   public get isDisposed(): boolean {
@@ -138,7 +318,7 @@ export class RoaringBitmap32 {
     const ptr = this._ptr;
     if (ptr) {
       roaringWasm._roaring_bitmap_free(ptr);
-      this._ptr = undefined;
+      this._ptr = false;
       return true;
     }
     return false;
@@ -148,7 +328,7 @@ export class RoaringBitmap32 {
    * Throws an exception if this object was disposed before.
    */
   public throwIfDisposed(): void | never {
-    if (typeof this._ptr !== "number") {
+    if (this._ptr === false) {
       throw new TypeError("RoaringBitmap32 was disposed");
     }
   }
@@ -157,6 +337,14 @@ export class RoaringBitmap32 {
    * Get the cardinality of the bitmap (number of elements).
    */
   public cardinality(): number {
+    const ptr = this._ptr;
+    return ptr ? roaringWasm._roaring_bitmap_get_cardinality(ptr) >>> 0 : 0;
+  }
+
+  /**
+   * Get the cardinality of the bitmap (number of elements).
+   */
+  public get size(): number {
     const ptr = this._ptr;
     return ptr ? roaringWasm._roaring_bitmap_get_cardinality(ptr) >>> 0 : 0;
   }
@@ -186,7 +374,7 @@ export class RoaringBitmap32 {
    * @returns True if the bitmap changed, false if not.
    */
   public addChecked(value: number): boolean {
-    return !!roaringWasm._roaring_bitmap_add_checked_js(_getPtr(this), value);
+    return !!roaringWasm._roaring_bitmap_add_checked(_getPtr(this), value);
   }
 
   /**
@@ -196,7 +384,7 @@ export class RoaringBitmap32 {
    *
    * @param values - The values to add.
    */
-  public addMany(values: RoaringUint32Array | Iterable<number>): void {
+  public addMany(values: RoaringUint32Array | Iterable<number> | ArrayLike<number>): void {
     if (values instanceof RoaringUint32Array) {
       if (values.length > 0) {
         roaringWasm._roaring_bitmap_add_many(_getPtr(this), values.length, values.byteOffset);
@@ -232,7 +420,7 @@ export class RoaringBitmap32 {
    * @returns True if the bitmap changed, false if not.
    */
   public removeChecked(value: number): boolean {
-    return !!roaringWasm._roaring_bitmap_remove_checked_js(_getPtr(this), value);
+    return !!roaringWasm._roaring_bitmap_remove_checked(_getPtr(this), value);
   }
 
   /**
@@ -370,22 +558,6 @@ export class RoaringBitmap32 {
   }
 
   /**
-   * Negates in place the bitmap within a specified interval.
-   * Areas outside the range are passed through unchanged.
-   *
-   * @param start - Range start.
-   * @param end - Range end.
-   */
-  public flipRange(start: number, end: number): void {
-    start >>>= 0;
-    end >>>= 0;
-    if (end > start) {
-      return;
-    }
-    roaringWasm._roaring_bitmap_flip_inplace(_getPtr(this), start, end);
-  }
-
-  /**
    * Optimizes the bitmap releasing unused memory and compressing containers.
    * Returns true if something changed.
    *
@@ -405,6 +577,17 @@ export class RoaringBitmap32 {
    */
   public select(rank: number): number {
     return roaringWasm._roaring_bitmap_select_js(_getPtr(this), rank);
+  }
+
+  /**
+   * Finds the index of the nth set element.
+   * Returns -1 if not found.
+   *
+   * @param rank - Element index
+   * @returns element index or -1 if not found
+   */
+  public indexOf(rank: number): number {
+    return roaringWasm._roaring_bitmap_get_index(_getPtr(this), rank);
   }
 
   /**
@@ -630,26 +813,42 @@ export class RoaringBitmap32 {
 
     this._ptr = ptr;
   }
-}
 
-function _getPtr(bitmap: RoaringBitmap32): number {
-  if (!(bitmap instanceof RoaringBitmap32)) {
-    throw new TypeError("RoaringBitmap32 expected");
+  /**
+   * Remove run-length encoding even when it is more space efficient.
+   *
+   * Return whether a change was applied.
+   *
+   * @returns True if a change was applied, false if not.
+   */
+  public removeRunCompression(): boolean {
+    const ptr = this._ptr;
+    return !!ptr && !!roaringWasm._roaring_bitmap_remove_run_compression(ptr);
   }
 
-  let ptr = (bitmap as unknown as { _ptr?: number | null | undefined })._ptr;
-
-  if (ptr === null || ptr === undefined) {
-    throw new TypeError("RoaringBitmap32 was disposed");
+  /**
+   * Convert array and bitmap containers to run containers when it is more efficient;
+   * also convert from run containers when more space efficient.
+   *
+   * Returns true if the bitmap has at least one run container.
+   *
+   * Additional savings might be possible by calling shrinkToFit().
+   *
+   * @returns True if the bitmap has at least one run container.
+   */
+  public runOptimize(): boolean {
+    const ptr = this._ptr;
+    return !!ptr && !!roaringWasm._roaring_bitmap_run_optimize(ptr);
   }
 
-  if (ptr === 0) {
-    ptr = roaringWasm._roaring_bitmap_create_js(0) >>> 0;
-    if (!ptr) {
-      throw new Error("Failed to allocate RoaringBitmap32");
-    }
-    (bitmap as unknown as { _ptr?: number | null | undefined })._ptr = ptr;
+  /**
+   * If needed, reallocate memory to shrink the memory usage.
+   *
+   * Returns the number of bytes saved.
+   *
+   * @returns The number of bytes saved.
+   */
+  public shrinkToFit(): number {
+    return roaringWasm._roaring_bitmap_shrink_to_fit_js(this._ptr);
   }
-
-  return ptr;
 }

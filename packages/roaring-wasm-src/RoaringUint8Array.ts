@@ -1,3 +1,4 @@
+import { RoaringArenaAlloc } from "./RoaringArenaAlloc";
 import { roaringWasm } from "./lib/roaring-wasm";
 
 /**
@@ -88,9 +89,10 @@ export class RoaringUint8Array implements Iterable<number> {
    *
    * @param lengthOrArray - Length of the array to allocate or the array to copy
    */
-  public constructor(lengthOrArray: number | Iterable<number>, _pointer?: number) {
+  public constructor(lengthOrArray: number | Iterable<number> | ArrayLike<number>, _pointer?: number) {
     this.byteOffset = 0;
     this.length = 0;
+    RoaringArenaAlloc.register(this);
 
     let length: number;
     if (typeof lengthOrArray === "number") {
@@ -98,7 +100,7 @@ export class RoaringUint8Array implements Iterable<number> {
     } else if (lengthOrArray !== null && typeof lengthOrArray === "object") {
       length = (lengthOrArray as unknown as ArrayLike<number>).length;
       if (typeof length !== "number") {
-        const copy = new Uint8Array(lengthOrArray);
+        const copy = new Uint8Array(lengthOrArray as Iterable<number>);
         lengthOrArray = copy;
         length = copy.length;
       }
@@ -118,7 +120,7 @@ export class RoaringUint8Array implements Iterable<number> {
 
       if (typeof lengthOrArray !== "number") {
         try {
-          this.set(lengthOrArray);
+          this.set(lengthOrArray as Iterable<number>);
         } catch (error) {
           this.dispose();
           throw error;
@@ -274,8 +276,8 @@ Object.defineProperties(RoaringUint8Array.prototype, {
     enumerable: false,
   },
   toJSON: {
-    value: function arrayToJSON(this: RoaringUint8Array) {
-      return this.asTypedArray();
+    value() {
+      return {};
     },
     configurable: true,
     enumerable: false,
