@@ -1,0 +1,56 @@
+{
+  "[json]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false,
+  },
+  "[jsonc]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false,
+  },
+  "[css]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false,
+  },
+  "[html]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false,
+  },
+  "[javascript]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false,
+  },
+  "[javascriptreact]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false,
+  },
+  "[typescript]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false,
+  },
+  "[typescriptreact]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false,
+  },
+  "editor.codeActionsOnSave": {
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false,
+  },
+  "[c]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false,
+},
+  "[cpp]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false,
+},
+  "editor.detectIndentation": true,
+  "editor.formatOnSave": false,
+  "editor.lineNumbers": "on",
+  "editor.formatOnType": false,
+  "eslint.enable": false,
+  "prettier.enable": false,
+  "eslint.format.enable": false,
+  "eslint.lintTask.enable": false,
+  "files.eol": "\n",
+  "git.detectSubmodules": true
+}
