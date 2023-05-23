@@ -53,7 +53,6 @@ export class RoaringBitmap32 {
    */
   public constructor(values?: RoaringUint32Array | Iterable<number> | ArrayLike<number>) {
     this._ptr = 0;
-    RoaringArenaAlloc.register(this);
 
     if (values) {
       try {
@@ -63,6 +62,47 @@ export class RoaringBitmap32 {
         throw error;
       }
     }
+
+    RoaringArenaAlloc.register(this);
+  }
+
+  /**
+   * The RoaringBitmap32.of() static method creates a new Array instance from a variable number of arguments, regardless of number or type of the arguments.
+   * Note that is faster to pass a Uint32Array instance instead of an array or an iterable.
+   *
+   * @static
+   * @param values A set of values to add to the new RoaringBitmap32 instance.
+   * @returns A new RoaringBitmap32 instance.
+   */
+  public static of(...values: (number | string | null | undefined)[]): RoaringBitmap32 {
+    const buf = new Uint32Array(values.length);
+    let count = 0;
+    for (let i = 0; i < values.length; ++i) {
+      const v = values[i];
+      if (v !== null && v !== undefined) {
+        const n = Number(v);
+        if (!isNaN(n) && n >= 0 && n < 0x100000000) {
+          buf[count++] = n;
+        }
+      }
+    }
+    return new RoaringBitmap32(buf.subarray(0, count));
+  }
+
+  /**
+   * Creates a new bitmap that contains all the values in the interval: [rangeStart, rangeEnd).
+   * Is possible to specify the step parameter to have a non contiguous range.
+   *
+   * @static
+   * @param rangeStart The start index. Trimmed to 0.
+   * @param rangeEnd The end index. Trimmed to 4294967296.
+   * @param step The increment step, defaults to 1.
+   * @returns A new RoaringBitmap32 instance.
+   */
+  public static fromRange(rangeStart: number = 0, rangeEnd: number = 0x100000000, step: number = 1): RoaringBitmap32 {
+    const bitmap = new RoaringBitmap32();
+    bitmap._ptr = roaringWasm._roaring_bitmap_from_range_js(rangeStart, rangeEnd, _clampToUint32(step) || 1);
+    return bitmap;
   }
 
   /**
@@ -87,22 +127,6 @@ export class RoaringBitmap32 {
    */
   public rangeCardinality(rangeStart: number = 0, rangeEnd: number = 0x10000000): number {
     return roaringWasm._roaring_bitmap_range_cardinality_js(this._ptr, rangeStart, rangeEnd);
-  }
-
-  /**
-   * Creates a new bitmap that contains all the values in the interval: [rangeStart, rangeEnd).
-   * Is possible to specify the step parameter to have a non contiguous range.
-   *
-   * @static
-   * @param rangeStart The start index. Trimmed to 0.
-   * @param rangeEnd The end index. Trimmed to 4294967296.
-   * @param step The increment step, defaults to 1.
-   * @returns A new RoaringBitmap32 instance.
-   */
-  public static fromRange(rangeStart: number = 0, rangeEnd: number = 0x100000000, step: number = 1): RoaringBitmap32 {
-    const bitmap = new RoaringBitmap32();
-    bitmap._ptr = roaringWasm._roaring_bitmap_from_range_js(rangeStart, rangeEnd, _clampToUint32(step) || 1);
-    return bitmap;
   }
 
   /**
@@ -300,6 +324,19 @@ export class RoaringBitmap32 {
   public static addOffset(input: RoaringBitmap32, offset: number): RoaringBitmap32 {
     const result = new RoaringBitmap32();
     result._ptr = roaringWasm._roaring_bitmap_add_offset_js(input._ptr, offset);
+    return result;
+  }
+
+  /**
+   * Creates a new bitmap with the content of the input bitmap but with given range of values flipped.
+   * @param input The input bitmap, it will not be modified
+   * @param rangeStart The start index (inclusive).
+   * @param rangeEnd The end index (exclusive).
+   * @returns A new copied bitmap with the range flipped.
+   */
+  public static flipRange(input: RoaringBitmap32, rangeStart: number, rangeEnd: number): RoaringBitmap32 {
+    const result = new RoaringBitmap32();
+    result._ptr = roaringWasm._roaring_bitmap_flip_range_static_js(input._ptr, rangeStart, rangeEnd);
     return result;
   }
 
@@ -850,5 +887,71 @@ export class RoaringBitmap32 {
    */
   public shrinkToFit(): number {
     return roaringWasm._roaring_bitmap_shrink_to_fit_js(this._ptr);
+  }
+
+  /**
+   * Returns a new RoaringBitmap32 with the intersection (and) between the given two bitmaps.
+   *
+   * The provided bitmaps are not modified.
+   *
+   * @param a - The first RoaringBitmap32 instance to and.
+   * @param b - The second RoaringBitmap32 instance to and.
+   * @returns A new RoaringBitmap32 that contains the intersection a AND b
+   */
+  public static and(a: RoaringBitmap32, b: RoaringBitmap32): RoaringBitmap32 {
+    const pa = _getPtr(a);
+    const pb = _getPtr(b);
+    const result = new RoaringBitmap32();
+    result._ptr = roaringWasm._roaring_bitmap_and(pa, pb);
+    return result;
+  }
+
+  /**
+   * Returns a new RoaringBitmap32 with the union (or) of the two given bitmaps.
+   *
+   * The provided bitmaps are not modified.
+   *
+   * @param a The first RoaringBitmap32 instance to or.
+   * @param b The second RoaringBitmap32 instance to or.
+   */
+  public static or(a: RoaringBitmap32, b: RoaringBitmap32): RoaringBitmap32 {
+    const pa = _getPtr(a);
+    const pb = _getPtr(b);
+    const result = new RoaringBitmap32();
+    result._ptr = roaringWasm._roaring_bitmap_or(pa, pb);
+    return result;
+  }
+
+  /**
+   * Returns a new RoaringBitmap32 with the symmetric union (xor) between the two given bitmaps.
+   *
+   * The provided bitmaps are not modified.
+   *
+   * @param a The first RoaringBitmap32 instance to xor.
+   * @param b The second RoaringBitmap32 instance to xor.
+   */
+  public static xor(a: RoaringBitmap32, b: RoaringBitmap32): RoaringBitmap32 {
+    const pa = _getPtr(a);
+    const pb = _getPtr(b);
+    const result = new RoaringBitmap32();
+    result._ptr = roaringWasm._roaring_bitmap_xor(pa, pb);
+    return result;
+  }
+
+  /**
+   * Returns a new RoaringBitmap32 with the difference (and not) between the two given bitmaps.
+   *
+   * The provided bitmaps are not modified.
+   *
+   * @static
+   * @param a The first RoaringBitmap32 instance.
+   * @param b The second RoaringBitmap32 instance.
+   */
+  public static andNot(a: RoaringBitmap32, b: RoaringBitmap32): RoaringBitmap32 {
+    const pa = _getPtr(a);
+    const pb = _getPtr(b);
+    const result = new RoaringBitmap32();
+    result._ptr = roaringWasm._roaring_bitmap_andnot(pa, pb);
+    return result;
   }
 }

@@ -103,6 +103,17 @@ void roaring_bitmap_flip_range_inplace_js(roaring_bitmap_t * bm, double minimum,
   }
 }
 
+roaring_bitmap_t * _roaring_bitmap_flip_range_static_js(const roaring_bitmap_t * input, double minimum, double maximum) {
+  uint64_t minInteger, maxInteger;
+  if (getRangeOperationParameters(minimum, maximum, &minInteger, &maxInteger)) {
+    if (input) {
+      return roaring_bitmap_flip(input, minInteger, maxInteger);
+    }
+    return roaring_bitmap_from_range(minInteger, maxInteger, 1);
+  }
+  return NULL;
+}
+
 roaring_bitmap_t * roaring_bitmap_add_offset_js(const roaring_bitmap_t * input, double offset) {
   if (!input) {
     return NULL;

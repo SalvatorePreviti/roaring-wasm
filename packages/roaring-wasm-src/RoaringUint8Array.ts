@@ -92,7 +92,6 @@ export class RoaringUint8Array implements Iterable<number> {
   public constructor(lengthOrArray: number | Iterable<number> | ArrayLike<number>, _pointer?: number) {
     this.byteOffset = 0;
     this.length = 0;
-    RoaringArenaAlloc.register(this);
 
     let length: number;
     if (typeof lengthOrArray === "number") {
@@ -127,6 +126,8 @@ export class RoaringUint8Array implements Iterable<number> {
         }
       }
     }
+
+    RoaringArenaAlloc.register(this);
   }
 
   /**

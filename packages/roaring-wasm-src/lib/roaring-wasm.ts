@@ -69,6 +69,12 @@ export type RoaringWasm = {
   _roaring_bitmap_run_optimize(roaring: number): number | boolean;
   _roaring_bitmap_shrink_to_fit_js(roaring: NullablePtr): number;
   _roaring_bitmap_remove_run_compression(roaring: number): number | boolean;
+  _roaring_bitmap_flip_range_static_js(roaring: NullablePtr, start: number, end: number): number;
+
+  _roaring_bitmap_and(roaring1: number, roaring2: number): number;
+  _roaring_bitmap_or(roaring1: number, roaring2: number): number;
+  _roaring_bitmap_xor(roaring1: number, roaring2: number): number;
+  _roaring_bitmap_andnot(roaring1: number, roaring2: number): number;
 };
 
 const _loadedModule = roaring_wasm_module_init<RoaringWasm>();

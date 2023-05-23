@@ -42,6 +42,7 @@ const exportedFunctions = [
   "_roaring_bitmap_serialize",
   "_roaring_bitmap_deserialize",
 
+  "_roaring_bitmap_flip_range_static_js",
   "_roaring_bitmap_from_range_js",
   "_roaring_bitmap_contains_range_js",
   "_roaring_bitmap_add_range_js",
