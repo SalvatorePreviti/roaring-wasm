@@ -128,4 +128,31 @@ describe("RoaringBitmap32", () => {
       expect(Array.from(bitmap2.toUint32Array())).deep.equal(values);
     });
   });
+
+  describe("at", () => {
+    it("returns the value at the given index", () => {
+      const bitmap = new RoaringBitmap32([1, 12, 30, 0xffff]);
+      expect(bitmap.at(0)).eq(1);
+      expect(bitmap.at(1)).eq(12);
+      expect(bitmap.at(2)).eq(30);
+      expect(bitmap.at(3)).eq(0xffff);
+      expect(bitmap.at(4)).eq(undefined);
+      expect(bitmap.at(5)).eq(undefined);
+      expect(bitmap.at(-5)).eq(undefined);
+
+      expect(bitmap.at(1.5)).eq(12);
+      expect(bitmap.at("1.5" as any)).eq(12);
+    });
+
+    it("works with negative indices", () => {
+      const bitmap = new RoaringBitmap32([1, 12, 3]);
+      expect(bitmap.at(-1)).eq(12);
+      expect(bitmap.at(-1.4)).eq(12);
+      expect(bitmap.at(-2)).eq(3);
+      expect(bitmap.at(-2.9)).eq(3);
+      expect(bitmap.at(-3)).eq(1);
+      expect(bitmap.at("-3" as any)).eq(1);
+      expect(bitmap.at(-4)).eq(undefined);
+    });
+  });
 });

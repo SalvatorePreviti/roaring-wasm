@@ -32,9 +32,10 @@ export type RoaringWasm = {
   _roaring_bitmap_is_strict_subset(roaring1: number, roaring2: number): boolean;
   _roaring_bitmap_to_uint32_array(roaring: number, arrayPtr: number): void;
   _roaring_bitmap_equals(roaring1: number, roaring2: number): boolean;
-  _roaring_bitmap_optimize_js(roaring: number): boolean;
-  _roaring_bitmap_select_js(roaring: number, rank: number): number;
-  _roaring_bitmap_get_index(roaring: number, rank: number): number;
+  _roaring_bitmap_optimize_js(roaring: NullablePtr): boolean;
+  _roaring_bitmap_at_js(roaring: NullablePtr, index: number): number;
+  _roaring_bitmap_select_js(roaring: NullablePtr, rank: number): number;
+  _roaring_bitmap_get_index_js(roaring: NullablePtr, rank: number): number;
   _roaring_bitmap_and_cardinality(roaring1: number, roaring2: number): number;
   _roaring_bitmap_or_cardinality(roaring1: number, roaring2: number): number;
   _roaring_bitmap_andnot_cardinality(roaring1: number, roaring2: number): number;
@@ -64,11 +65,17 @@ export type RoaringWasm = {
   _roaring_bitmap_add_offset_js(roaring: NullablePtr, offset: number): number;
   _roaring_bitmap_copy(roaring: number): number;
   _roaring_bitmap_overwrite(roaring: number, other: number): void;
-  _roaring_bitmap_clear(roaring: number): void;
-
   _roaring_bitmap_run_optimize(roaring: number): number | boolean;
   _roaring_bitmap_shrink_to_fit_js(roaring: NullablePtr): number;
   _roaring_bitmap_remove_run_compression(roaring: number): number | boolean;
+  _roaring_bitmap_flip_range_static_js(roaring: NullablePtr, start: number, end: number): number;
+  _roaring_bitmap_and(roaring1: number, roaring2: number): number;
+  _roaring_bitmap_or(roaring1: number, roaring2: number): number;
+  _roaring_bitmap_xor(roaring1: number, roaring2: number): number;
+  _roaring_bitmap_andnot(roaring1: number, roaring2: number): number;
+  _roaring_bitmap_or_many(count: number, bitmapsPtrs: number): number;
+  _roaring_bitmap_xor_many(count: number, bitmapsPtrs: number): number;
+  _roaring_bitmap_intersect_with_range_js(bitmap: NullablePtr, rangeStart: number, rangeEnd: number): number | boolean;
 };
 
 const _loadedModule = roaring_wasm_module_init<RoaringWasm>();

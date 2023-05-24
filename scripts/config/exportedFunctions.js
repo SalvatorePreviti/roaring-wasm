@@ -18,7 +18,8 @@ const exportedFunctions = [
   "_roaring_bitmap_equals",
   "_roaring_bitmap_optimize_js",
   "_roaring_bitmap_select_js",
-  "_roaring_bitmap_get_index",
+  "_roaring_bitmap_get_index_js",
+  "_roaring_bitmap_at_js",
   "_roaring_bitmap_and_cardinality",
   "_roaring_bitmap_or_cardinality",
   "_roaring_bitmap_andnot_cardinality",
@@ -42,6 +43,7 @@ const exportedFunctions = [
   "_roaring_bitmap_serialize",
   "_roaring_bitmap_deserialize",
 
+  "_roaring_bitmap_flip_range_static_js",
   "_roaring_bitmap_from_range_js",
   "_roaring_bitmap_contains_range_js",
   "_roaring_bitmap_add_range_js",
@@ -51,10 +53,16 @@ const exportedFunctions = [
   "_roaring_bitmap_add_offset_js",
   "_roaring_bitmap_copy",
   "_roaring_bitmap_overwrite",
-  "_roaring_bitmap_clear",
   "_roaring_bitmap_run_optimize",
   "_roaring_bitmap_shrink_to_fit_js",
   "_roaring_bitmap_remove_run_compression",
+  "_roaring_bitmap_and",
+  "_roaring_bitmap_or",
+  "_roaring_bitmap_xor",
+  "_roaring_bitmap_andnot",
+  "_roaring_bitmap_or_many",
+  "_roaring_bitmap_xor_many",
+  "_roaring_bitmap_intersect_with_range_js",
 ];
 
 module.exports = exportedFunctions;
