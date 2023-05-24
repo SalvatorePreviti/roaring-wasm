@@ -15,19 +15,53 @@
 
 bool roaring_bitmap_optimize_js(roaring_bitmap_t * bitmap) {
   bool result = false;
-  for (int repeat = 0; repeat < 4; ++repeat) {
-    if (roaring_bitmap_run_optimize(bitmap)) result = true;
-    if (roaring_bitmap_shrink_to_fit(bitmap)) result = true;
-    if (!result) {
-      break;
+  if (bitmap) {
+    for (int repeat = 0; repeat < 4; ++repeat) {
+      if (roaring_bitmap_run_optimize(bitmap)) {
+        result = true;
+      }
+      if (roaring_bitmap_shrink_to_fit(bitmap)) {
+        result = true;
+      }
+      if (!result) {
+        break;
+      }
     }
   }
   return result;
 }
 
-double roaring_bitmap_select_js(const roaring_bitmap_t * bm, uint32_t rank) {
+double roaring_bitmap_select_js(const roaring_bitmap_t * bm, double rank) {
+  if (!bm || isnan(rank) || rank <= -1 || rank >= 0x100000000) {
+    return NAN;
+  }
   uint32_t element;
-  return roaring_bitmap_select(bm, rank, &element) ? element : NAN;
+  return roaring_bitmap_select(bm, (uint32_t)rank, &element) ? element : NAN;
+}
+
+double roaring_bitmap_get_index_js(const roaring_bitmap_t * bm, double x) {
+  if (!bm || isnan(x) || x <= -1 || x >= 0x100000000) {
+    return -1;
+  }
+  return roaring_bitmap_get_index(bm, (uint32_t)x);
+}
+
+double roaring_bitmap_at_js(const roaring_bitmap_t * bm, double index) {
+  if (!bm || isnan(index)) {
+    return -1;
+  }
+  index = trunc(index);
+  if (index < 0) {
+    index += (double)roaring_bitmap_get_cardinality(bm);
+    if (index < 0) {
+      return -1;
+    }
+  }
+  if (index > UINT32_MAX) {
+    return -1;
+  }
+  uint32_t result;
+  return roaring_bitmap_select(bm, (uint32_t)index, &result) ? result : -1.0;
 }
 
 inline bool getRangeOperationParameters(double minimum, double maximum, uint64_t * minInteger, uint64_t * maxInteger) {
@@ -103,24 +137,30 @@ void roaring_bitmap_flip_range_inplace_js(roaring_bitmap_t * bm, double minimum,
   }
 }
 
-roaring_bitmap_t * _roaring_bitmap_flip_range_static_js(const roaring_bitmap_t * input, double minimum, double maximum) {
+roaring_bitmap_t * roaring_bitmap_flip_range_static_js(const roaring_bitmap_t * input, double minimum, double maximum) {
   uint64_t minInteger, maxInteger;
   if (getRangeOperationParameters(minimum, maximum, &minInteger, &maxInteger)) {
-    if (input) {
-      return roaring_bitmap_flip(input, minInteger, maxInteger);
-    }
-    return roaring_bitmap_from_range(minInteger, maxInteger, 1);
+    return input ? roaring_bitmap_flip(input, minInteger, maxInteger) : roaring_bitmap_from_range(minInteger, maxInteger, 1);
   }
   return NULL;
+}
+
+bool roaring_bitmap_intersect_with_range_js(const roaring_bitmap_t * input, double minimum, double maximum) {
+  uint64_t minInteger, maxInteger;
+  if (input && getRangeOperationParameters(minimum, maximum, &minInteger, &maxInteger)) {
+    return roaring_bitmap_intersect_with_range(input, minInteger, (uint64_t)(maxInteger - 1));
+  }
+  return false;
 }
 
 roaring_bitmap_t * roaring_bitmap_add_offset_js(const roaring_bitmap_t * input, double offset) {
   if (!input) {
     return NULL;
   }
-  if (isnan(offset)) {
-    offset = 0;
-  } else if (offset < -4294967296) {
+  if (isnan(offset) || offset == 0) {
+    return roaring_bitmap_copy(input);
+  }
+  if (offset < -4294967296) {
     offset = -4294967296;
   } else if (offset > 4294967296) {
     offset = 4294967296;
