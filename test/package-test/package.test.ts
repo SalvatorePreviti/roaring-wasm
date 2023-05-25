@@ -8,8 +8,8 @@ import * as roaring from "roaring-wasm";
  */
 describe("package test", () => {
   before(roaring.roaringLibraryInitialize);
-  beforeEach(roaring.RoaringArenaAlloc.push);
-  afterEach(roaring.RoaringArenaAlloc.pop);
+  beforeEach(roaring.RoaringArenaAllocator.start);
+  afterEach(roaring.RoaringArenaAllocator.stop);
 
   it("loads the package correctly", () => {
     const bitmap = new roaring.RoaringBitmap32([1, 2, 3]);

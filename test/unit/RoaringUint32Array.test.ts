@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { roaringWasm } from "../../packages/roaring-wasm-src/lib/roaring-wasm";
-import { RoaringArenaAlloc, RoaringUint32Array, roaringLibraryInitialize } from "roaring-wasm-src";
+import { RoaringArenaAllocator, RoaringUint32Array, roaringLibraryInitialize } from "roaring-wasm-src";
 
 function sameInstance(a: any, b: any): boolean {
   return a === b;
@@ -8,8 +8,8 @@ function sameInstance(a: any, b: any): boolean {
 
 describe("RoaringUint32Array", () => {
   before(roaringLibraryInitialize);
-  beforeEach(RoaringArenaAlloc.push);
-  afterEach(RoaringArenaAlloc.pop);
+  beforeEach(RoaringArenaAllocator.start);
+  afterEach(RoaringArenaAllocator.stop);
 
   it("allows creating empty arrays", () => {
     const p = new RoaringUint32Array(0);
@@ -52,5 +52,49 @@ describe("RoaringUint32Array", () => {
     expect(p.toArray()).deep.eq([123, 189, 456, 789]);
     const q = new RoaringUint32Array(p);
     expect(q.toArray()).deep.eq([123, 189, 456, 789]);
+  });
+
+  describe("shrink", () => {
+    it("should shrink the allocated memory", () => {
+      const array = new RoaringUint32Array(100);
+      expect(array.byteLength).eq(100 * 4);
+      expect(array.length).eq(100);
+      expect(array.shrink(50)).true;
+      expect(array.byteLength).eq(50 * 4);
+      expect(array.length).eq(50);
+      expect(array.shrink(50)).false;
+      expect(array.byteLength).eq(50 * 4);
+      expect(array.length).eq(50);
+      expect(array.shrink(0)).true;
+      expect(array.byteLength).eq(0 * 4);
+      expect(array.length).eq(0);
+      expect(array.shrink(0)).false;
+      expect(array.byteLength).eq(0 * 4);
+      expect(array.length).eq(0);
+      expect(array.isDisposed).true;
+    });
+  });
+
+  describe("at", () => {
+    it("should return the value at the given index", () => {
+      const array = new RoaringUint32Array([1, 2, 3]);
+      expect(array.at(0)).eq(1);
+      expect(array.at(1)).eq(2);
+      expect(array.at(2)).eq(3);
+    });
+
+    it("should behaves like array.at() if the index is negative", () => {
+      const array = new RoaringUint32Array([1, 2, 3]);
+      expect(array.at(-1)).eq(3);
+      expect(array.at(-2)).eq(2);
+      expect(array.at(-3)).eq(1);
+    });
+
+    it("shoudl work for floating point values like array.at()", () => {
+      const array = new RoaringUint32Array([1, 2, 3]);
+      expect(array.at(0.1)).eq(1);
+      expect(array.at(1.1)).eq(2);
+      expect(array.at(2.1)).eq(3);
+    });
   });
 });

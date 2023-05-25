@@ -13,6 +13,8 @@
 
 #define MAX_SERIALIZATION_NATIVE_MEMORY 0x00FFFFFF
 
+roaring_bitmap_t * roaring_bitmap_create_js(void) { return roaring_bitmap_create_with_capacity(0); }
+
 bool roaring_bitmap_optimize_js(roaring_bitmap_t * bitmap) {
   bool result = false;
   if (bitmap) {
@@ -109,11 +111,17 @@ double roaring_bitmap_range_cardinality_js(const roaring_bitmap_t * bm, double m
   return 0;
 }
 
-roaring_bitmap_t * roaring_bitmap_from_range_js(double minimum, double maximum, uint32_t step) {
+roaring_bitmap_t * roaring_bitmap_from_range_js(double minimum, double maximum, double step) {
   uint64_t minInteger, maxInteger;
-  return getRangeOperationParameters(minimum, maximum, &minInteger, &maxInteger)
-    ? roaring_bitmap_from_range(minInteger, maxInteger, step)
-    : 0;
+  if (!getRangeOperationParameters(minimum, maximum, &minInteger, &maxInteger)) {
+    return 0;
+  }
+  if (isnan(step) || step < 1) {
+    step = 1;
+  } else if (step > 0xffffffff) {
+    step = 0xffffffff;
+  }
+  return roaring_bitmap_from_range(minInteger, maxInteger, (uint32_t)step);
 }
 
 void roaring_bitmap_add_range_js(roaring_bitmap_t * bm, double minimum, double maximum) {
@@ -170,4 +178,33 @@ roaring_bitmap_t * roaring_bitmap_add_offset_js(const roaring_bitmap_t * input, 
 
 double roaring_bitmap_shrink_to_fit_js(roaring_bitmap_t * input) {
   return input ? (double)roaring_bitmap_shrink_to_fit(input) : 0;
+}
+
+double roaring_bitmap_jaccard_index_js(const roaring_bitmap_t * x1, const roaring_bitmap_t * x2) {
+  const uint64_t c1 = x1 ? roaring_bitmap_get_cardinality(x1) : 0;
+  const uint64_t c2 = x2 ? roaring_bitmap_get_cardinality(x2) : 0;
+  const uint64_t inter = c1 && c2 ? roaring_bitmap_and_cardinality(x1, x2) : 0;
+  return (double)inter / (double)(c1 + c2 - inter);
+}
+
+roaring_bitmap_t * roaring_bitmap_and_js(const roaring_bitmap_t * a, const roaring_bitmap_t * b) {
+  return a && b ? roaring_bitmap_and(a, b) : 0;
+}
+
+roaring_bitmap_t * roaring_bitmap_or_js(const roaring_bitmap_t * a, const roaring_bitmap_t * b) {
+  if (!a) {
+    return b ? roaring_bitmap_copy(b) : 0;
+  }
+  return b ? roaring_bitmap_or(a, b) : roaring_bitmap_copy(a);
+}
+
+roaring_bitmap_t * roaring_bitmap_xor_js(const roaring_bitmap_t * a, const roaring_bitmap_t * b) {
+  if (!a) {
+    return b ? roaring_bitmap_copy(b) : 0;
+  }
+  return b ? roaring_bitmap_xor(a, b) : roaring_bitmap_copy(a);
+}
+
+roaring_bitmap_t * roaring_bitmap_andnot_js(const roaring_bitmap_t * a, const roaring_bitmap_t * b) {
+  return !a ? 0 : (b ? roaring_bitmap_andnot(a, b) : roaring_bitmap_copy(a));
 }

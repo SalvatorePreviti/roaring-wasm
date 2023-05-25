@@ -62,5 +62,6 @@
   "javascript.format.semicolons": "insert",
   "typescript.format.semicolons": "insert",
   "files.eol": "\n",
-  "git.detectSubmodules": true
+  "git.detectSubmodules": true,
+  "cmake.configureOnOpen": false
 }

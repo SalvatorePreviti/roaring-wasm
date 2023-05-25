@@ -1,15 +1,14 @@
 # roaring-wasm
 
-WebAssembly port of [Roaring Bitmaps](http://roaringbitmap.org) for NodeJS. It is interoperable with other implementations via the [Roaring format](https://github.com/RoaringBitmap/RoaringFormatSpec/).
+WebAssembly port of [Roaring Bitmaps](http://roaringbitmap.org) for Node, Browser and Deno.
+It is interoperable with other implementations via the [Roaring format](https://github.com/RoaringBitmap/RoaringFormatSpec/).
 
 Roaring bitmaps are compressed bitmaps. They can be hundreds of times faster.
 
 ## NOTE
 
-Implementation of all features is not complete and not all features can be implemented.
-
-This package is intended as a stripped down cross platform alternative to [roaring for NodeJS](https://www.npmjs.com/package/roaring) [repository](https://github.com/SalvatorePreviti/roaring-node) that can be used in the browser.
-The NodeJS version has a better API that fully leverages the v8 garbage collector and the native CPU SIMD instructions, and has also asynchronous operations.
+This package is intended as a stripped down cross platform and broewser alternative to [roaring-node](https://www.npmjs.com/package/roaring), [repository](https://github.com/SalvatorePreviti/roaring-node).
+If you are using just NodeJS, [roaring-node](https://github.com/SalvatorePreviti/roaring-node) is faster, has a better API that fully leverages the v8 garbage collector and the native CPU SIMD instructions, and has also asynchronous operations.
 
 ## installation
 
@@ -21,11 +20,12 @@ Try it live - <https://npm.runkit.com/roaring-wasm>
 
 Code sample:
 
-```javascript// npm install --save roaring-wasm
+```javascript
+// npm install --save roaring-wasm
 // create this file as demo.js
 // type node demo.js or nodejs demo.js depending on your system
 
-import { RoaringBitmap32, roaringLibraryInitialize } from 'roaring-wasm';
+import { RoaringBitmap32, roaringLibraryInitialize } from "roaring-wasm";
 
 // This is needed in browser (and in this case we are using top level await), in nodejs this is not required.
 await roaringLibraryInitialize();
@@ -57,9 +57,13 @@ bitmap2.dispose();
 bitmap3.dispose();
 ```
 
+## Documentation
+
+[https://salvatorepreviti.github.io/roaring-wasm](https://salvatorepreviti.github.io/roaring-wasm/modules.html)
+
 ## References
 
-- [roaring for NodeJS](https://www.npmjs.com/package/roaring) [repository](https://github.com/SalvatorePreviti/roaring-node)
+- [roaring for NodeJS](https://www.npmjs.com/package/roaring), [repository](https://github.com/SalvatorePreviti/roaring-node)
 
 - This package - <https://www.npmjs.com/package/roaring-wasm>
 
@@ -113,6 +117,6 @@ To compile and run test
 npm run build
 ```
 
-Output will be generated in the `dist` folder
+Output will be generated in the `packages/roaring-wasm` folder
 
 The build system was tried on Linux and MacOSX, is not tested/maintained for other system or Windows.

@@ -1,10 +1,10 @@
 import { expect } from "chai";
-import { RoaringArenaAlloc, RoaringBitmap32, roaringLibraryInitialize } from "roaring-wasm-src";
+import { RoaringArenaAllocator, RoaringBitmap32, roaringLibraryInitialize } from "roaring-wasm-src";
 
 describe("RoaringBitmap32 empty", () => {
   before(roaringLibraryInitialize);
-  beforeEach(RoaringArenaAlloc.push);
-  afterEach(RoaringArenaAlloc.pop);
+  beforeEach(RoaringArenaAllocator.start);
+  afterEach(RoaringArenaAllocator.stop);
 
   it("should have isEmpty() === true", () => {
     expect(new RoaringBitmap32().isEmpty()).eq(true);
