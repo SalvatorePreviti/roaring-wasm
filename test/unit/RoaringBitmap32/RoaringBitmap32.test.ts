@@ -1,10 +1,10 @@
 import { expect } from "chai";
-import { RoaringArenaAlloc, RoaringBitmap32, RoaringUint32Array, roaringLibraryInitialize } from "roaring-wasm-src";
+import { RoaringArenaAllocator, RoaringBitmap32, RoaringUint32Array, roaringLibraryInitialize } from "roaring-wasm-src";
 
 describe("RoaringBitmap32", () => {
   before(roaringLibraryInitialize);
-  beforeEach(RoaringArenaAlloc.push);
-  afterEach(RoaringArenaAlloc.pop);
+  beforeEach(RoaringArenaAllocator.start);
+  afterEach(RoaringArenaAllocator.stop);
 
   describe("addChecked", () => {
     it("returns false if nothing changes", () => {

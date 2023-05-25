@@ -1,10 +1,10 @@
-import { RoaringArenaAlloc, roaringLibraryInitialize, RoaringBitmap32 } from "roaring-wasm-src";
+import { RoaringArenaAllocator, roaringLibraryInitialize, RoaringBitmap32 } from "roaring-wasm-src";
 import { expect } from "chai";
 
 describe("RoaringBitmap32 static", () => {
   before(roaringLibraryInitialize);
-  beforeEach(RoaringArenaAlloc.push);
-  afterEach(RoaringArenaAlloc.pop);
+  beforeEach(RoaringArenaAllocator.start);
+  afterEach(RoaringArenaAllocator.stop);
 
   describe("addOffset", () => {
     it("returns an empty bitmap if the input bitmap is empty", () => {

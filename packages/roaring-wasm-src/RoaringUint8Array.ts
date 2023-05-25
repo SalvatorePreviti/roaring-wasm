@@ -1,38 +1,35 @@
-import { RoaringArenaAlloc } from "./RoaringArenaAlloc";
 import { roaringWasm } from "./lib/roaring-wasm";
+import { RoaringAllocatedMemory } from "./RoaringAllocatedMemory";
+import type { RoaringArenaAllocator } from "./RoaringArenaAllocator";
 
 /**
  * Array of bytes allocted directly in roaring library WASM memory.
  * Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
  */
-export class RoaringUint8Array implements Iterable<number> {
+export class RoaringUint8Array extends RoaringAllocatedMemory implements Iterable<number> {
   /**
    * The type of typed array used by this class.
    * For RoaringUint8Array is Uint8Array.
    */
-  public static readonly TypedArray: typeof Uint8Array = Uint8Array;
+  public declare static readonly TypedArray: typeof Uint8Array;
 
   /**
    * The size in bytes of each element in the array.
    * For RoaringUint8Array is always 1
    */
-  public static readonly BYTES_PER_ELEMENT: 1 = 1 as const;
+  public declare static readonly BYTES_PER_ELEMENT: 1;
 
   /**
    * The type of typed array used by this class.
    * For RoaringUint8Array is Uint8Array.
    */
-  public get TypedArray(): typeof Uint8Array {
-    return Uint8Array;
-  }
+  public declare readonly TypedArray: typeof Uint8Array;
 
   /**
    * The size in bytes of each element in the array.
    * For RoaringUint8Array is always 1
    */
-  public get BYTES_PER_ELEMENT(): 1 {
-    return 1;
-  }
+  public declare readonly BYTES_PER_ELEMENT: 1;
 
   /**
    * The ArrayBuffer instance referenced by the array.
@@ -45,18 +42,17 @@ export class RoaringUint8Array implements Iterable<number> {
   }
 
   /**
-   * Returns true if this object was deallocated.
+   * The length in bytes of the array.
    */
-  public get isDisposed(): boolean {
-    return !this.byteOffset;
+  public get length(): number {
+    return this.byteLength;
   }
 
   /**
    * The length in bytes of the array.
-   * For RoaringUint8Array it is equal to this.length
    */
-  public get byteLength(): number {
-    return this.length;
+  public get size(): number {
+    return this.byteLength;
   }
 
   /**
@@ -70,14 +66,14 @@ export class RoaringUint8Array implements Iterable<number> {
   }
 
   /**
-   * The offset in bytes of the array (the location of the first byte in WASM memory).
+   * The position in this.heap where the array starts.
+   * Is byteOffset.
+   * @see byteOffset
+   * @see heap
    */
-  public readonly byteOffset: number;
-
-  /**
-   * Number of elements allocated in this array.
-   */
-  public readonly length: number;
+  public get heapOffset(): number {
+    return this.byteOffset;
+  }
 
   /**
    * Allocates an array in the roaring WASM heap.
@@ -89,10 +85,10 @@ export class RoaringUint8Array implements Iterable<number> {
    *
    * @param lengthOrArray - Length of the array to allocate or the array to copy
    */
-  public constructor(lengthOrArray: number | Iterable<number> | ArrayLike<number>, _pointer?: number) {
-    this.byteOffset = 0;
-    this.length = 0;
-
+  public constructor(
+    lengthOrArray?: number | Iterable<number> | ArrayLike<number> | null | undefined,
+    arenaAllocator?: RoaringArenaAllocator | null | undefined,
+  ) {
     let length: number;
     if (typeof lengthOrArray === "number") {
       length = lengthOrArray;
@@ -108,15 +104,14 @@ export class RoaringUint8Array implements Iterable<number> {
     }
 
     if (length > 0) {
-      if (_pointer === undefined) {
-        _pointer = roaringWasm._malloc(length);
+      if (length >= 0x10000000) {
+        throw new RangeError(`RoaringUint8Array too big, ${length} bytes`);
       }
-      if (!_pointer) {
+      const pointer = roaringWasm._malloc(length);
+      if (!pointer) {
         throw new Error(`RoaringUint8Array failed to allocate ${length} bytes`);
       }
-      this.byteOffset = _pointer;
-      this.length = length;
-
+      super(pointer, length, arenaAllocator);
       if (typeof lengthOrArray !== "number") {
         try {
           this.set(lengthOrArray as Iterable<number>);
@@ -125,25 +120,9 @@ export class RoaringUint8Array implements Iterable<number> {
           throw error;
         }
       }
+    } else {
+      super(0, 0, arenaAllocator);
     }
-
-    RoaringArenaAlloc.register(this);
-  }
-
-  /**
-   * Frees the allocated memory.
-   * Is safe to call this method more than once.
-   * @returns True if memory gets freed during this call, false if not.
-   */
-  public dispose(): boolean {
-    const ptr = this.byteOffset;
-    if (ptr) {
-      (this as { byteOffset: number }).byteOffset = 0;
-      (this as { length: number }).length = 0;
-      roaringWasm._free(ptr);
-      return true;
-    }
-    return false;
   }
 
   /**
@@ -254,33 +233,45 @@ export class RoaringUint8Array implements Iterable<number> {
   public [Symbol.iterator](): IterableIterator<number> {
     return this.asTypedArray()[Symbol.iterator]();
   }
+
+  /**
+   * The at() method takes an integer value and returns the item at that index, allowing for positive and negative integers. Negative integers count back from the last item in the array.
+   * Follows the specification for array.at().
+   * If the computed index is less than 0, or equal to length, undefined is returned.
+   * @param index - Zero-based index of the array element to be returned, converted to an integer. Negative index counts back from the end of the array — if index < 0, index + array.length is accessed.
+   * @returns The element in the array matching the given index. Always returns undefined if index < -array.length or index >= array.length without attempting to access the corresponding property.
+   */
+  public at(index: number): number | undefined {
+    const { length, byteOffset, heap } = this;
+    if (index < 0) {
+      index += length;
+    }
+    return index >= 0 && index < length ? heap[(byteOffset + index) >>> 0] : undefined;
+  }
+
+  /**
+   * Sets the value at the given index.
+   * @param index - Zero-based index of the array element to be set, converted to an integer. Negative index counts back from the end of the array — if index < 0, index + array.length is accessed.
+   * @param value - The value to set at the given index.
+   * @returns True if the value was set, false if the index is out of bounds.
+   */
+  public setAt(index: number, value: number): boolean {
+    const { length, byteOffset, heap } = this;
+    if (index < 0) {
+      index += length;
+    }
+    if (index >= 0 && index < length) {
+      heap[(byteOffset + index) >>> 0] = value;
+      return true;
+    }
+    return false;
+  }
 }
 
-Object.defineProperties(RoaringUint8Array.prototype, {
-  TypedArray: {
-    value: Uint8Array,
-    writable: false,
-    configurable: false,
-    enumerable: false,
-  },
-  BYTES_PER_ELEMENT: {
-    value: 1,
-    writable: false,
-    configurable: false,
-    enumerable: false,
-  },
-  size: {
-    get: function getSize(this: RoaringUint8Array) {
-      return this.length;
-    },
-    configurable: false,
-    enumerable: false,
-  },
-  toJSON: {
-    value() {
-      return {};
-    },
-    configurable: true,
-    enumerable: false,
-  },
-});
+const _props = {
+  TypedArray: { value: Uint8Array },
+  BYTES_PER_ELEMENT: { value: 1 },
+};
+
+Object.defineProperties(RoaringUint8Array, _props);
+Object.defineProperties(RoaringUint8Array.prototype, _props);

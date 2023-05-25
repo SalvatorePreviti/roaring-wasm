@@ -16,6 +16,7 @@ export type RoaringWasm = {
 
   _malloc(size: number): Ptr;
   _free(pointer: NullablePtr): void;
+  _roaring_bitmap_create_js(): number;
   _roaring_bitmap_create_with_capacity(capacity: number): number;
   _roaring_bitmap_free(roaring: number): void;
   _roaring_bitmap_get_cardinality(roaring: number): number;
@@ -46,7 +47,7 @@ export type RoaringWasm = {
   _roaring_bitmap_xor_inplace(roaring1: number, roaring2: number): void;
   _roaring_bitmap_andnot_inplace(roaring1: number, roaring2: number): void;
   _roaring_bitmap_intersect(roaring1: number, roaring2: number): boolean;
-  _roaring_bitmap_jaccard_index(roaring1: number, roaring2: number): number;
+  _roaring_bitmap_jaccard_index_js(roaring1: NullablePtr, roaring2: NullablePtr): number;
 
   _roaring_bitmap_portable_size_in_bytes(roaring: number): number;
   _roaring_bitmap_portable_serialize(roaring: number, buf: number): number;
@@ -69,10 +70,10 @@ export type RoaringWasm = {
   _roaring_bitmap_shrink_to_fit_js(roaring: NullablePtr): number;
   _roaring_bitmap_remove_run_compression(roaring: number): number | boolean;
   _roaring_bitmap_flip_range_static_js(roaring: NullablePtr, start: number, end: number): number;
-  _roaring_bitmap_and(roaring1: number, roaring2: number): number;
-  _roaring_bitmap_or(roaring1: number, roaring2: number): number;
-  _roaring_bitmap_xor(roaring1: number, roaring2: number): number;
-  _roaring_bitmap_andnot(roaring1: number, roaring2: number): number;
+  _roaring_bitmap_and_js(roaring1: NullablePtr, roaring2: NullablePtr): number;
+  _roaring_bitmap_or_js(roaring1: NullablePtr, roaring2: NullablePtr): number;
+  _roaring_bitmap_xor_js(roaring1: NullablePtr, roaring2: NullablePtr): number;
+  _roaring_bitmap_andnot_js(roaring1: NullablePtr, roaring2: NullablePtr): number;
   _roaring_bitmap_or_many(count: number, bitmapsPtrs: number): number;
   _roaring_bitmap_xor_many(count: number, bitmapsPtrs: number): number;
   _roaring_bitmap_intersect_with_range_js(bitmap: NullablePtr, rangeStart: number, rangeEnd: number): number | boolean;

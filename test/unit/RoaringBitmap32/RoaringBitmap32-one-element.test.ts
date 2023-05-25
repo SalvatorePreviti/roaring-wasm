@@ -1,10 +1,10 @@
 import { expect } from "chai";
-import { RoaringArenaAlloc, RoaringBitmap32, roaringLibraryInitialize } from "roaring-wasm-src";
+import { RoaringArenaAllocator, RoaringBitmap32, roaringLibraryInitialize } from "roaring-wasm-src";
 
 describe("RoaringBitmap32 one element", () => {
   before(roaringLibraryInitialize);
-  beforeEach(RoaringArenaAlloc.push);
-  afterEach(RoaringArenaAlloc.pop);
+  beforeEach(RoaringArenaAllocator.start);
+  afterEach(RoaringArenaAllocator.stop);
 
   describe("read", () => {
     it("should not be empty", () => {

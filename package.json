@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@balsamic/eslint-config": "^0.4.1",
-    "@playwright/test": "^1.34.1",
+    "@playwright/test": "^1.34.3",
     "@types/chai": "^4.3.5",
     "@types/chai-as-promised": "^7.1.5",
     "@types/mocha": "^10.0.1",
@@ -56,6 +56,7 @@
     "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
     "delete-empty": "^3.0.0",
+    "esbuild": "^0.17.19",
     "eslint": "^8.41.0",
     "eslint-plugin-chai-expect": "^3.0.0",
     "eslint-plugin-import": "^2.27.5",

@@ -2,11 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "emitDeclarationOnly": true,
-    "declaration": true,
-    "allowJs": false,
-    "noEmit": false,
-    "outDir": "build/tsc",
-    "pretty": true
+    "declaration": true
   },
   "include": ["src/ts/**/*"],
   "exclude": ["test/**/*", "node_modules/**/*", ".tmp/**/*", "temp/**/*", "packages/roaring-wasm/**/*", "docs/**/*"]
