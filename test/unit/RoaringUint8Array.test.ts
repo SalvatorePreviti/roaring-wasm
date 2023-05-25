@@ -183,9 +183,10 @@ describe("RoaringUint8Array", () => {
 
     it("should behaves like array.at() if the index is negative", () => {
       const array = new RoaringUint8Array([1, 2, 3]);
-      expect(array.setAt(-1, 10)).false;
-      expect(array.setAt(-2, 20)).false;
-      expect(array.setAt(-3, 30)).false;
+      expect(array.setAt(-1, 10)).true;
+      expect(array.setAt(-2, 20)).true;
+      expect(array.setAt(-3, 30)).true;
+      expect(array.toArray()).deep.eq([30, 20, 10]);
     });
 
     it("should return false if the index is out of bounds", () => {
@@ -193,6 +194,7 @@ describe("RoaringUint8Array", () => {
       expect(array.setAt(3, 10)).false;
       expect(array.setAt(4, 20)).false;
       expect(array.setAt(-5, 30)).false;
+      expect(array.toArray()).deep.eq([1, 2, 3]);
     });
 
     it("shoudl work for floating point values like array.at()", () => {
