@@ -51,6 +51,8 @@ function buildLinkArgs(environment) {
   linkargs.push("-s", "MIN_NODE_VERSION=160000");
   linkargs.push("-s", `ENVIRONMENT=${environment === "browser" ? "web,worker" : "node"}`);
 
+  linkargs.push("-s", "ASSERTIONS"); // useful when debugging
+
   if (environment === "browser") {
     linkargs.push("-s", "USE_ES6_IMPORT_META=0");
   }

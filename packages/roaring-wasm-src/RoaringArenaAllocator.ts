@@ -9,6 +9,7 @@ import {
   _roaringArenaAllocator_pop,
   _roaringArenaAllocator_push,
 } from "./lib/roaring-arena-allocator-stack";
+import { RoaringBitmap32Iterator } from "./RoaringBitmap32Iterator";
 
 export class RoaringArenaAllocator {
   #refs: Set<IDisposable> | null;
@@ -118,6 +119,11 @@ export class RoaringArenaAllocator {
     return disposable;
   }
 
+  public unregister(disposable: IDisposable | null | undefined): boolean {
+    const refs = this.#refs;
+    return !!refs && refs.delete(disposable!);
+  }
+
   public escape<T extends IDisposable>(disposable: T): T {
     (this.#escaped || (this.#escaped = new Set())).add(disposable);
     return disposable;
@@ -131,6 +137,11 @@ export class RoaringArenaAllocator {
   public newRoaringUint32Array(lengthOrArray?: number | Iterable<number> | ArrayLike<number> | null | undefined) {
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new RoaringUint32Array(lengthOrArray, this);
+  }
+
+  public newRoaringBitmap32Iterator(bitmap?: RoaringBitmap32 | null | undefined): RoaringBitmap32Iterator {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    return new RoaringBitmap32Iterator(bitmap, this);
   }
 
   public newRoaringBitmap32(

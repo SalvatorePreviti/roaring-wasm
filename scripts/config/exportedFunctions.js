@@ -1,5 +1,5 @@
 const exportedFunctions = [
-  "_malloc",
+  "_jsalloc_zero",
   "_free",
 
   "_roaring_bitmap_create_js",
@@ -64,6 +64,10 @@ const exportedFunctions = [
   "_roaring_bitmap_or_many",
   "_roaring_bitmap_xor_many",
   "_roaring_bitmap_intersect_with_range_js",
+
+  "_roaring_iterator_js_new_gte",
+  "_roaring_iterator_js_clone",
+  "_roaring_iterator_js_next",
 ];
 
 module.exports = exportedFunctions;

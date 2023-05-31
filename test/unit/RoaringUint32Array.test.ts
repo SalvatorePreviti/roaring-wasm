@@ -20,7 +20,7 @@ describe("RoaringUint32Array", () => {
     expect(p.heap).to.be.an.instanceOf(Uint32Array);
     expect(p.buffer).to.be.an.instanceOf(ArrayBuffer);
     expect(sameInstance(p.heap, roaringWasm.HEAPU32)).eq(true);
-    expect(sameInstance(p.buffer, roaringWasm.HEAP8.buffer)).eq(true);
+    expect(sameInstance(p.buffer, roaringWasm.HEAPU8.buffer)).eq(true);
     expect(p.toArray()).deep.eq([]);
     expect(p.isDisposed).eq(true);
   });
@@ -34,7 +34,7 @@ describe("RoaringUint32Array", () => {
     expect(p.heap).to.be.an.instanceOf(Uint32Array);
     expect(p.buffer).to.be.an.instanceOf(ArrayBuffer);
     expect(sameInstance(p.heap, roaringWasm.HEAPU32)).eq(true);
-    expect(sameInstance(p.buffer, roaringWasm.HEAP8.buffer)).eq(true);
+    expect(sameInstance(p.buffer, roaringWasm.HEAPU8.buffer)).eq(true);
     expect(p.isDisposed).eq(false);
   });
 

@@ -63,5 +63,9 @@
   "typescript.format.semicolons": "insert",
   "files.eol": "\n",
   "git.detectSubmodules": true,
-  "cmake.configureOnOpen": false
+  "cmake.configureOnOpen": false,
+  "files.associations": {
+    "filesystem": "c",
+    "__locale": "c"
+  }
 }
