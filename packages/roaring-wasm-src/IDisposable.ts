@@ -92,3 +92,34 @@ export const using: {
   dispose(disposable);
   return result;
 };
+
+export const disposeAll = (
+  ...disposables: readonly (
+    | readonly (IDisposable | null | undefined | false | readonly (IDisposable | null | undefined | false)[])[]
+    | IDisposable
+    | null
+    | undefined
+    | false
+  )[]
+): number => {
+  let result = 0;
+  let errorToThrow: Error | undefined;
+  for (const disposable of disposables) {
+    try {
+      if (isDisposable(disposable)) {
+        if (dispose(disposable)) {
+          ++result;
+        }
+      }
+    } catch (e) {
+      errorToThrow = e as Error;
+    }
+    if (Array.isArray(disposable)) {
+      disposeAll(...disposable);
+    }
+  }
+  if (errorToThrow !== undefined) {
+    throw errorToThrow;
+  }
+  return result;
+};
