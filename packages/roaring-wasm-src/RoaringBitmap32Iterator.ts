@@ -121,12 +121,12 @@ export class RoaringBitmap32Iterator implements IDisposable, IterableIterator<nu
     }
     if (ptr) {
       this.reset();
+      const allocator = this.#alloc;
+      if (allocator) {
+        allocator.unregister(this);
+      }
     }
     this.#ptr = false;
-    const allocator = this.#alloc;
-    if (allocator) {
-      allocator.unregister(this);
-    }
     return true;
   }
 

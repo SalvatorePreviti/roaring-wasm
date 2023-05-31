@@ -225,7 +225,7 @@ roaring_bitmap_t * roaring_bitmap_andnot_js(const roaring_bitmap_t * a, const ro
   return !a ? NULL : (b ? roaring_bitmap_andnot(a, b) : roaring_bitmap_copy(a));
 }
 
-#define ROARING_ITERATOR_JS_BUFFER_SIZE 4000
+#define ROARING_ITERATOR_JS_BUFFER_SIZE 3000
 
 typedef struct roaring_iterator_js_s {
   // Must be the first field
