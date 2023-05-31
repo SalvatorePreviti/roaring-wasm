@@ -135,7 +135,7 @@ describe("RoaringBitmap32Iterator", () => {
       }
     });
 
-    it("allow iterating while modifying (slow path)", () => {
+    it("allow iterating while modifying", () => {
       const bitmap = RoaringBitmap32.fromRange(100, 50000, 2);
       const iter = new RoaringBitmap32Iterator(bitmap);
       const arr: number[] = [];

@@ -85,9 +85,9 @@ async function compileWasm() {
   emccFlags.push("-O3");
   emccFlags.push("-g0");
   emccFlags.push("-msimd128");
-  emccFlags.push("-mavx");
-  emccFlags.push("-msse4.1");
-  emccFlags.push("-msse3");
+  emccFlags.push("-mfpu=neon");
+  // emccFlags.push("-DCROARING_USENEON");
+  // emccFlags.push("-DSIMDE_NO_CONVERT_VECTOR");
 
   const cflags = [];
   cflags.push("-O3");
