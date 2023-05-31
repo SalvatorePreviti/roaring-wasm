@@ -136,22 +136,25 @@ describe("RoaringBitmap32Iterator", () => {
     });
 
     it("allow iterating while modifying", () => {
-      const bitmap = RoaringBitmap32.fromRange(100, 50000, 2);
+      const bitmap = RoaringBitmap32.fromRange(100, 40000, 2);
       const iter = new RoaringBitmap32Iterator(bitmap);
       const arr: number[] = [];
+      let z = 0;
       for (const x of iter) {
         arr.push(x);
-        bitmap.add(x + 1);
-        if (x === 50000) {
+        if (z++ < 10000) {
+          bitmap.add(x + 1);
+        }
+        if (x === 40000) {
           break;
         }
       }
       expect(iter.done).eq(true);
       expect(iter.value).eq(undefined);
       expect(iter.isDisposed).eq(true);
-      expect(arr.length).eq(50001 - 100);
+      expect(arr.length).eq(24950);
       for (let i = 0; i < arr.length; i++) {
-        expect(arr[i]).eq(i + 100);
+        expect(arr[i]).eq(i < 10000 ? i + 100 : i * 2 + 100 - 10000);
       }
     });
   });

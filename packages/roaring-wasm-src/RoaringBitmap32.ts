@@ -23,6 +23,7 @@ const _throwFrozen = (): never => {
 export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   #ptr: NullablePtr;
   #v: number;
+  #frozen: 0 | 1;
   #size: number;
   #alloc: RoaringArenaAllocator | null;
 
@@ -33,8 +34,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * This property is useful to check if the bitmap changed since the last time you checked it.
    */
   public get v(): number {
-    const v = this.#v;
-    return v < 0 ? -v : v;
+    return this.#v;
   }
 
   /**
@@ -44,7 +44,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * A bitmap cannot be unfrozen.
    */
   public get isFrozen(): boolean {
-    return this.#v < 0;
+    return !!this.#frozen;
   }
 
   /**
@@ -55,9 +55,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * A frozen bitmap cannot be unfrozen, but it can be disposed.
    */
   public freeze(): this {
-    const v = this.#v;
-    if (v >= 0) {
-      this.#v = -v;
+    if (!this.#frozen) {
+      this.#frozen = 1;
     }
     return this;
   }
@@ -83,6 +82,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     this.#ptr = 0;
     this.#size = 0;
     this.#v = 1;
+    this.#frozen = 0;
     this.#alloc = arenaAllocator;
 
     if (arenaAllocator) {
@@ -196,7 +196,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    */
   public addRange(rangeStart: number = 0, rangeEnd: number = 0x100000000): this {
     const ptr = this.#ptr;
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     if (ptr) {
@@ -222,7 +222,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @memberof RoaringBitmap32
    */
   public removeRange(rangeStart: number = 0, rangeEnd: number = 0x100000000): this {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     if (roaringWasm._roaring_bitmap_remove_range_js(this.#ptr, rangeStart, rangeEnd)) {
@@ -245,7 +245,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @memberof RoaringBitmap32
    */
   public flipRange(rangeStart: number = 0, rangeEnd: number = 0x100000000): this {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     const ptr = this.#ptr;
@@ -367,7 +367,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * Clears the bitmap, removing all values.
    */
   public clear(): void {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     this.#setPtr(0);
@@ -379,7 +379,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns This RoaringBitmap32 instance.
    */
   public overwrite(other: RoaringBitmap32): this {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     if (this !== other) {
@@ -506,7 +506,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * Values are unique, this function does nothing if the value already exists.
    */
   public add(value: number): void {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     if (roaringWasm._roaring_bitmap_add_checked(this.#getPtr(), value)) {
@@ -523,7 +523,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns True if the bitmap changed, false if not.
    */
   public addChecked(value: number): boolean {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     if (roaringWasm._roaring_bitmap_add_checked(this.#getPtr(), value)) {
@@ -543,7 +543,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   public addMany(
     values: RoaringBitmap32 | RoaringUint32Array | Iterable<number> | ArrayLike<number> | null | undefined,
   ): void {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     if (!values) {
@@ -581,7 +581,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @param value - The value to remove.
    */
   public remove(value: number): void {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     const ptr = this.#ptr;
@@ -601,7 +601,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns True if the bitmap changed, false if not.
    */
   public removeChecked(value: number): boolean {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     const ptr = this.#ptr;
@@ -759,7 +759,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns True if something changed.
    */
   public optimize(): boolean {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     return !!roaringWasm._roaring_bitmap_optimize_js(this.#ptr);
@@ -860,7 +860,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @param other - The other bitmap.
    */
   public andInPlace(other: RoaringBitmap32): void {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     const a = this.#ptr;
@@ -885,7 +885,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @param other - The other bitmap.
    */
   public orInPlace(other: RoaringBitmap32): void {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     const a = this.#ptr;
@@ -908,7 +908,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @param other - The other bitmap.
    */
   public xorInPlace(other: RoaringBitmap32): void {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     const a = this.#ptr;
@@ -935,7 +935,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @param other - The other bitmap.
    */
   public andNotInPlace(other: RoaringBitmap32): void {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     const a = this.#ptr;
@@ -1074,7 +1074,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * If false, deserialization is compatible with the C version of the library. Default is false.
    */
   public deserialize(buffer: RoaringUint8Array | Uint8Array | Iterable<number>, portable: boolean = false): void {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     if (!(buffer instanceof RoaringUint8Array)) {
@@ -1109,7 +1109,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns True if a change was applied, false if not.
    */
   public removeRunCompression(): boolean {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     const ptr = this.#ptr;
@@ -1127,7 +1127,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns True if the bitmap has at least one run container.
    */
   public runOptimize(): boolean {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     const ptr = this.#ptr;
@@ -1142,7 +1142,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns The number of bytes saved.
    */
   public shrinkToFit(): number {
-    if (this.#v < 0) {
+    if (this.#frozen) {
       _throwFrozen();
     }
     return roaringWasm._roaring_bitmap_shrink_to_fit_js(this.#ptr);

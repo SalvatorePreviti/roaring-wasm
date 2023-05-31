@@ -76,25 +76,24 @@ export class RoaringBitmap32Iterator implements IDisposable, IterableIterator<nu
     return result;
   }
 
-  public next(): IteratorResult<number> {
-    const r = this.#r;
+  public next(result = this.#r): IteratorResult<number> {
     if (this.#ver !== this.#bitmap.v) {
       if (!this.#init()) {
-        return _done(r);
+        return _done(result);
       }
     }
 
     if (this.#idx >= this.#size) {
       if (!this.#advance()) {
-        return _done(r);
+        return _done(result);
       }
     }
 
-    const value = roaringWasm.HEAPU32[this.#idx++ + ((this.#ptr as number) >>> 2)];
+    const value = roaringWasm.HEAPU32[((this.#ptr as number) >>> 2) + this.#idx++];
     this.#val = value;
-    r.value = value;
-    r.done = false;
-    return r;
+    result.done = false;
+    result.value = value;
+    return result;
   }
 
   public reset(minimumValue: number = this.#min): this {
@@ -142,7 +141,6 @@ export class RoaringBitmap32Iterator implements IDisposable, IterableIterator<nu
     const val = this.#val;
 
     this.reset();
-
     ptr = roaringWasm._roaring_iterator_js_new_gte(bitmap._ptr, val !== undefined ? val + 1 : this.#min) || false;
     this.#ptr = ptr;
     if (ptr) {
