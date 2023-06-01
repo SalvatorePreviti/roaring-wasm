@@ -2,10 +2,9 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "declaration": true,
+    "stripInternal": true,
     "allowJs": false,
-    "noEmit": true,
-    "outDir": "build/tsc",
-    "pretty": true
+    "noEmit": true
   },
   "include": ["."],
   "exclude": ["node_modules/**/*"]

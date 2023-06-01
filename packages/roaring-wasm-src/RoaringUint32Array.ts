@@ -1,3 +1,4 @@
+import type { IDisposable } from "./IDisposable";
 import { roaringWasm } from "./lib/roaring-wasm";
 import { RoaringAllocatedMemory } from "./RoaringAllocatedMemory";
 import type { RoaringArenaAllocator } from "./RoaringArenaAllocator";
@@ -6,7 +7,7 @@ import type { RoaringArenaAllocator } from "./RoaringArenaAllocator";
  * Array of unsigned 32 bit integers allocted directly in roaring library WASM memory.
  * Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
  */
-export class RoaringUint32Array extends RoaringAllocatedMemory implements Iterable<number> {
+export class RoaringUint32Array extends RoaringAllocatedMemory implements Iterable<number>, IDisposable {
   /**
    * The type of typed array used by this class.
    * For RoaringUint32Array is Uint32Array.
@@ -84,42 +85,45 @@ export class RoaringUint32Array extends RoaringAllocatedMemory implements Iterab
     lengthOrArray?: number | Iterable<number> | ArrayLike<number> | null | undefined,
     arenaAllocator?: RoaringArenaAllocator | null | undefined,
   ) {
-    let length: number;
-    if (typeof lengthOrArray === "number") {
-      length = lengthOrArray;
-    } else if (lengthOrArray !== null && typeof lengthOrArray === "object") {
-      length = (lengthOrArray as unknown as ArrayLike<number>).length;
-      if (typeof length !== "number") {
-        const copy = new Uint32Array(lengthOrArray as Iterable<number>);
-        lengthOrArray = copy;
-        length = copy.length;
-      }
-    } else {
-      throw new TypeError("Invalid argument");
-    }
-
-    if (length > 0) {
-      const byteLength = length * 4;
-      if (byteLength >= 0x10000000) {
-        throw new RangeError(`RoaringUint32Array too big, ${byteLength} bytes`);
-      }
-      const pointer = roaringWasm._malloc(byteLength);
-      if (!pointer) {
-        throw new Error(`RoaringUint32Array failed to allocate ${byteLength} bytes`);
-      }
-
-      super(pointer, byteLength, arenaAllocator);
-      if (typeof lengthOrArray !== "number") {
-        try {
-          this.set(lengthOrArray as Iterable<number>);
-        } catch (e) {
-          this.dispose();
-          throw e;
+    if (lengthOrArray) {
+      let length: number;
+      if (typeof lengthOrArray === "number") {
+        length = Math.ceil(lengthOrArray);
+      } else if (lengthOrArray !== null && typeof lengthOrArray === "object") {
+        length = (lengthOrArray as unknown as ArrayLike<number>).length;
+        if (typeof length !== "number") {
+          const copy = new Uint32Array(lengthOrArray as Iterable<number>);
+          lengthOrArray = copy;
+          length = copy.length;
         }
+      } else {
+        throw new TypeError("Invalid argument");
       }
-    } else {
-      super(0, 0, arenaAllocator);
+
+      if (length > 0) {
+        const byteLength = length * 4;
+        if (byteLength >= 0x10000000) {
+          throw new RangeError(`RoaringUint32Array too big, ${byteLength} bytes`);
+        }
+        const pointer = roaringWasm._jsalloc_zero(byteLength);
+        if (!pointer) {
+          throw new Error(`RoaringUint32Array failed to allocate ${byteLength} bytes`);
+        }
+
+        super(pointer, byteLength, arenaAllocator);
+        if (typeof lengthOrArray !== "number") {
+          try {
+            this.set(lengthOrArray as Iterable<number>);
+          } catch (e) {
+            this.dispose();
+            throw e;
+          }
+        }
+        return;
+      }
     }
+
+    super(0, 0, arenaAllocator);
   }
 
   /**

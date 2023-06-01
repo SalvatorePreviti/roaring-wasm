@@ -21,4 +21,24 @@ describe("package test", () => {
     const b = new roaring.RoaringUint32Array([1, 2, 3]);
     expect(b.toArray()).deep.eq([1, 2, 3]);
   });
+
+  it("allow iterating a large array", () => {
+    const bitmap = new roaring.RoaringBitmap32();
+    bitmap.addRange(100, 50000);
+    const iter = new roaring.RoaringBitmap32Iterator(bitmap);
+    const arr = new Uint32Array(bitmap.size);
+    let sz = 0;
+    for (const x of iter) {
+      arr[sz++] = x;
+    }
+    expect(sz).eq(50000 - 100);
+    expect(iter.done).eq(true);
+    expect(iter.value).eq(undefined);
+    expect(iter.isDisposed).eq(true);
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i] !== i + 100) {
+        expect(arr[i]).eq(i + 100);
+      }
+    }
+  });
 });

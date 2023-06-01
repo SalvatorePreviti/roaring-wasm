@@ -1,11 +1,17 @@
+import type { IDisposable } from "./IDisposable";
 import { _roaringArenaAllocator_head } from "./lib/roaring-arena-allocator-stack";
 import type { NullablePtr } from "./lib/roaring-wasm";
 import { roaringWasm } from "./lib/roaring-wasm";
 import type { RoaringArenaAllocator } from "./RoaringArenaAllocator";
+import { RoaringBitmap32Iterator } from "./RoaringBitmap32Iterator";
 import { RoaringUint32Array } from "./RoaringUint32Array";
 import { RoaringUint8Array } from "./RoaringUint8Array";
 
 let _finalizationRegistry: FinalizationRegistry<number> | undefined;
+
+const _throwFrozen = (): never => {
+  throw new TypeError("RoaringBitmap32 is frozen");
+};
 
 /**
  * A Roaring Bitmap that supports 32 bit unsigned integers.
@@ -14,8 +20,46 @@ let _finalizationRegistry: FinalizationRegistry<number> | undefined;
  * the RoaringBitmap32 when not needed anymore to release WASM memory.
  *
  */
-export class RoaringBitmap32 {
-  #ptr: NullablePtr;
+export class RoaringBitmap32 implements IDisposable, Iterable<number> {
+  #p: NullablePtr;
+  #v: number;
+  #sz: number;
+  #frozen: 0 | 1;
+  #alloc: RoaringArenaAllocator | null;
+
+  /**
+   * A number that changes every time the bitmap might have changed.
+   * Do not make assumptions about the value of this property, it is not guaranteed to be sequential.
+   * The value might change after some operations also if the content of the bitmap does not change, because it would be too expensive to check if the content changed.
+   * This property is useful to check if the bitmap changed since the last time you checked it.
+   */
+  public get v(): number {
+    return this.#v;
+  }
+
+  /**
+   * Property. True if the bitmap is read-only.
+   * A read-only bitmap cannot be modified, every operation will throw an error.
+   * You can freeze a bitmap using the freeze() method.
+   * A bitmap cannot be unfrozen.
+   */
+  public get isFrozen(): boolean {
+    return !!this.#frozen;
+  }
+
+  /**
+   * Makes this roaring bitmap readonly.
+   * Sets isFrozen to true.
+   * This is a no-op if isFrozen is already true.
+   * Every attempt to modify the bitmap will throw an exception.
+   * A frozen bitmap cannot be unfrozen, but it can be disposed.
+   */
+  public freeze(): this {
+    if (!this.#frozen) {
+      this.#frozen = 1;
+    }
+    return this;
+  }
 
   /**
    * Creates a new roaring bitmap adding the specified values.
@@ -35,7 +79,16 @@ export class RoaringBitmap32 {
       | undefined,
     arenaAllocator: RoaringArenaAllocator | null = _roaringArenaAllocator_head,
   ) {
-    this.#ptr = 0;
+    this.#p = 0;
+    this.#sz = 0;
+    this.#v = 1;
+    this.#frozen = 0;
+    this.#alloc = arenaAllocator;
+
+    if (arenaAllocator) {
+      arenaAllocator.register(this);
+    }
+
     if (valuesOrCapacity) {
       if (typeof valuesOrCapacity === "number") {
         if (valuesOrCapacity > 0 && valuesOrCapacity < 0x10000000) {
@@ -54,10 +107,10 @@ export class RoaringBitmap32 {
         }
       }
     }
+  }
 
-    if (arenaAllocator) {
-      arenaAllocator.register(this);
-    }
+  [Symbol.iterator](): RoaringBitmap32Iterator {
+    return new RoaringBitmap32Iterator(this);
   }
 
   public static from(
@@ -114,7 +167,7 @@ export class RoaringBitmap32 {
    * @memberof ReadonlyRoaringBitmap32
    */
   public hasRange(rangeStart: number = 0, rangeEnd: number = 0x10000000): boolean {
-    return !!roaringWasm._roaring_bitmap_contains_range_js(this.#ptr, rangeStart, rangeEnd);
+    return !!roaringWasm._roaring_bitmap_contains_range_js(this.#p, rangeStart, rangeEnd);
   }
 
   /**
@@ -126,7 +179,7 @@ export class RoaringBitmap32 {
    * @returns The number of elements between rangeStart (included) to rangeEnd (excluded).
    */
   public rangeCardinality(rangeStart: number = 0, rangeEnd: number = 0x10000000): number {
-    return roaringWasm._roaring_bitmap_range_cardinality_js(this.#ptr, rangeStart, rangeEnd);
+    return roaringWasm._roaring_bitmap_range_cardinality_js(this.#p, rangeStart, rangeEnd);
   }
 
   /**
@@ -142,9 +195,14 @@ export class RoaringBitmap32 {
    * @returns This RoaringBitmap32 instance.
    */
   public addRange(rangeStart: number = 0, rangeEnd: number = 0x100000000): this {
-    const ptr = this.#ptr;
+    const ptr = this.#p;
+    if (this.#frozen) {
+      _throwFrozen();
+    }
     if (ptr) {
-      roaringWasm._roaring_bitmap_add_range_js(ptr, rangeStart, rangeEnd);
+      if (roaringWasm._roaring_bitmap_add_range_js(ptr, rangeStart, rangeEnd)) {
+        this.invalidate();
+      }
     } else {
       this.#setPtr(roaringWasm._roaring_bitmap_from_range_js(rangeStart, rangeEnd, 1));
     }
@@ -164,7 +222,12 @@ export class RoaringBitmap32 {
    * @memberof RoaringBitmap32
    */
   public removeRange(rangeStart: number = 0, rangeEnd: number = 0x100000000): this {
-    roaringWasm._roaring_bitmap_remove_range_js(this.#ptr, rangeStart, rangeEnd);
+    if (this.#frozen) {
+      _throwFrozen();
+    }
+    if (roaringWasm._roaring_bitmap_remove_range_js(this.#p, rangeStart, rangeEnd)) {
+      this.invalidate();
+    }
     return this;
   }
 
@@ -182,9 +245,14 @@ export class RoaringBitmap32 {
    * @memberof RoaringBitmap32
    */
   public flipRange(rangeStart: number = 0, rangeEnd: number = 0x100000000): this {
-    const ptr = this.#ptr;
+    if (this.#frozen) {
+      _throwFrozen();
+    }
+    const ptr = this.#p;
     if (ptr) {
-      roaringWasm._roaring_bitmap_flip_range_inplace_js(ptr, rangeStart, rangeEnd);
+      if (roaringWasm._roaring_bitmap_flip_range_inplace_js(ptr, rangeStart, rangeEnd)) {
+        this.invalidate();
+      }
     } else {
       this.#setPtr(roaringWasm._roaring_bitmap_from_range_js(rangeStart, rangeEnd, 1));
     }
@@ -288,7 +356,7 @@ export class RoaringBitmap32 {
    */
   public clone(): RoaringBitmap32 {
     const result = new RoaringBitmap32();
-    const ptr = this.#ptr;
+    const ptr = this.#p;
     if (ptr) {
       result.#setPtr(roaringWasm._roaring_bitmap_copy(ptr));
     }
@@ -299,6 +367,9 @@ export class RoaringBitmap32 {
    * Clears the bitmap, removing all values.
    */
   public clear(): void {
+    if (this.#frozen) {
+      _throwFrozen();
+    }
     this.#setPtr(0);
   }
 
@@ -308,14 +379,19 @@ export class RoaringBitmap32 {
    * @returns This RoaringBitmap32 instance.
    */
   public overwrite(other: RoaringBitmap32): this {
+    if (this.#frozen) {
+      _throwFrozen();
+    }
     if (this !== other) {
-      const otherPtr = other.#ptr;
+      const otherPtr = other.#p;
       if (!otherPtr) {
         this.clear();
       } else {
-        const thisPtr = this.#ptr;
+        const thisPtr = this.#p;
         if (thisPtr) {
           roaringWasm._roaring_bitmap_overwrite(thisPtr, otherPtr);
+          this.#sz = other.#sz;
+          this.invalidate();
         } else {
           this.#setPtr(roaringWasm._roaring_bitmap_copy(otherPtr));
         }
@@ -334,7 +410,7 @@ export class RoaringBitmap32 {
    */
   public static addOffset(input: RoaringBitmap32, offset: number): RoaringBitmap32 {
     const result = new RoaringBitmap32();
-    result.#setPtr(roaringWasm._roaring_bitmap_add_offset_js(input.#ptr, offset));
+    result.#setPtr(roaringWasm._roaring_bitmap_add_offset_js(input.#p, offset));
     return result;
   }
 
@@ -347,7 +423,7 @@ export class RoaringBitmap32 {
    */
   public static flipRange(input: RoaringBitmap32, rangeStart: number, rangeEnd: number): RoaringBitmap32 {
     const result = new RoaringBitmap32();
-    result.#setPtr(roaringWasm._roaring_bitmap_flip_range_static_js(input.#ptr, rangeStart, rangeEnd));
+    result.#setPtr(roaringWasm._roaring_bitmap_flip_range_static_js(input.#p, rangeStart, rangeEnd));
     return result;
   }
 
@@ -355,7 +431,7 @@ export class RoaringBitmap32 {
    * Returns true if this instance was disposed.
    */
   public get isDisposed(): boolean {
-    return this.#ptr === false;
+    return this.#p === false;
   }
 
   /**
@@ -363,7 +439,15 @@ export class RoaringBitmap32 {
    * Is safe to call this method more than once.
    */
   public dispose(): boolean {
+    if (this.#p === false) {
+      return false;
+    }
     this.#setPtr(false);
+    const allocator = this.#alloc;
+    if (allocator) {
+      this.#alloc = null;
+      allocator.unregister(this);
+    }
     return true;
   }
 
@@ -371,7 +455,7 @@ export class RoaringBitmap32 {
    * Throws an exception if this object was disposed before.
    */
   public throwIfDisposed(): void | never {
-    if (this.#ptr === false) {
+    if (this.#p === false) {
       throw new TypeError("RoaringBitmap32 was disposed");
     }
   }
@@ -380,24 +464,41 @@ export class RoaringBitmap32 {
    * Get the cardinality of the bitmap (number of elements).
    */
   public cardinality(): number {
-    const ptr = this.#ptr;
-    return ptr ? roaringWasm._roaring_bitmap_get_cardinality(ptr) >>> 0 : 0;
+    let size = this.#sz;
+    if (size < 0) {
+      const ptr = this.#p;
+      size = ptr ? roaringWasm._roaring_bitmap_get_cardinality(ptr) >>> 0 : 0;
+      this.#sz = size;
+    }
+    return size;
   }
 
   /**
    * Get the cardinality of the bitmap (number of elements).
    */
   public get size(): number {
-    const ptr = this.#ptr;
-    return ptr ? roaringWasm._roaring_bitmap_get_cardinality(ptr) >>> 0 : 0;
+    let size = this.#sz;
+    if (size < 0) {
+      const ptr = this.#p;
+      size = ptr ? roaringWasm._roaring_bitmap_get_cardinality(ptr) >>> 0 : 0;
+      this.#sz = size;
+    }
+    return size;
   }
 
   /**
    * Returns true if the bitmap has no elements.
    */
   public isEmpty(): boolean {
-    const ptr = this.#ptr;
-    return !ptr || !!roaringWasm._roaring_bitmap_is_empty(ptr);
+    const size = this.#sz;
+    if (size < 0) {
+      const ptr = this.#p;
+      if (!ptr || !!roaringWasm._roaring_bitmap_is_empty(ptr)) {
+        this.#sz = 0;
+        return true;
+      }
+    }
+    return size === 0;
   }
 
   /**
@@ -405,7 +506,12 @@ export class RoaringBitmap32 {
    * Values are unique, this function does nothing if the value already exists.
    */
   public add(value: number): void {
-    roaringWasm._roaring_bitmap_add(this.#getPtr(), value);
+    if (this.#frozen) {
+      _throwFrozen();
+    }
+    if (roaringWasm._roaring_bitmap_add_checked(this.#p || this.#createEmpty(), value)) {
+      this.invalidate();
+    }
   }
 
   /**
@@ -417,8 +523,14 @@ export class RoaringBitmap32 {
    * @returns True if the bitmap changed, false if not.
    */
   public addChecked(value: number): boolean {
-    const ptr = this.#ptr;
-    return ptr !== false && !!roaringWasm._roaring_bitmap_add_checked(ptr || this.#getPtr(), value);
+    if (this.#frozen) {
+      _throwFrozen();
+    }
+    if (roaringWasm._roaring_bitmap_add_checked(this.#p || this.#createEmpty(), value)) {
+      this.invalidate();
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -431,13 +543,17 @@ export class RoaringBitmap32 {
   public addMany(
     values: RoaringBitmap32 | RoaringUint32Array | Iterable<number> | ArrayLike<number> | null | undefined,
   ): void {
+    if (this.#frozen) {
+      _throwFrozen();
+    }
     if (!values) {
       return;
     }
 
     if (values instanceof RoaringUint32Array) {
       if (values.length > 0) {
-        roaringWasm._roaring_bitmap_add_many(this.#getPtr(), values.length, values.byteOffset);
+        roaringWasm._roaring_bitmap_add_many(this.#p || this.#createEmpty(), values.length, values.byteOffset);
+        this.invalidate();
       }
       return;
     }
@@ -450,7 +566,12 @@ export class RoaringBitmap32 {
     const roaringArray = new RoaringUint32Array(values);
     try {
       if (roaringArray.length > 0) {
-        roaringWasm._roaring_bitmap_add_many(this.#getPtr(), roaringArray.length, roaringArray.byteOffset);
+        roaringWasm._roaring_bitmap_add_many(
+          this.#p || this.#createEmpty(),
+          roaringArray.length,
+          roaringArray.byteOffset,
+        );
+        this.invalidate();
       }
     } finally {
       roaringArray.dispose();
@@ -464,9 +585,12 @@ export class RoaringBitmap32 {
    * @param value - The value to remove.
    */
   public remove(value: number): void {
-    const ptr = this.#ptr;
-    if (ptr) {
-      roaringWasm._roaring_bitmap_remove(ptr, value);
+    if (this.#frozen) {
+      _throwFrozen();
+    }
+    const ptr = this.#p;
+    if (ptr && roaringWasm._roaring_bitmap_remove_checked(ptr, value)) {
+      this.invalidate();
     }
   }
 
@@ -479,8 +603,15 @@ export class RoaringBitmap32 {
    * @returns True if the bitmap changed, false if not.
    */
   public removeChecked(value: number): boolean {
-    const ptr = this.#ptr;
-    return !!ptr && !!roaringWasm._roaring_bitmap_remove_checked(ptr, value);
+    if (this.#frozen) {
+      _throwFrozen();
+    }
+    const ptr = this.#p;
+    if (ptr && roaringWasm._roaring_bitmap_remove_checked(ptr, value)) {
+      this.invalidate();
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -490,7 +621,7 @@ export class RoaringBitmap32 {
    * @returns The minimum 32 bit unsigned integer or 0xFFFFFFFF if empty.
    */
   public minimum(): number {
-    const ptr = this.#ptr;
+    const ptr = this.#p;
     return ptr ? roaringWasm._roaring_bitmap_minimum(ptr) >>> 0 : 0xffffffff;
   }
 
@@ -501,7 +632,7 @@ export class RoaringBitmap32 {
    * @returns The maximum 32 bit unsigned integer or 0 if empty.
    */
   public maximum(): number {
-    const ptr = this.#ptr;
+    const ptr = this.#p;
     return ptr ? roaringWasm._roaring_bitmap_maximum(ptr) >>> 0 : 0;
   }
 
@@ -512,7 +643,7 @@ export class RoaringBitmap32 {
    * @returns True if value exists in the set, false if not.
    */
   public contains(value: number): boolean {
-    const ptr = this.#ptr;
+    const ptr = this.#p;
     return !!ptr && !!roaringWasm._roaring_bitmap_contains(ptr, value);
   }
 
@@ -523,8 +654,8 @@ export class RoaringBitmap32 {
    * @returns true if the bitmap is subset of the other.
    */
   public isSubset(other: RoaringBitmap32): boolean {
-    const a = this.#ptr;
-    const b = other.#ptr;
+    const a = this.#p;
+    const b = other.#p;
     return !a || !!(b && roaringWasm._roaring_bitmap_is_subset(a, b));
   }
 
@@ -535,8 +666,8 @@ export class RoaringBitmap32 {
    * @returns True if this bitmap is a strict subset of other
    */
   public isStrictSubset(other: RoaringBitmap32): boolean {
-    const a = this.#ptr;
-    const b = other.#ptr;
+    const a = this.#p;
+    const b = other.#p;
     return !!(a && b && roaringWasm._roaring_bitmap_is_strict_subset(a, b));
   }
 
@@ -552,7 +683,7 @@ export class RoaringBitmap32 {
     const cardinality = this.size;
     const result = new RoaringUint32Array(cardinality);
     if (cardinality > 0) {
-      roaringWasm._roaring_bitmap_to_uint32_array(this.#ptr as number, result.byteOffset);
+      roaringWasm._roaring_bitmap_to_uint32_array(this.#p as number, result.byteOffset);
     }
     return result;
   }
@@ -612,11 +743,11 @@ export class RoaringBitmap32 {
     if (this === other) {
       return true;
     }
-    const a = this.#ptr;
+    const a = this.#p;
     if (!a) {
       return other.isEmpty();
     }
-    const b = other && other.#ptr;
+    const b = other && other.#p;
     if (!b) {
       return this.isEmpty();
     }
@@ -630,7 +761,10 @@ export class RoaringBitmap32 {
    * @returns True if something changed.
    */
   public optimize(): boolean {
-    return !!roaringWasm._roaring_bitmap_optimize_js(this.#ptr);
+    if (this.#frozen) {
+      _throwFrozen();
+    }
+    return !!roaringWasm._roaring_bitmap_optimize_js(this.#p);
   }
 
   /**
@@ -642,7 +776,7 @@ export class RoaringBitmap32 {
    * @returns element or NaN
    */
   public select(rank: number): number {
-    return roaringWasm._roaring_bitmap_select_js(this.#ptr, rank);
+    return roaringWasm._roaring_bitmap_select_js(this.#p, rank);
   }
 
   /**
@@ -653,7 +787,7 @@ export class RoaringBitmap32 {
    * @returns The element in the set matching the given index. Always returns undefined if index < -array.length or index >= array.length without attempting to access the corresponding property.
    */
   public at(index: number): number | undefined {
-    const result = roaringWasm._roaring_bitmap_at_js(this.#ptr, index);
+    const result = roaringWasm._roaring_bitmap_at_js(this.#p, index);
     return result >= 0 ? result : undefined;
   }
 
@@ -665,7 +799,7 @@ export class RoaringBitmap32 {
    * @returns element index or -1 if not found
    */
   public indexOf(value: number): number {
-    return roaringWasm._roaring_bitmap_get_index_js(this.#ptr, value);
+    return roaringWasm._roaring_bitmap_get_index_js(this.#p, value);
   }
 
   /**
@@ -676,8 +810,8 @@ export class RoaringBitmap32 {
    * @returns Cardinality of the intersection between two bitmaps.
    */
   public andCardinality(other: RoaringBitmap32): number {
-    const a = this.#ptr;
-    const b = other.#ptr;
+    const a = this.#p;
+    const b = other.#p;
     return a && b ? (a === b ? this.size : roaringWasm._roaring_bitmap_and_cardinality(a, b) >>> 0) : 0;
   }
 
@@ -689,8 +823,8 @@ export class RoaringBitmap32 {
    * @returns Cardinality of the union of two bitmaps.
    */
   public orCardinality(other: RoaringBitmap32): number {
-    const a = this.#ptr;
-    const b = other.#ptr;
+    const a = this.#p;
+    const b = other.#p;
     return !b || a === b ? this.size : !a ? other.size : roaringWasm._roaring_bitmap_or_cardinality(a, b) >>> 0;
   }
 
@@ -702,8 +836,8 @@ export class RoaringBitmap32 {
    * @returns Cardinality of the difference (andnot) of two bitmaps.
    */
   public andNotCardinality(other: RoaringBitmap32): number {
-    const a = this.#ptr;
-    return a ? roaringWasm._roaring_bitmap_andnot_cardinality(a, other.#getPtr()) >>> 0 : 0;
+    const a = this.#p;
+    return a ? roaringWasm._roaring_bitmap_andnot_cardinality(a, other.#p || other.#createEmpty()) >>> 0 : 0;
   }
 
   /**
@@ -714,8 +848,8 @@ export class RoaringBitmap32 {
    * @returns Cardinality of the symmetric difference (xor) of two bitmaps.
    */
   public xorCardinality(other: RoaringBitmap32): number {
-    const a = this.#ptr;
-    const b = other.#ptr;
+    const a = this.#p;
+    const b = other.#p;
     return !a ? other.size : !b ? this.size : roaringWasm._roaring_bitmap_xor_cardinality(a, b) >>> 0;
   }
 
@@ -728,14 +862,18 @@ export class RoaringBitmap32 {
    * @param other - The other bitmap.
    */
   public andInPlace(other: RoaringBitmap32): void {
-    const a = this.#ptr;
+    if (this.#frozen) {
+      _throwFrozen();
+    }
+    const a = this.#p;
     if (a) {
-      const b = other.#ptr;
+      const b = other.#p;
       if (a !== b) {
         if (!b) {
           this.clear();
         } else {
           roaringWasm._roaring_bitmap_and_inplace(a, b);
+          this.invalidate();
         }
       }
     }
@@ -749,11 +887,15 @@ export class RoaringBitmap32 {
    * @param other - The other bitmap.
    */
   public orInPlace(other: RoaringBitmap32): void {
-    const a = this.#ptr;
-    const b = other.#ptr;
+    if (this.#frozen) {
+      _throwFrozen();
+    }
+    const a = this.#p;
+    const b = other.#p;
     if (a) {
       if (b && a !== b) {
         roaringWasm._roaring_bitmap_or_inplace(a, b);
+        this.invalidate();
       }
     } else if (b) {
       this.overwrite(other);
@@ -768,14 +910,18 @@ export class RoaringBitmap32 {
    * @param other - The other bitmap.
    */
   public xorInPlace(other: RoaringBitmap32): void {
-    const a = this.#ptr;
-    const b = other.#ptr;
+    if (this.#frozen) {
+      _throwFrozen();
+    }
+    const a = this.#p;
+    const b = other.#p;
     if (a) {
       if (b) {
         if (a === b) {
           this.clear();
         } else {
           roaringWasm._roaring_bitmap_xor_inplace(a, b);
+          this.invalidate();
         }
       }
     } else if (b) {
@@ -791,9 +937,13 @@ export class RoaringBitmap32 {
    * @param other - The other bitmap.
    */
   public andNotInPlace(other: RoaringBitmap32): void {
-    const a = this.#ptr;
+    if (this.#frozen) {
+      _throwFrozen();
+    }
+    const a = this.#p;
     if (a) {
-      roaringWasm._roaring_bitmap_andnot_inplace(a, other.#getPtr());
+      roaringWasm._roaring_bitmap_andnot_inplace(a, other.#p || other.#createEmpty());
+      this.invalidate();
     }
   }
 
@@ -804,7 +954,7 @@ export class RoaringBitmap32 {
    * @returns The number of values smaller than the given value
    */
   public rank(value: number): number {
-    const ptr = this.#ptr;
+    const ptr = this.#p;
     return ptr ? roaringWasm._roaring_bitmap_rank(ptr, value) >>> 0 : 0;
   }
 
@@ -815,8 +965,8 @@ export class RoaringBitmap32 {
    * @returns True if the two bitmaps intersects, false if not.
    */
   public intersects(other: RoaringBitmap32): boolean {
-    const a = this.#ptr;
-    const b = other.#ptr;
+    const a = this.#p;
+    const b = other.#p;
     return !!(a && b && roaringWasm._roaring_bitmap_intersect(a, b));
   }
 
@@ -828,7 +978,7 @@ export class RoaringBitmap32 {
    * @returns boolean True if the bitmap and the range intersects, false if not.
    */
   public intersectsWithRange(rangeStart: number = 0, rangeEnd: number = 0x10000000): boolean {
-    return !!roaringWasm._roaring_bitmap_intersect_with_range_js(this.#ptr, rangeStart, rangeEnd);
+    return !!roaringWasm._roaring_bitmap_intersect_with_range_js(this.#p, rangeStart, rangeEnd);
   }
 
   /**
@@ -841,7 +991,7 @@ export class RoaringBitmap32 {
    * @returns The Jaccard index
    */
   public jaccardIndex(other: RoaringBitmap32): number {
-    return roaringWasm._roaring_bitmap_jaccard_index_js(this.#ptr, other.#ptr);
+    return roaringWasm._roaring_bitmap_jaccard_index_js(this.#p, other.#p);
   }
 
   /**
@@ -851,7 +1001,7 @@ export class RoaringBitmap32 {
    * If false, deserialization is compatible with the C version of the library. Default is false.
    */
   public getSerializationSizeInBytes(portable: boolean = false): number {
-    const ptr = this.#getPtr();
+    const ptr = this.#p || this.#createEmpty();
     return (
       (portable
         ? roaringWasm._roaring_bitmap_portable_size_in_bytes(ptr)
@@ -870,7 +1020,7 @@ export class RoaringBitmap32 {
    * @returns The RoaringUint8Array. Remember to manually dispose to free the memory.
    */
   public serializeToRoaringUint8Array(portable: boolean = false): RoaringUint8Array {
-    const ptr = this.#getPtr();
+    const ptr = this.#p || this.#createEmpty();
     const size = this.getSerializationSizeInBytes(portable);
     const result = new RoaringUint8Array(size);
     if (size) {
@@ -926,6 +1076,9 @@ export class RoaringBitmap32 {
    * If false, deserialization is compatible with the C version of the library. Default is false.
    */
   public deserialize(buffer: RoaringUint8Array | Uint8Array | Iterable<number>, portable: boolean = false): void {
+    if (this.#frozen) {
+      _throwFrozen();
+    }
     if (!(buffer instanceof RoaringUint8Array)) {
       if (typeof buffer === "number") {
         throw new TypeError("deserialize expects an array of bytes");
@@ -958,7 +1111,10 @@ export class RoaringBitmap32 {
    * @returns True if a change was applied, false if not.
    */
   public removeRunCompression(): boolean {
-    const ptr = this.#ptr;
+    if (this.#frozen) {
+      _throwFrozen();
+    }
+    const ptr = this.#p;
     return !!ptr && !!roaringWasm._roaring_bitmap_remove_run_compression(ptr);
   }
 
@@ -973,7 +1129,10 @@ export class RoaringBitmap32 {
    * @returns True if the bitmap has at least one run container.
    */
   public runOptimize(): boolean {
-    const ptr = this.#ptr;
+    if (this.#frozen) {
+      _throwFrozen();
+    }
+    const ptr = this.#p;
     return !!ptr && !!roaringWasm._roaring_bitmap_run_optimize(ptr);
   }
 
@@ -985,7 +1144,10 @@ export class RoaringBitmap32 {
    * @returns The number of bytes saved.
    */
   public shrinkToFit(): number {
-    return roaringWasm._roaring_bitmap_shrink_to_fit_js(this.#ptr);
+    if (this.#frozen) {
+      _throwFrozen();
+    }
+    return roaringWasm._roaring_bitmap_shrink_to_fit_js(this.#p);
   }
 
   /**
@@ -999,7 +1161,7 @@ export class RoaringBitmap32 {
    */
   public static and(a: RoaringBitmap32, b: RoaringBitmap32): RoaringBitmap32 {
     const result = new RoaringBitmap32();
-    result.#setPtr(roaringWasm._roaring_bitmap_and_js(a.#ptr, b.#ptr));
+    result.#setPtr(roaringWasm._roaring_bitmap_and_js(a.#p, b.#p));
     return result;
   }
 
@@ -1013,7 +1175,7 @@ export class RoaringBitmap32 {
    */
   public static or(a: RoaringBitmap32, b: RoaringBitmap32): RoaringBitmap32 {
     const result = new RoaringBitmap32();
-    result.#setPtr(roaringWasm._roaring_bitmap_or_js(a.#ptr, b.#ptr));
+    result.#setPtr(roaringWasm._roaring_bitmap_or_js(a.#p, b.#p));
     return result;
   }
 
@@ -1027,7 +1189,7 @@ export class RoaringBitmap32 {
    */
   public static xor(a: RoaringBitmap32, b: RoaringBitmap32): RoaringBitmap32 {
     const result = new RoaringBitmap32();
-    result.#setPtr(roaringWasm._roaring_bitmap_xor_js(a.#ptr, b.#ptr));
+    result.#setPtr(roaringWasm._roaring_bitmap_xor_js(a.#p, b.#p));
     return result;
   }
 
@@ -1042,7 +1204,7 @@ export class RoaringBitmap32 {
    */
   public static andNot(a: RoaringBitmap32, b: RoaringBitmap32): RoaringBitmap32 {
     const result = new RoaringBitmap32();
-    result.#setPtr(roaringWasm._roaring_bitmap_andnot_js(a.#ptr, b.#ptr));
+    result.#setPtr(roaringWasm._roaring_bitmap_andnot_js(a.#p, b.#p));
     return result;
   }
 
@@ -1065,7 +1227,7 @@ export class RoaringBitmap32 {
         for (let i = 0; i < len; ++i) {
           const v = bitmaps[i];
           if (v) {
-            const ptr = v.#ptr;
+            const ptr = v.#p;
             if (ptr) {
               buf[count++] = ptr;
             }
@@ -1100,7 +1262,7 @@ export class RoaringBitmap32 {
         for (let i = 0; i < len; ++i) {
           const v = bitmaps[i];
           if (v) {
-            const ptr = v.#ptr;
+            const ptr = v.#p;
             if (ptr) {
               buf[count++] = ptr;
             }
@@ -1125,9 +1287,12 @@ export class RoaringBitmap32 {
    * @memberof RoaringBitmap32
    */
   public static swap(a: RoaringBitmap32, b: RoaringBitmap32): void {
+    if (a.#v < 0 || b.#v < 0) {
+      _throwFrozen();
+    }
     if (a !== b) {
-      const aptr = a.#ptr;
-      const bptr = b.#ptr;
+      const aptr = a.#p;
+      const bptr = b.#p;
 
       if (aptr === false) {
         a.throwIfDisposed();
@@ -1141,16 +1306,22 @@ export class RoaringBitmap32 {
         _finalizationRegistry.unregister(b);
       }
 
-      a.#ptr = 0;
-      b.#ptr = 0;
+      a.#p = 0;
+      b.#p = 0;
 
       a.#setPtr(bptr);
       b.#setPtr(aptr);
     }
   }
 
+  /** This method is called after the bitmap is modified */
+  protected invalidate(): void {
+    this.#sz = -1;
+    ++this.#v;
+  }
+
   #setPtr(newPtr: NullablePtr): void {
-    const oldPtr = this.#ptr;
+    const oldPtr = this.#p;
     if (oldPtr !== newPtr) {
       if (oldPtr) {
         if (_finalizationRegistry) {
@@ -1158,7 +1329,7 @@ export class RoaringBitmap32 {
         }
         roaringWasm._roaring_bitmap_free(oldPtr);
       }
-      this.#ptr = newPtr;
+      this.#p = newPtr;
       if (newPtr) {
         if (_finalizationRegistry) {
           _finalizationRegistry.register(this, newPtr, this);
@@ -1167,23 +1338,37 @@ export class RoaringBitmap32 {
           _finalizationRegistry.register(this, newPtr, this);
         }
       }
+      if (oldPtr || newPtr) {
+        this.invalidate();
+      }
     }
   }
 
-  #getPtr(): number {
-    let ptr = this.#ptr;
-
-    if (!ptr) {
-      if (ptr === false) {
-        throw new TypeError("RoaringBitmap32 was disposed");
-      }
-      ptr = roaringWasm._roaring_bitmap_create_js();
-      if (!ptr) {
-        throw new Error("Failed to allocate RoaringBitmap32");
-      }
-      this.#setPtr(ptr);
+  #createEmpty(): number {
+    let ptr = this.#p;
+    if (ptr === false) {
+      throw new TypeError("RoaringBitmap32 was disposed");
     }
-
+    ptr = roaringWasm._roaring_bitmap_create_js();
+    if (!ptr) {
+      throw new Error("Failed to allocate RoaringBitmap32");
+    }
+    if (_finalizationRegistry) {
+      _finalizationRegistry.register(this, ptr, this);
+    } else if (typeof FinalizationRegistry !== "undefined") {
+      _finalizationRegistry = new FinalizationRegistry(roaringWasm._roaring_bitmap_free);
+      _finalizationRegistry.register(this, ptr, this);
+    }
+    this.#p = ptr;
+    this.#sz = 0;
     return ptr;
+  }
+
+  /**
+   * Internal property, do not use.
+   * @internal
+   */
+  get _p(): number | false {
+    return this.#p;
   }
 }

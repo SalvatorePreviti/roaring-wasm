@@ -13,6 +13,16 @@
 
 #define MAX_SERIALIZATION_NATIVE_MEMORY 0x00FFFFFF
 
+/** Allocate memory, aligned to 32 bytes, filling it with zeroes */
+void * jsalloc_zero(uint32_t size) {
+  void * result;
+  if (posix_memalign(&result, 32, size) != 0) {
+    return NULL;
+  }
+  memset(result, 0, size);
+  return result;
+}
+
 roaring_bitmap_t * roaring_bitmap_create_js(void) { return roaring_bitmap_create_with_capacity(0); }
 
 bool roaring_bitmap_optimize_js(roaring_bitmap_t * bitmap) {
@@ -124,25 +134,31 @@ roaring_bitmap_t * roaring_bitmap_from_range_js(double minimum, double maximum, 
   return roaring_bitmap_from_range(minInteger, maxInteger, (uint32_t)step);
 }
 
-void roaring_bitmap_add_range_js(roaring_bitmap_t * bm, double minimum, double maximum) {
+bool roaring_bitmap_add_range_js(roaring_bitmap_t * bm, double minimum, double maximum) {
   uint64_t minInteger, maxInteger;
   if (bm && getRangeOperationParameters(minimum, maximum, &minInteger, &maxInteger)) {
     roaring_bitmap_add_range_closed(bm, (uint32_t)minInteger, (uint32_t)(maxInteger - 1));
+    return true;
   }
+  return false;
 }
 
-void roaring_bitmap_remove_range_js(roaring_bitmap_t * bm, double minimum, double maximum) {
+bool roaring_bitmap_remove_range_js(roaring_bitmap_t * bm, double minimum, double maximum) {
   uint64_t minInteger, maxInteger;
   if (bm && getRangeOperationParameters(minimum, maximum, &minInteger, &maxInteger)) {
     roaring_bitmap_remove_range_closed(bm, (uint32_t)minInteger, (uint32_t)(maxInteger - 1));
+    return true;
   }
+  return false;
 }
 
-void roaring_bitmap_flip_range_inplace_js(roaring_bitmap_t * bm, double minimum, double maximum) {
+bool roaring_bitmap_flip_range_inplace_js(roaring_bitmap_t * bm, double minimum, double maximum) {
   uint64_t minInteger, maxInteger;
   if (bm && getRangeOperationParameters(minimum, maximum, &minInteger, &maxInteger)) {
     roaring_bitmap_flip_inplace(bm, minInteger, maxInteger);
+    return true;
   }
+  return false;
 }
 
 roaring_bitmap_t * roaring_bitmap_flip_range_static_js(const roaring_bitmap_t * input, double minimum, double maximum) {
@@ -188,23 +204,135 @@ double roaring_bitmap_jaccard_index_js(const roaring_bitmap_t * x1, const roarin
 }
 
 roaring_bitmap_t * roaring_bitmap_and_js(const roaring_bitmap_t * a, const roaring_bitmap_t * b) {
-  return a && b ? roaring_bitmap_and(a, b) : 0;
+  return a && b ? roaring_bitmap_and(a, b) : NULL;
 }
 
 roaring_bitmap_t * roaring_bitmap_or_js(const roaring_bitmap_t * a, const roaring_bitmap_t * b) {
   if (!a) {
-    return b ? roaring_bitmap_copy(b) : 0;
+    return b ? roaring_bitmap_copy(b) : NULL;
   }
   return b ? roaring_bitmap_or(a, b) : roaring_bitmap_copy(a);
 }
 
 roaring_bitmap_t * roaring_bitmap_xor_js(const roaring_bitmap_t * a, const roaring_bitmap_t * b) {
   if (!a) {
-    return b ? roaring_bitmap_copy(b) : 0;
+    return b ? roaring_bitmap_copy(b) : NULL;
   }
   return b ? roaring_bitmap_xor(a, b) : roaring_bitmap_copy(a);
 }
 
 roaring_bitmap_t * roaring_bitmap_andnot_js(const roaring_bitmap_t * a, const roaring_bitmap_t * b) {
-  return !a ? 0 : (b ? roaring_bitmap_andnot(a, b) : roaring_bitmap_copy(a));
+  return !a ? NULL : (b ? roaring_bitmap_andnot(a, b) : roaring_bitmap_copy(a));
+}
+
+typedef struct roaring_iterator_js_s {
+  roaring_uint32_iterator_t iterator;
+
+  double version;
+} roaring_iterator_js_t;
+
+roaring_iterator_js_t * roaring_iterator_js_new(const roaring_bitmap_t * bitmap, double version) {
+  if (!bitmap) {
+    return NULL;
+  }
+  roaring_iterator_js_t * iterator = malloc(sizeof(roaring_iterator_js_t));
+  if (!iterator) {
+    return NULL;
+  }
+
+  roaring_init_iterator(bitmap, &iterator->iterator);
+
+  if (!iterator->iterator.has_value) {
+    free(iterator);
+    return NULL;
+  }
+
+  iterator->version = version;
+
+  return iterator;
+}
+
+roaring_iterator_js_t * roaring_iterator_js_clone(const roaring_iterator_js_t * iterator) {
+  roaring_iterator_js_t * clone = malloc(sizeof(roaring_iterator_js_t));
+  if (clone) {
+    memcpy(clone, iterator, sizeof(roaring_iterator_js_t));
+  }
+  return clone;
+}
+
+double roaring_iterator_js_next(roaring_iterator_js_t * iterator, const roaring_bitmap_t * bitmap, double version) {
+  uint32_t value = iterator->iterator.current_value;
+
+  if (!iterator->iterator.has_value) {
+    free(iterator);
+    return -1;
+  }
+
+  if (iterator->iterator.parent != bitmap || iterator->version != version) {
+    if (!bitmap) {
+      free(iterator);
+      return -1;
+    }
+
+    roaring_init_iterator(bitmap, &iterator->iterator);
+
+    if (!roaring_move_uint32_iterator_equalorlarger(&iterator->iterator, value)) {
+      free(iterator);
+      return -1;
+    }
+
+    value = iterator->iterator.current_value;
+
+    iterator->version = version;
+  }
+
+  roaring_advance_uint32_iterator(&iterator->iterator);
+  return (double)value;
+}
+
+double roaring_iterator_js_gte(
+  roaring_iterator_js_t * iterator, const roaring_bitmap_t * bitmap, double version, double minimumValue) {
+  if (isnan(minimumValue) || minimumValue < 1) {
+    minimumValue = 0;
+  }
+
+  if (minimumValue >= 0x100000000) {
+    free(iterator);
+    return -1;
+  }
+
+  if (!iterator->iterator.has_value) {
+    free(iterator);
+    return -1;
+  }
+
+  if (iterator->iterator.parent != bitmap || iterator->version != version) {
+    if (!bitmap) {
+      free(iterator);
+      return -1;
+    }
+
+    roaring_init_iterator(bitmap, &iterator->iterator);
+
+    if (!iterator->iterator.has_value) {
+      free(iterator);
+      return -1;
+    }
+
+    iterator->version = version;
+  }
+
+  if (
+    minimumValue > iterator->iterator.current_value &&
+    !roaring_move_uint32_iterator_equalorlarger(&iterator->iterator, (uint32_t)minimumValue)) {
+    free(iterator);
+    return -1;
+  }
+
+  if (!iterator->iterator.has_value) {
+    free(iterator);
+    return -1;
+  }
+
+  return (double)iterator->iterator.current_value;
 }

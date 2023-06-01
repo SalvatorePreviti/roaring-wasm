@@ -1,12 +1,12 @@
+import { _free_finalizationRegistry, _free_finalizationRegistry_init } from "./lib/free-finalization-registry";
 import { _roaringArenaAllocator_head } from "./lib/roaring-arena-allocator-stack";
 import { roaringWasm } from "./lib/roaring-wasm";
 import type { RoaringArenaAllocator } from "./RoaringArenaAllocator";
 
-let _finalizationRegistry: FinalizationRegistry<number> | undefined;
-
 export abstract class RoaringAllocatedMemory {
   #ptr: number;
   #bytes: number;
+  #alloc: RoaringArenaAllocator | null;
 
   /**
    * The offset in bytes of the array (the location of the first byte in WASM memory).
@@ -24,7 +24,7 @@ export abstract class RoaringAllocatedMemory {
     return this.#bytes;
   }
 
-  public constructor(
+  protected constructor(
     ptr: number,
     bytes: number,
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
@@ -32,13 +32,12 @@ export abstract class RoaringAllocatedMemory {
   ) {
     this.#ptr = ptr;
     this.#bytes = bytes;
+    this.#alloc = arenaAllocator;
 
     if (ptr) {
-      if (_finalizationRegistry) {
-        _finalizationRegistry.register(this, ptr, this);
-      } else if (typeof FinalizationRegistry !== "undefined") {
-        _finalizationRegistry = new FinalizationRegistry(roaringWasm._free);
-        _finalizationRegistry.register(this, ptr, this);
+      const finalizationRegistry = _free_finalizationRegistry || _free_finalizationRegistry_init();
+      if (finalizationRegistry) {
+        finalizationRegistry.register(this, ptr, this);
       }
       if (arenaAllocator) {
         arenaAllocator.register(this);
@@ -73,17 +72,19 @@ export abstract class RoaringAllocatedMemory {
     if (ptr) {
       this.#ptr = 0;
       this.#bytes = 0;
-      if (_finalizationRegistry) {
-        _finalizationRegistry.unregister(this);
+
+      const allocator = this.#alloc;
+      if (allocator) {
+        this.#alloc = null;
+        allocator.unregister(this);
+      }
+      if (_free_finalizationRegistry) {
+        _free_finalizationRegistry.unregister(this);
       }
       roaringWasm._free(ptr);
       return true;
     }
     return false;
-  }
-
-  protected toJSON(): unknown {
-    return {};
   }
 
   /**

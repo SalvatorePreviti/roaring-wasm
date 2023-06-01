@@ -2,12 +2,14 @@ export * from "./IDisposable";
 
 export { roaringLibraryInitialize, roaringLibraryIsReady } from "./lib/roaring-wasm";
 
-export * from "./RoaringAllocatedMemory";
+export { RoaringAllocatedMemory } from "./RoaringAllocatedMemory";
 
-export * from "./RoaringUint8Array";
+export { RoaringUint8Array } from "./RoaringUint8Array";
 
-export * from "./RoaringUint32Array";
+export { RoaringUint32Array } from "./RoaringUint32Array";
 
-export * from "./RoaringBitmap32";
+export { RoaringBitmap32 } from "./RoaringBitmap32";
+
+export { RoaringBitmap32Iterator } from "./RoaringBitmap32Iterator";
 
 export { RoaringArenaAllocator } from "./RoaringArenaAllocator";
