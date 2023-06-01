@@ -80,9 +80,9 @@ export type RoaringWasm = {
   _roaring_bitmap_xor_many(count: number, bitmapsPtrs: number): number;
   _roaring_bitmap_intersect_with_range_js(bitmap: NullablePtr, rangeStart: number, rangeEnd: number): WasmBool;
 
-  _roaring_iterator_js_new_gte(roaring: NullablePtr, minimumValue: number): number;
-  _roaring_iterator_js_clone(iterator: NullablePtr): number;
-  _roaring_iterator_js_next(iterator: NullablePtr): number;
+  _roaring_iterator_js_new(roaring: NullablePtr, version: number, minimumValue: number): number;
+  _roaring_iterator_js_clone(iterator: number): number;
+  _roaring_iterator_js_next(iterator: number, bitmap: NullablePtr, version: number): number;
 };
 
 const _loadedModule = roaring_wasm_module_init<RoaringWasm>();

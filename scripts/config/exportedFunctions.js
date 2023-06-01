@@ -65,9 +65,9 @@ const exportedFunctions = [
   "_roaring_bitmap_xor_many",
   "_roaring_bitmap_intersect_with_range_js",
 
-  "_roaring_iterator_js_new_gte",
-  "_roaring_iterator_js_clone",
+  "_roaring_iterator_js_new",
   "_roaring_iterator_js_next",
+  "_roaring_iterator_js_clone",
 ];
 
 module.exports = exportedFunctions;

@@ -122,40 +122,44 @@ describe("RoaringBitmap32Iterator", () => {
       const bitmap = new RoaringBitmap32();
       bitmap.addRange(100, 50000);
       const iter = new RoaringBitmap32Iterator(bitmap);
-      const arr: number[] = [];
+      const arr = new Uint32Array(bitmap.size);
+      let sz = 0;
       for (const x of iter) {
-        arr.push(x);
+        arr[sz++] = x;
       }
+      expect(sz).eq(50000 - 100);
       expect(iter.done).eq(true);
       expect(iter.value).eq(undefined);
       expect(iter.isDisposed).eq(true);
-      expect(arr.length).eq(50000 - 100);
       for (let i = 0; i < arr.length; i++) {
-        expect(arr[i]).eq(i + 100);
+        if (arr[i] !== i + 100) {
+          expect(arr[i]).eq(i + 100);
+        }
       }
     });
 
     it("allow iterating while modifying", () => {
-      const bitmap = RoaringBitmap32.fromRange(100, 40000, 2);
+      const bitmap = RoaringBitmap32.fromRange(100, 1000);
       const iter = new RoaringBitmap32Iterator(bitmap);
       const arr: number[] = [];
-      let z = 0;
       for (const x of iter) {
         arr.push(x);
-        if (z++ < 10000) {
-          bitmap.add(x + 1);
-        }
-        if (x === 40000) {
-          break;
+        if (!(x & 1)) {
+          bitmap.remove(x + 1);
         }
       }
+
       expect(iter.done).eq(true);
       expect(iter.value).eq(undefined);
       expect(iter.isDisposed).eq(true);
-      expect(arr.length).eq(24950);
       for (let i = 0; i < arr.length; i++) {
-        expect(arr[i]).eq(i < 10000 ? i + 100 : i * 2 + 100 - 10000);
+        const v = i * 2 + 100;
+        if (arr[i] !== v) {
+          expect(arr[i]).eq(v);
+        }
       }
+
+      expect(arr.length).eq(450);
     });
   });
 

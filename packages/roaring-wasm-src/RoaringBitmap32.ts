@@ -21,10 +21,10 @@ const _throwFrozen = (): never => {
  *
  */
 export class RoaringBitmap32 implements IDisposable, Iterable<number> {
-  #ptr: NullablePtr;
+  #p: NullablePtr;
   #v: number;
+  #sz: number;
   #frozen: 0 | 1;
-  #size: number;
   #alloc: RoaringArenaAllocator | null;
 
   /**
@@ -79,8 +79,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
       | undefined,
     arenaAllocator: RoaringArenaAllocator | null = _roaringArenaAllocator_head,
   ) {
-    this.#ptr = 0;
-    this.#size = 0;
+    this.#p = 0;
+    this.#sz = 0;
     this.#v = 1;
     this.#frozen = 0;
     this.#alloc = arenaAllocator;
@@ -167,7 +167,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @memberof ReadonlyRoaringBitmap32
    */
   public hasRange(rangeStart: number = 0, rangeEnd: number = 0x10000000): boolean {
-    return !!roaringWasm._roaring_bitmap_contains_range_js(this.#ptr, rangeStart, rangeEnd);
+    return !!roaringWasm._roaring_bitmap_contains_range_js(this.#p, rangeStart, rangeEnd);
   }
 
   /**
@@ -179,7 +179,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns The number of elements between rangeStart (included) to rangeEnd (excluded).
    */
   public rangeCardinality(rangeStart: number = 0, rangeEnd: number = 0x10000000): number {
-    return roaringWasm._roaring_bitmap_range_cardinality_js(this.#ptr, rangeStart, rangeEnd);
+    return roaringWasm._roaring_bitmap_range_cardinality_js(this.#p, rangeStart, rangeEnd);
   }
 
   /**
@@ -195,7 +195,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns This RoaringBitmap32 instance.
    */
   public addRange(rangeStart: number = 0, rangeEnd: number = 0x100000000): this {
-    const ptr = this.#ptr;
+    const ptr = this.#p;
     if (this.#frozen) {
       _throwFrozen();
     }
@@ -225,7 +225,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (this.#frozen) {
       _throwFrozen();
     }
-    if (roaringWasm._roaring_bitmap_remove_range_js(this.#ptr, rangeStart, rangeEnd)) {
+    if (roaringWasm._roaring_bitmap_remove_range_js(this.#p, rangeStart, rangeEnd)) {
       this.invalidate();
     }
     return this;
@@ -248,7 +248,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (this.#frozen) {
       _throwFrozen();
     }
-    const ptr = this.#ptr;
+    const ptr = this.#p;
     if (ptr) {
       if (roaringWasm._roaring_bitmap_flip_range_inplace_js(ptr, rangeStart, rangeEnd)) {
         this.invalidate();
@@ -356,7 +356,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    */
   public clone(): RoaringBitmap32 {
     const result = new RoaringBitmap32();
-    const ptr = this.#ptr;
+    const ptr = this.#p;
     if (ptr) {
       result.#setPtr(roaringWasm._roaring_bitmap_copy(ptr));
     }
@@ -383,14 +383,14 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
       _throwFrozen();
     }
     if (this !== other) {
-      const otherPtr = other.#ptr;
+      const otherPtr = other.#p;
       if (!otherPtr) {
         this.clear();
       } else {
-        const thisPtr = this.#ptr;
+        const thisPtr = this.#p;
         if (thisPtr) {
           roaringWasm._roaring_bitmap_overwrite(thisPtr, otherPtr);
-          this.#size = other.#size;
+          this.#sz = other.#sz;
           this.invalidate();
         } else {
           this.#setPtr(roaringWasm._roaring_bitmap_copy(otherPtr));
@@ -410,7 +410,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    */
   public static addOffset(input: RoaringBitmap32, offset: number): RoaringBitmap32 {
     const result = new RoaringBitmap32();
-    result.#setPtr(roaringWasm._roaring_bitmap_add_offset_js(input.#ptr, offset));
+    result.#setPtr(roaringWasm._roaring_bitmap_add_offset_js(input.#p, offset));
     return result;
   }
 
@@ -423,7 +423,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    */
   public static flipRange(input: RoaringBitmap32, rangeStart: number, rangeEnd: number): RoaringBitmap32 {
     const result = new RoaringBitmap32();
-    result.#setPtr(roaringWasm._roaring_bitmap_flip_range_static_js(input.#ptr, rangeStart, rangeEnd));
+    result.#setPtr(roaringWasm._roaring_bitmap_flip_range_static_js(input.#p, rangeStart, rangeEnd));
     return result;
   }
 
@@ -431,7 +431,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * Returns true if this instance was disposed.
    */
   public get isDisposed(): boolean {
-    return this.#ptr === false;
+    return this.#p === false;
   }
 
   /**
@@ -439,7 +439,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * Is safe to call this method more than once.
    */
   public dispose(): boolean {
-    if (this.#ptr === false) {
+    if (this.#p === false) {
       return false;
     }
     this.#setPtr(false);
@@ -455,7 +455,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * Throws an exception if this object was disposed before.
    */
   public throwIfDisposed(): void | never {
-    if (this.#ptr === false) {
+    if (this.#p === false) {
       throw new TypeError("RoaringBitmap32 was disposed");
     }
   }
@@ -464,11 +464,11 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * Get the cardinality of the bitmap (number of elements).
    */
   public cardinality(): number {
-    let size = this.#size;
+    let size = this.#sz;
     if (size < 0) {
-      const ptr = this.#ptr;
+      const ptr = this.#p;
       size = ptr ? roaringWasm._roaring_bitmap_get_cardinality(ptr) >>> 0 : 0;
-      this.#size = size;
+      this.#sz = size;
     }
     return size;
   }
@@ -477,11 +477,11 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * Get the cardinality of the bitmap (number of elements).
    */
   public get size(): number {
-    let size = this.#size;
+    let size = this.#sz;
     if (size < 0) {
-      const ptr = this.#ptr;
+      const ptr = this.#p;
       size = ptr ? roaringWasm._roaring_bitmap_get_cardinality(ptr) >>> 0 : 0;
-      this.#size = size;
+      this.#sz = size;
     }
     return size;
   }
@@ -490,11 +490,11 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * Returns true if the bitmap has no elements.
    */
   public isEmpty(): boolean {
-    const size = this.#size;
+    const size = this.#sz;
     if (size < 0) {
-      const ptr = this.#ptr;
+      const ptr = this.#p;
       if (!ptr || !!roaringWasm._roaring_bitmap_is_empty(ptr)) {
-        this.#size = 0;
+        this.#sz = 0;
         return true;
       }
     }
@@ -509,7 +509,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (this.#frozen) {
       _throwFrozen();
     }
-    if (roaringWasm._roaring_bitmap_add_checked(this.#getPtr(), value)) {
+    if (roaringWasm._roaring_bitmap_add_checked(this.#p || this.#createEmpty(), value)) {
       this.invalidate();
     }
   }
@@ -526,7 +526,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (this.#frozen) {
       _throwFrozen();
     }
-    if (roaringWasm._roaring_bitmap_add_checked(this.#getPtr(), value)) {
+    if (roaringWasm._roaring_bitmap_add_checked(this.#p || this.#createEmpty(), value)) {
       this.invalidate();
       return true;
     }
@@ -552,7 +552,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
 
     if (values instanceof RoaringUint32Array) {
       if (values.length > 0) {
-        roaringWasm._roaring_bitmap_add_many(this.#getPtr(), values.length, values.byteOffset);
+        roaringWasm._roaring_bitmap_add_many(this.#p || this.#createEmpty(), values.length, values.byteOffset);
         this.invalidate();
       }
       return;
@@ -566,7 +566,11 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     const roaringArray = new RoaringUint32Array(values);
     try {
       if (roaringArray.length > 0) {
-        roaringWasm._roaring_bitmap_add_many(this.#getPtr(), roaringArray.length, roaringArray.byteOffset);
+        roaringWasm._roaring_bitmap_add_many(
+          this.#p || this.#createEmpty(),
+          roaringArray.length,
+          roaringArray.byteOffset,
+        );
         this.invalidate();
       }
     } finally {
@@ -584,11 +588,9 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (this.#frozen) {
       _throwFrozen();
     }
-    const ptr = this.#ptr;
-    if (ptr) {
-      if (roaringWasm._roaring_bitmap_remove_checked(ptr, value)) {
-        this.invalidate();
-      }
+    const ptr = this.#p;
+    if (ptr && roaringWasm._roaring_bitmap_remove_checked(ptr, value)) {
+      this.invalidate();
     }
   }
 
@@ -604,7 +606,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (this.#frozen) {
       _throwFrozen();
     }
-    const ptr = this.#ptr;
+    const ptr = this.#p;
     if (ptr && roaringWasm._roaring_bitmap_remove_checked(ptr, value)) {
       this.invalidate();
       return true;
@@ -619,7 +621,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns The minimum 32 bit unsigned integer or 0xFFFFFFFF if empty.
    */
   public minimum(): number {
-    const ptr = this.#ptr;
+    const ptr = this.#p;
     return ptr ? roaringWasm._roaring_bitmap_minimum(ptr) >>> 0 : 0xffffffff;
   }
 
@@ -630,7 +632,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns The maximum 32 bit unsigned integer or 0 if empty.
    */
   public maximum(): number {
-    const ptr = this.#ptr;
+    const ptr = this.#p;
     return ptr ? roaringWasm._roaring_bitmap_maximum(ptr) >>> 0 : 0;
   }
 
@@ -641,7 +643,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns True if value exists in the set, false if not.
    */
   public contains(value: number): boolean {
-    const ptr = this.#ptr;
+    const ptr = this.#p;
     return !!ptr && !!roaringWasm._roaring_bitmap_contains(ptr, value);
   }
 
@@ -652,8 +654,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns true if the bitmap is subset of the other.
    */
   public isSubset(other: RoaringBitmap32): boolean {
-    const a = this.#ptr;
-    const b = other.#ptr;
+    const a = this.#p;
+    const b = other.#p;
     return !a || !!(b && roaringWasm._roaring_bitmap_is_subset(a, b));
   }
 
@@ -664,8 +666,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns True if this bitmap is a strict subset of other
    */
   public isStrictSubset(other: RoaringBitmap32): boolean {
-    const a = this.#ptr;
-    const b = other.#ptr;
+    const a = this.#p;
+    const b = other.#p;
     return !!(a && b && roaringWasm._roaring_bitmap_is_strict_subset(a, b));
   }
 
@@ -681,7 +683,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     const cardinality = this.size;
     const result = new RoaringUint32Array(cardinality);
     if (cardinality > 0) {
-      roaringWasm._roaring_bitmap_to_uint32_array(this.#ptr as number, result.byteOffset);
+      roaringWasm._roaring_bitmap_to_uint32_array(this.#p as number, result.byteOffset);
     }
     return result;
   }
@@ -741,11 +743,11 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (this === other) {
       return true;
     }
-    const a = this.#ptr;
+    const a = this.#p;
     if (!a) {
       return other.isEmpty();
     }
-    const b = other && other.#ptr;
+    const b = other && other.#p;
     if (!b) {
       return this.isEmpty();
     }
@@ -762,7 +764,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (this.#frozen) {
       _throwFrozen();
     }
-    return !!roaringWasm._roaring_bitmap_optimize_js(this.#ptr);
+    return !!roaringWasm._roaring_bitmap_optimize_js(this.#p);
   }
 
   /**
@@ -774,7 +776,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns element or NaN
    */
   public select(rank: number): number {
-    return roaringWasm._roaring_bitmap_select_js(this.#ptr, rank);
+    return roaringWasm._roaring_bitmap_select_js(this.#p, rank);
   }
 
   /**
@@ -785,7 +787,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns The element in the set matching the given index. Always returns undefined if index < -array.length or index >= array.length without attempting to access the corresponding property.
    */
   public at(index: number): number | undefined {
-    const result = roaringWasm._roaring_bitmap_at_js(this.#ptr, index);
+    const result = roaringWasm._roaring_bitmap_at_js(this.#p, index);
     return result >= 0 ? result : undefined;
   }
 
@@ -797,7 +799,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns element index or -1 if not found
    */
   public indexOf(value: number): number {
-    return roaringWasm._roaring_bitmap_get_index_js(this.#ptr, value);
+    return roaringWasm._roaring_bitmap_get_index_js(this.#p, value);
   }
 
   /**
@@ -808,8 +810,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns Cardinality of the intersection between two bitmaps.
    */
   public andCardinality(other: RoaringBitmap32): number {
-    const a = this.#ptr;
-    const b = other.#ptr;
+    const a = this.#p;
+    const b = other.#p;
     return a && b ? (a === b ? this.size : roaringWasm._roaring_bitmap_and_cardinality(a, b) >>> 0) : 0;
   }
 
@@ -821,8 +823,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns Cardinality of the union of two bitmaps.
    */
   public orCardinality(other: RoaringBitmap32): number {
-    const a = this.#ptr;
-    const b = other.#ptr;
+    const a = this.#p;
+    const b = other.#p;
     return !b || a === b ? this.size : !a ? other.size : roaringWasm._roaring_bitmap_or_cardinality(a, b) >>> 0;
   }
 
@@ -834,8 +836,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns Cardinality of the difference (andnot) of two bitmaps.
    */
   public andNotCardinality(other: RoaringBitmap32): number {
-    const a = this.#ptr;
-    return a ? roaringWasm._roaring_bitmap_andnot_cardinality(a, other.#getPtr()) >>> 0 : 0;
+    const a = this.#p;
+    return a ? roaringWasm._roaring_bitmap_andnot_cardinality(a, other.#p || other.#createEmpty()) >>> 0 : 0;
   }
 
   /**
@@ -846,8 +848,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns Cardinality of the symmetric difference (xor) of two bitmaps.
    */
   public xorCardinality(other: RoaringBitmap32): number {
-    const a = this.#ptr;
-    const b = other.#ptr;
+    const a = this.#p;
+    const b = other.#p;
     return !a ? other.size : !b ? this.size : roaringWasm._roaring_bitmap_xor_cardinality(a, b) >>> 0;
   }
 
@@ -863,9 +865,9 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (this.#frozen) {
       _throwFrozen();
     }
-    const a = this.#ptr;
+    const a = this.#p;
     if (a) {
-      const b = other.#ptr;
+      const b = other.#p;
       if (a !== b) {
         if (!b) {
           this.clear();
@@ -888,8 +890,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (this.#frozen) {
       _throwFrozen();
     }
-    const a = this.#ptr;
-    const b = other.#ptr;
+    const a = this.#p;
+    const b = other.#p;
     if (a) {
       if (b && a !== b) {
         roaringWasm._roaring_bitmap_or_inplace(a, b);
@@ -911,8 +913,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (this.#frozen) {
       _throwFrozen();
     }
-    const a = this.#ptr;
-    const b = other.#ptr;
+    const a = this.#p;
+    const b = other.#p;
     if (a) {
       if (b) {
         if (a === b) {
@@ -938,9 +940,9 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (this.#frozen) {
       _throwFrozen();
     }
-    const a = this.#ptr;
+    const a = this.#p;
     if (a) {
-      roaringWasm._roaring_bitmap_andnot_inplace(a, other.#getPtr());
+      roaringWasm._roaring_bitmap_andnot_inplace(a, other.#p || other.#createEmpty());
       this.invalidate();
     }
   }
@@ -952,7 +954,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns The number of values smaller than the given value
    */
   public rank(value: number): number {
-    const ptr = this.#ptr;
+    const ptr = this.#p;
     return ptr ? roaringWasm._roaring_bitmap_rank(ptr, value) >>> 0 : 0;
   }
 
@@ -963,8 +965,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns True if the two bitmaps intersects, false if not.
    */
   public intersects(other: RoaringBitmap32): boolean {
-    const a = this.#ptr;
-    const b = other.#ptr;
+    const a = this.#p;
+    const b = other.#p;
     return !!(a && b && roaringWasm._roaring_bitmap_intersect(a, b));
   }
 
@@ -976,7 +978,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns boolean True if the bitmap and the range intersects, false if not.
    */
   public intersectsWithRange(rangeStart: number = 0, rangeEnd: number = 0x10000000): boolean {
-    return !!roaringWasm._roaring_bitmap_intersect_with_range_js(this.#ptr, rangeStart, rangeEnd);
+    return !!roaringWasm._roaring_bitmap_intersect_with_range_js(this.#p, rangeStart, rangeEnd);
   }
 
   /**
@@ -989,7 +991,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns The Jaccard index
    */
   public jaccardIndex(other: RoaringBitmap32): number {
-    return roaringWasm._roaring_bitmap_jaccard_index_js(this.#ptr, other.#ptr);
+    return roaringWasm._roaring_bitmap_jaccard_index_js(this.#p, other.#p);
   }
 
   /**
@@ -999,7 +1001,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * If false, deserialization is compatible with the C version of the library. Default is false.
    */
   public getSerializationSizeInBytes(portable: boolean = false): number {
-    const ptr = this.#getPtr();
+    const ptr = this.#p || this.#createEmpty();
     return (
       (portable
         ? roaringWasm._roaring_bitmap_portable_size_in_bytes(ptr)
@@ -1018,7 +1020,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns The RoaringUint8Array. Remember to manually dispose to free the memory.
    */
   public serializeToRoaringUint8Array(portable: boolean = false): RoaringUint8Array {
-    const ptr = this.#getPtr();
+    const ptr = this.#p || this.#createEmpty();
     const size = this.getSerializationSizeInBytes(portable);
     const result = new RoaringUint8Array(size);
     if (size) {
@@ -1112,7 +1114,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (this.#frozen) {
       _throwFrozen();
     }
-    const ptr = this.#ptr;
+    const ptr = this.#p;
     return !!ptr && !!roaringWasm._roaring_bitmap_remove_run_compression(ptr);
   }
 
@@ -1130,7 +1132,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (this.#frozen) {
       _throwFrozen();
     }
-    const ptr = this.#ptr;
+    const ptr = this.#p;
     return !!ptr && !!roaringWasm._roaring_bitmap_run_optimize(ptr);
   }
 
@@ -1145,7 +1147,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (this.#frozen) {
       _throwFrozen();
     }
-    return roaringWasm._roaring_bitmap_shrink_to_fit_js(this.#ptr);
+    return roaringWasm._roaring_bitmap_shrink_to_fit_js(this.#p);
   }
 
   /**
@@ -1159,7 +1161,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    */
   public static and(a: RoaringBitmap32, b: RoaringBitmap32): RoaringBitmap32 {
     const result = new RoaringBitmap32();
-    result.#setPtr(roaringWasm._roaring_bitmap_and_js(a.#ptr, b.#ptr));
+    result.#setPtr(roaringWasm._roaring_bitmap_and_js(a.#p, b.#p));
     return result;
   }
 
@@ -1173,7 +1175,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    */
   public static or(a: RoaringBitmap32, b: RoaringBitmap32): RoaringBitmap32 {
     const result = new RoaringBitmap32();
-    result.#setPtr(roaringWasm._roaring_bitmap_or_js(a.#ptr, b.#ptr));
+    result.#setPtr(roaringWasm._roaring_bitmap_or_js(a.#p, b.#p));
     return result;
   }
 
@@ -1187,7 +1189,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    */
   public static xor(a: RoaringBitmap32, b: RoaringBitmap32): RoaringBitmap32 {
     const result = new RoaringBitmap32();
-    result.#setPtr(roaringWasm._roaring_bitmap_xor_js(a.#ptr, b.#ptr));
+    result.#setPtr(roaringWasm._roaring_bitmap_xor_js(a.#p, b.#p));
     return result;
   }
 
@@ -1202,7 +1204,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    */
   public static andNot(a: RoaringBitmap32, b: RoaringBitmap32): RoaringBitmap32 {
     const result = new RoaringBitmap32();
-    result.#setPtr(roaringWasm._roaring_bitmap_andnot_js(a.#ptr, b.#ptr));
+    result.#setPtr(roaringWasm._roaring_bitmap_andnot_js(a.#p, b.#p));
     return result;
   }
 
@@ -1225,7 +1227,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
         for (let i = 0; i < len; ++i) {
           const v = bitmaps[i];
           if (v) {
-            const ptr = v.#ptr;
+            const ptr = v.#p;
             if (ptr) {
               buf[count++] = ptr;
             }
@@ -1260,7 +1262,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
         for (let i = 0; i < len; ++i) {
           const v = bitmaps[i];
           if (v) {
-            const ptr = v.#ptr;
+            const ptr = v.#p;
             if (ptr) {
               buf[count++] = ptr;
             }
@@ -1289,8 +1291,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
       _throwFrozen();
     }
     if (a !== b) {
-      const aptr = a.#ptr;
-      const bptr = b.#ptr;
+      const aptr = a.#p;
+      const bptr = b.#p;
 
       if (aptr === false) {
         a.throwIfDisposed();
@@ -1304,8 +1306,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
         _finalizationRegistry.unregister(b);
       }
 
-      a.#ptr = 0;
-      b.#ptr = 0;
+      a.#p = 0;
+      b.#p = 0;
 
       a.#setPtr(bptr);
       b.#setPtr(aptr);
@@ -1315,11 +1317,11 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   protected invalidate(): void {
     const v = this.#v;
     this.#v = v < 0 ? v - 1 : v + 1;
-    this.#size = -1;
+    this.#sz = -1;
   }
 
   #setPtr(newPtr: NullablePtr): void {
-    const oldPtr = this.#ptr;
+    const oldPtr = this.#p;
     if (oldPtr !== newPtr) {
       if (oldPtr) {
         if (_finalizationRegistry) {
@@ -1327,7 +1329,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
         }
         roaringWasm._roaring_bitmap_free(oldPtr);
       }
-      this.#ptr = newPtr;
+      this.#p = newPtr;
       if (newPtr) {
         if (_finalizationRegistry) {
           _finalizationRegistry.register(this, newPtr, this);
@@ -1343,7 +1345,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   }
 
   #createEmpty(): number {
-    let ptr = this.#ptr;
+    let ptr = this.#p;
     if (ptr === false) {
       throw new TypeError("RoaringBitmap32 was disposed");
     }
@@ -1357,20 +1359,16 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
       _finalizationRegistry = new FinalizationRegistry(roaringWasm._roaring_bitmap_free);
       _finalizationRegistry.register(this, ptr, this);
     }
-    this.#ptr = ptr;
-    this.#size = 0;
+    this.#p = ptr;
+    this.#sz = 0;
     return ptr;
-  }
-
-  #getPtr(): number {
-    return this.#ptr || this.#createEmpty();
   }
 
   /**
    * Internal property, do not use.
    * @internal
    */
-  get _ptr(): NullablePtr {
-    return this.#ptr;
+  get _p(): NullablePtr {
+    return this.#p;
   }
 }
