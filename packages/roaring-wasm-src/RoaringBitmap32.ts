@@ -1314,10 +1314,10 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     }
   }
 
+  /** This method is called after the bitmap is modified */
   protected invalidate(): void {
-    const v = this.#v;
-    this.#v = v < 0 ? v - 1 : v + 1;
     this.#sz = -1;
+    ++this.#v;
   }
 
   #setPtr(newPtr: NullablePtr): void {
