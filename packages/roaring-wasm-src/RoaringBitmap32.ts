@@ -1368,7 +1368,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * Internal property, do not use.
    * @internal
    */
-  get _p(): NullablePtr {
+  get _p(): number | false {
     return this.#p;
   }
 }
