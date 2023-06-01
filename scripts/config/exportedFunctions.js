@@ -68,6 +68,7 @@ const exportedFunctions = [
   "_roaring_iterator_js_new",
   "_roaring_iterator_js_next",
   "_roaring_iterator_js_clone",
+  "_roaring_iterator_js_gte",
 ];
 
 module.exports = exportedFunctions;

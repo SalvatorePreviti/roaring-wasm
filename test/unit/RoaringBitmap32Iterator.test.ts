@@ -57,10 +57,10 @@ describe("RoaringBitmap32Iterator", () => {
       expect(iter.isDisposed).eq(true);
       expect(iter.done).eq(true);
 
-      expect(iter.reset(900)).eq(iter);
+      expect(iter.reset().moveToGreaterEqual(900)).eq(iter);
       expect(iter.isDisposed).eq(false);
       expect(iter.done).eq(false);
-      expect(iter.value).eq(undefined);
+      expect(iter.value).eq(999);
       expect(iter.next()).deep.equal({ value: 999, done: false });
       expect(iter.next()).deep.equal({ value: 1000, done: false });
       expect(iter.next()).deep.equal({ value: undefined, done: true });
@@ -68,7 +68,7 @@ describe("RoaringBitmap32Iterator", () => {
       expect(iter.isDisposed).eq(true);
       expect(iter.done).eq(true);
 
-      iter.reset(1001);
+      iter.reset().moveToGreaterEqual(1001);
       expect(iter.next()).deep.equal({ value: undefined, done: true });
     });
   });
@@ -163,35 +163,35 @@ describe("RoaringBitmap32Iterator", () => {
     });
   });
 
-  describe("reset", () => {
+  describe("reset, moveToGreaterEqual", () => {
     it("resets the iterator", () => {
       const bitmap = new RoaringBitmap32([123, 456, 999, 1000]);
       const iter = new RoaringBitmap32Iterator(bitmap);
       expect(iter.next()).deep.equal({ value: 123, done: false });
       expect(iter.next()).deep.equal({ value: 456, done: false });
-      iter.reset(0);
+      iter.reset();
       expect(iter.next()).deep.equal({ value: 123, done: false });
       expect(iter.next()).deep.equal({ value: 456, done: false });
 
-      iter.reset(0);
+      iter.reset();
       const tmp: number[] = [];
       for (const x of iter) {
         tmp.push(x);
       }
       expect(tmp).deep.equal([123, 456, 999, 1000]);
 
-      iter.reset(500);
+      iter.reset().moveToGreaterEqual(500);
       expect(Array.from(iter)).deep.equal([999, 1000]);
 
-      iter.reset(0xffffffff);
+      iter.moveToGreaterEqual(0xffffffff);
       expect(Array.from(iter)).deep.equal([]);
 
       bitmap.add(0xffffffff);
 
-      iter.reset(0xffffffff);
+      iter.reset().moveToGreaterEqual(0xffffffff);
       expect(Array.from(iter)).deep.equal([0xffffffff]);
 
-      iter.reset(0x100000000);
+      iter.reset().moveToGreaterEqual(0x100000000);
       expect(Array.from(iter)).deep.equal([]);
     });
   });

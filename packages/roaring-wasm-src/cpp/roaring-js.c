@@ -231,11 +231,8 @@ typedef struct roaring_iterator_js_s {
   double version;
 } roaring_iterator_js_t;
 
-roaring_iterator_js_t * roaring_iterator_js_new(const roaring_bitmap_t * bitmap, double version, double minimumValue) {
+roaring_iterator_js_t * roaring_iterator_js_new(const roaring_bitmap_t * bitmap, double version) {
   if (!bitmap) {
-    return NULL;
-  }
-  if (minimumValue >= 0x100000000) {
     return NULL;
   }
   roaring_iterator_js_t * iterator = malloc(sizeof(roaring_iterator_js_t));
@@ -246,13 +243,6 @@ roaring_iterator_js_t * roaring_iterator_js_new(const roaring_bitmap_t * bitmap,
   roaring_init_iterator(bitmap, &iterator->iterator);
 
   if (!iterator->iterator.has_value) {
-    free(iterator);
-    return NULL;
-  }
-
-  if (
-    !isnan(minimumValue) && minimumValue > iterator->iterator.current_value &&
-    !roaring_move_uint32_iterator_equalorlarger(&iterator->iterator, (uint32_t)minimumValue)) {
     free(iterator);
     return NULL;
   }
@@ -298,4 +288,51 @@ double roaring_iterator_js_next(roaring_iterator_js_t * iterator, const roaring_
 
   roaring_advance_uint32_iterator(&iterator->iterator);
   return (double)value;
+}
+
+double roaring_iterator_js_gte(
+  roaring_iterator_js_t * iterator, const roaring_bitmap_t * bitmap, double version, double minimumValue) {
+  if (isnan(minimumValue) || minimumValue < 1) {
+    minimumValue = 0;
+  }
+
+  if (minimumValue >= 0x100000000) {
+    free(iterator);
+    return -1;
+  }
+
+  if (!iterator->iterator.has_value) {
+    free(iterator);
+    return -1;
+  }
+
+  if (iterator->iterator.parent != bitmap || iterator->version != version) {
+    if (!bitmap) {
+      free(iterator);
+      return -1;
+    }
+
+    roaring_init_iterator(bitmap, &iterator->iterator);
+
+    if (!iterator->iterator.has_value) {
+      free(iterator);
+      return -1;
+    }
+
+    iterator->version = version;
+  }
+
+  if (
+    minimumValue > iterator->iterator.current_value &&
+    !roaring_move_uint32_iterator_equalorlarger(&iterator->iterator, (uint32_t)minimumValue)) {
+    free(iterator);
+    return -1;
+  }
+
+  if (!iterator->iterator.has_value) {
+    free(iterator);
+    return -1;
+  }
+
+  return (double)iterator->iterator.current_value;
 }
