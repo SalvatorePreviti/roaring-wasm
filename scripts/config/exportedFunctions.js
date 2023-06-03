@@ -5,7 +5,6 @@ const exportedFunctions = [
   "_roaring_bitmap_create_js",
   "_roaring_bitmap_create_with_capacity",
   "_roaring_bitmap_free",
-  "_roaring_bitmap_get_cardinality",
   "_roaring_bitmap_is_empty",
   "_roaring_bitmap_add",
   "_roaring_bitmap_add_many",
@@ -38,12 +37,13 @@ const exportedFunctions = [
 
   "_roaring_bitmap_portable_size_in_bytes",
   "_roaring_bitmap_portable_serialize",
-  "_roaring_bitmap_portable_deserialize",
+  "_roaring_bitmap_portable_deserialize_safe",
 
   "_roaring_bitmap_size_in_bytes",
   "_roaring_bitmap_serialize",
-  "_roaring_bitmap_deserialize",
+  "_roaring_bitmap_deserialize_safe",
 
+  "_roaring_bitmap_get_cardinality_js",
   "_roaring_bitmap_flip_range_static_js",
   "_roaring_bitmap_from_range_js",
   "_roaring_bitmap_contains_range_js",

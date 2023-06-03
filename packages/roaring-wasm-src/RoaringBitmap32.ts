@@ -91,12 +91,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
 
     if (valuesOrCapacity) {
       if (typeof valuesOrCapacity === "number") {
-        if (valuesOrCapacity > 0 && valuesOrCapacity < 0x10000000) {
-          const bitmap = roaringWasm._roaring_bitmap_create_with_capacity(valuesOrCapacity >>> 0);
-          if (!bitmap) {
-            throw new Error(`RoaringBitmap32 failed to allocate with capacity ${valuesOrCapacity}`);
-          }
-          this.#setPtr(bitmap);
+        if (valuesOrCapacity >= 1 && valuesOrCapacity < 0x10000000) {
+          this.#setPtr(roaringWasm._roaring_bitmap_create_with_capacity(valuesOrCapacity >>> 0));
         }
       } else {
         try {
@@ -390,11 +386,11 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
         const thisPtr = this.#p;
         if (thisPtr) {
           roaringWasm._roaring_bitmap_overwrite(thisPtr, otherPtr);
-          this.#sz = other.#sz;
           this.invalidate();
         } else {
           this.#setPtr(roaringWasm._roaring_bitmap_copy(otherPtr));
         }
+        this.#sz = other.#sz;
       }
     }
     return this;
@@ -466,8 +462,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   public cardinality(): number {
     let size = this.#sz;
     if (size < 0) {
-      const ptr = this.#p;
-      size = ptr ? roaringWasm._roaring_bitmap_get_cardinality(ptr) >>> 0 : 0;
+      size = roaringWasm._roaring_bitmap_get_cardinality_js(this.#p);
       this.#sz = size;
     }
     return size;
@@ -479,8 +474,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   public get size(): number {
     let size = this.#sz;
     if (size < 0) {
-      const ptr = this.#p;
-      size = ptr ? roaringWasm._roaring_bitmap_get_cardinality(ptr) >>> 0 : 0;
+      size = roaringWasm._roaring_bitmap_get_cardinality_js(this.#p);
       this.#sz = size;
     }
     return size;
@@ -490,15 +484,16 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * Returns true if the bitmap has no elements.
    */
   public isEmpty(): boolean {
-    const size = this.#sz;
-    if (size < 0) {
-      const ptr = this.#p;
-      if (!ptr || !!roaringWasm._roaring_bitmap_is_empty(ptr)) {
-        this.#sz = 0;
-        return true;
-      }
+    const sz = this.#sz;
+    if (sz === 0) {
+      return true;
     }
-    return size === 0;
+    const ptr = this.#p;
+    if (ptr && !roaringWasm._roaring_bitmap_is_empty(ptr)) {
+      return false;
+    }
+    this.#sz = 0;
+    return true;
   }
 
   /**
@@ -1076,9 +1071,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * If false, deserialization is compatible with the C version of the library. Default is false.
    */
   public deserialize(buffer: RoaringUint8Array | Uint8Array | Iterable<number>, portable: boolean = false): void {
-    if (this.#frozen) {
-      _throwFrozen();
-    }
+    this.clear();
     if (!(buffer instanceof RoaringUint8Array)) {
       if (typeof buffer === "number") {
         throw new TypeError("deserialize expects an array of bytes");
@@ -1093,8 +1086,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     }
 
     const ptr = portable
-      ? roaringWasm._roaring_bitmap_portable_deserialize(buffer.byteOffset)
-      : roaringWasm._roaring_bitmap_deserialize(buffer.byteOffset);
+      ? roaringWasm._roaring_bitmap_portable_deserialize_safe(buffer.byteOffset, buffer.byteLength)
+      : roaringWasm._roaring_bitmap_deserialize_safe(buffer.byteOffset, buffer.byteLength);
 
     if (!ptr) {
       throw new Error(`RoaringBitmap32 deserialization failed`);
@@ -1306,11 +1299,17 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
         _finalizationRegistry.unregister(b);
       }
 
+      const asz = a.#sz;
+      const bsz = b.#sz;
+
       a.#p = 0;
       b.#p = 0;
 
       a.#setPtr(bptr);
       b.#setPtr(aptr);
+
+      a.#sz = bsz;
+      b.#sz = asz;
     }
   }
 

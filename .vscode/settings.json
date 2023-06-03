@@ -66,6 +66,7 @@
   "cmake.configureOnOpen": false,
   "files.associations": {
     "filesystem": "c",
-    "__locale": "c"
+    "__locale": "c",
+    "roaring_array.h": "c"
   }
 }

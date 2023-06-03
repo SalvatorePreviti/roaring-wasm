@@ -21,12 +21,9 @@ export type RoaringWasm = {
   _roaring_bitmap_create_js(): number;
   _roaring_bitmap_create_with_capacity(capacity: number): number;
   _roaring_bitmap_free(roaring: number): void;
-  _roaring_bitmap_get_cardinality(roaring: number): number;
   _roaring_bitmap_is_empty(roaring: number): WasmBool;
-  _roaring_bitmap_add(roaring: number, value: number): void;
   _roaring_bitmap_add_checked(roaring: number, value: number): WasmBool;
   _roaring_bitmap_add_many(roaring: number, count: number, values: number): void;
-  _roaring_bitmap_remove(roaring: number, value: number): void;
   _roaring_bitmap_remove_checked(roaring: number, value: number): WasmBool;
   _roaring_bitmap_maximum(roaring: number): number;
   _roaring_bitmap_minimum(roaring: number): number;
@@ -53,12 +50,13 @@ export type RoaringWasm = {
 
   _roaring_bitmap_portable_size_in_bytes(roaring: number): number;
   _roaring_bitmap_portable_serialize(roaring: number, buf: number): number;
-  _roaring_bitmap_portable_deserialize(buf: number): number;
+  _roaring_bitmap_portable_deserialize_safe(buf: number, maxBytes: number): number;
 
   _roaring_bitmap_size_in_bytes(roaring: number): number;
   _roaring_bitmap_serialize(roaring: number, buf: number): number;
-  _roaring_bitmap_deserialize(buf: number): number;
+  _roaring_bitmap_deserialize_safe(buf: number, maxBytes: number): number;
 
+  _roaring_bitmap_get_cardinality_js(roaring: NullablePtr): number;
   _roaring_bitmap_from_range_js(min: number, max: number, step: number): number;
   _roaring_bitmap_contains_range_js(roaring: NullablePtr, min: number, max: number): WasmBool;
   _roaring_bitmap_add_range_js(roaring: number, min: number, max: number): WasmBool;
