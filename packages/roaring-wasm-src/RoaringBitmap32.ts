@@ -719,13 +719,26 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    *
    * @returns The array containing all values in the bitmap.
    */
-  public toUint32Array(): Uint32Array {
-    const roaringArray = this.toRoaringUint32Array();
-    try {
-      return roaringArray.toTypedArray();
-    } finally {
-      roaringArray.dispose();
+  public toUint32Array(output?: Uint32Array): Uint32Array {
+    if (!output) {
+      output = new Uint32Array(this.size);
     }
+    const maxLen = output.length;
+    const mem = roaringWasm._roaring_sync_iter_init(this.#p) >>> 2;
+    const { _roaring_sync_iter_next, HEAP32 } = roaringWasm;
+    let written = 0;
+    while (written < maxLen) {
+      let n = _roaring_sync_iter_next();
+      if (written + n > maxLen) {
+        n = maxLen - written;
+      }
+      if (n <= 0) {
+        break;
+      }
+      output.set(HEAP32.subarray(mem, mem + n), written);
+      written += n;
+    }
+    return written < output.length ? output.subarray(0, written) : output;
   }
 
   /**

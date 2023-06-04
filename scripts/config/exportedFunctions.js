@@ -69,6 +69,9 @@ const exportedFunctions = [
   "_roaring_iterator_js_next",
   "_roaring_iterator_js_clone",
   "_roaring_iterator_js_gte",
+
+  "_roaring_sync_iter_init",
+  "_roaring_sync_iter_next",
 ];
 
 module.exports = exportedFunctions;

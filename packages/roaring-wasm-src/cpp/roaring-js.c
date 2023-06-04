@@ -382,3 +382,28 @@ roaring_bitmap_t * roaring_bitmap_deserialize_safe(const void * buf, size_t maxb
   } else
     return (NULL);
 }
+
+#define SYNC_ITER_SIZE 65536 * 16
+
+roaring_uint32_iterator_t sync_iter;
+uint32_t * sync_iter_buf = NULL;
+
+uint32_t * roaring_sync_iter_init(const roaring_bitmap_t * bitmap) {
+  if (bitmap == NULL) {
+    return NULL;
+  }
+  if (!sync_iter_buf) {
+    if (posix_memalign((void **)&sync_iter_buf, 32, SYNC_ITER_SIZE * sizeof(uint32_t)) != 0) {
+      return NULL;
+    }
+  }
+  roaring_init_iterator(bitmap, &sync_iter);
+  return sync_iter_buf;
+}
+
+uint32_t roaring_sync_iter_next() {
+  if (sync_iter_buf == NULL) {
+    return 0;
+  }
+  return roaring_read_uint32_iterator(&sync_iter, sync_iter_buf, SYNC_ITER_SIZE);
+}
