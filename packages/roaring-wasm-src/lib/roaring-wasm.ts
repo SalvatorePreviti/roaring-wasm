@@ -83,8 +83,9 @@ export type RoaringWasm = {
   _roaring_iterator_js_next(iterator: number, bitmap: NullablePtr, version: number): number;
   _roaring_iterator_js_gte(iterator: number, bitmap: NullablePtr, version: number, minimumValue: number): number;
 
-  _roaring_sync_iter_init(bitmap: NullablePtr): number;
+  _roaring_sync_iter_init(bitmap: NullablePtr, maxLength: number): number;
   _roaring_sync_iter_next(): number;
+  _roaring_sync_iter_min(minimumValue: number): number;
 };
 
 const _loadedModule = roaring_wasm_module_init<RoaringWasm>();

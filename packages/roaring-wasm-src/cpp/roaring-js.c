@@ -11,6 +11,7 @@
 #  define CROARING_SERIALIZATION_CONTAINER 2
 #endif
 
+#define MAX_SAFE_INTEGER 9007199254740991.0
 #define MAX_SERIALIZATION_NATIVE_MEMORY 0x00FFFFFF
 
 /** Allocate memory, aligned to 32 bytes, filling it with zeroes */
@@ -295,12 +296,12 @@ double roaring_iterator_js_next(roaring_iterator_js_t * iterator, const roaring_
 }
 
 double roaring_iterator_js_gte(
-  roaring_iterator_js_t * iterator, const roaring_bitmap_t * bitmap, double version, double minimumValue) {
-  if (isnan(minimumValue) || minimumValue < 1) {
-    minimumValue = 0;
-  }
+  roaring_iterator_js_t * iterator, const roaring_bitmap_t * bitmap, double version, double minimum) {
+  minimum = ceil(minimum);
 
-  if (minimumValue >= 0x100000000) {
+  if (isnan(minimum) || minimum < 0) {
+    minimum = 0;
+  } else if (minimum > 0xffffffff) {
     free(iterator);
     return -1;
   }
@@ -326,9 +327,11 @@ double roaring_iterator_js_gte(
     iterator->version = version;
   }
 
+  uint32_t uminimum = (uint32_t)minimum;
+
   if (
-    minimumValue > iterator->iterator.current_value &&
-    !roaring_move_uint32_iterator_equalorlarger(&iterator->iterator, (uint32_t)minimumValue)) {
+    uminimum > iterator->iterator.current_value &&
+    !roaring_move_uint32_iterator_equalorlarger(&iterator->iterator, uminimum)) {
     free(iterator);
     return -1;
   }
@@ -387,23 +390,56 @@ roaring_bitmap_t * roaring_bitmap_deserialize_safe(const void * buf, size_t maxb
 
 roaring_uint32_iterator_t sync_iter;
 uint32_t * sync_iter_buf = NULL;
+int64_t sync_iter_buf_left = 0;
 
-uint32_t * roaring_sync_iter_init(const roaring_bitmap_t * bitmap) {
-  if (bitmap == NULL) {
-    return NULL;
-  }
+uint32_t * init_sync_iter_buf() {
   if (!sync_iter_buf) {
     if (posix_memalign((void **)&sync_iter_buf, 32, SYNC_ITER_SIZE * sizeof(uint32_t)) != 0) {
       return NULL;
     }
   }
-  roaring_init_iterator(bitmap, &sync_iter);
   return sync_iter_buf;
 }
 
+uint32_t * roaring_sync_iter_init(const roaring_bitmap_t * bitmap, double maxLength) {
+  if (!bitmap || isnan(maxLength) || maxLength < 1) {
+    return NULL;
+  } else if (maxLength > MAX_SAFE_INTEGER) {
+    maxLength = MAX_SAFE_INTEGER;
+  }
+  sync_iter_buf_left = (int64_t)maxLength;
+  roaring_init_iterator(bitmap, &sync_iter);
+  return init_sync_iter_buf();
+}
+
 uint32_t roaring_sync_iter_next() {
-  if (sync_iter_buf == NULL) {
+  if (!sync_iter_buf || sync_iter_buf_left <= 0) {
     return 0;
   }
-  return roaring_read_uint32_iterator(&sync_iter, sync_iter_buf, SYNC_ITER_SIZE);
+
+  uint32_t n = roaring_read_uint32_iterator(
+    &sync_iter, sync_iter_buf, sync_iter_buf_left < SYNC_ITER_SIZE ? (uint32_t)sync_iter_buf_left : SYNC_ITER_SIZE);
+
+  sync_iter_buf_left -= n;
+
+  return n;
+}
+
+uint32_t roaring_sync_iter_min(double minimum) {
+  if (!sync_iter_buf || sync_iter_buf_left <= 0) {
+    return 0;
+  }
+
+  minimum = ceil(minimum);
+
+  if (minimum > 0 && !roaring_move_uint32_iterator_equalorlarger(&sync_iter, (uint32_t)minimum)) {
+    return 0;
+  }
+
+  uint32_t n = roaring_read_uint32_iterator(
+    &sync_iter, sync_iter_buf, sync_iter_buf_left < SYNC_ITER_SIZE ? (uint32_t)sync_iter_buf_left : SYNC_ITER_SIZE);
+
+  sync_iter_buf_left -= n;
+
+  return n;
 }

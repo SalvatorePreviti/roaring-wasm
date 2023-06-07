@@ -7,6 +7,8 @@ import { RoaringBitmap32Iterator } from "./RoaringBitmap32Iterator";
 import { RoaringUint32Array } from "./RoaringUint32Array";
 import { RoaringUint8Array } from "./RoaringUint8Array";
 
+export const MAX_STRING_LENGTH = 536870888;
+
 let _finalizationRegistry: FinalizationRegistry<number> | undefined;
 
 const _throwFrozen = (): never => {
@@ -23,7 +25,7 @@ const _throwFrozen = (): never => {
 export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   #p: NullablePtr;
   #v: number;
-  #sz: number;
+  #size: number;
   #frozen: 0 | 1;
   #alloc: RoaringArenaAllocator | null;
 
@@ -80,7 +82,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     arenaAllocator: RoaringArenaAllocator | null = _roaringArenaAllocator_head,
   ) {
     this.#p = 0;
-    this.#sz = 0;
+    this.#size = 0;
     this.#v = 1;
     this.#frozen = 0;
     this.#alloc = arenaAllocator;
@@ -91,7 +93,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
 
     if (valuesOrCapacity) {
       if (typeof valuesOrCapacity === "number") {
-        if (valuesOrCapacity >= 1 && valuesOrCapacity < 0x10000000) {
+        if (valuesOrCapacity >= 1 && valuesOrCapacity < 0x100000000) {
           this.#setPtr(roaringWasm._roaring_bitmap_create_with_capacity(valuesOrCapacity >>> 0));
         }
       } else {
@@ -162,7 +164,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns {boolean} True if the bitmap contains the whole range of values from rangeStart (included) to rangeEnd (excluded), false if not.
    * @memberof ReadonlyRoaringBitmap32
    */
-  public hasRange(rangeStart: number = 0, rangeEnd: number = 0x10000000): boolean {
+  public hasRange(rangeStart: number = 0, rangeEnd: number = 0x100000000): boolean {
     return !!roaringWasm._roaring_bitmap_contains_range_js(this.#p, rangeStart, rangeEnd);
   }
 
@@ -174,7 +176,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @param rangeEnd - The end index (exclusive).
    * @returns The number of elements between rangeStart (included) to rangeEnd (excluded).
    */
-  public rangeCardinality(rangeStart: number = 0, rangeEnd: number = 0x10000000): number {
+  public rangeCardinality(rangeStart: number = 0, rangeEnd: number = 0x100000000): number {
     return roaringWasm._roaring_bitmap_range_cardinality_js(this.#p, rangeStart, rangeEnd);
   }
 
@@ -390,7 +392,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
         } else {
           this.#setPtr(roaringWasm._roaring_bitmap_copy(otherPtr));
         }
-        this.#sz = other.#sz;
+        this.#size = other.#size;
       }
     }
     return this;
@@ -460,10 +462,10 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * Get the cardinality of the bitmap (number of elements).
    */
   public cardinality(): number {
-    let size = this.#sz;
+    let size = this.#size;
     if (size < 0) {
       size = roaringWasm._roaring_bitmap_get_cardinality_js(this.#p);
-      this.#sz = size;
+      this.#size = size;
     }
     return size;
   }
@@ -472,10 +474,10 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * Get the cardinality of the bitmap (number of elements).
    */
   public get size(): number {
-    let size = this.#sz;
+    let size = this.#size;
     if (size < 0) {
       size = roaringWasm._roaring_bitmap_get_cardinality_js(this.#p);
-      this.#sz = size;
+      this.#size = size;
     }
     return size;
   }
@@ -484,7 +486,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * Returns true if the bitmap has no elements.
    */
   public isEmpty(): boolean {
-    const sz = this.#sz;
+    const sz = this.#size;
     if (sz === 0) {
       return true;
     }
@@ -492,7 +494,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (ptr && !roaringWasm._roaring_bitmap_is_empty(ptr)) {
       return false;
     }
-    this.#sz = 0;
+    this.#size = 0;
     return true;
   }
 
@@ -672,15 +674,42 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * The returned RoaringUint32Array is allocated in WASM memory and not garbage collected,
    * it need to be freed manually calling dispose().
    *
-   * @returns The RoaringUint32Array. Remember to manually dispose to free the memory.
+   * This avoid copying to JS memory.
+   *
+   * @returns The RoaringUint32Array. Remember to manually dispose to free the memory as soon as possible.
    */
   public toRoaringUint32Array(): RoaringUint32Array {
-    const cardinality = this.size;
-    const result = new RoaringUint32Array(cardinality);
-    if (cardinality > 0) {
+    const size = this.size;
+    const result = new RoaringUint32Array(size);
+    if (size > 0) {
       roaringWasm._roaring_bitmap_to_uint32_array(this.#p as number, result.byteOffset);
     }
     return result;
+  }
+
+  /**
+   * Converts the bitmap to a JS Uint32Array.
+   * The resulting array may be very big, use this function with caution.
+   *
+   * @param output - The output Uint32Array. If not specified, a new array is created.
+   * If the output array is too small, only the first values that fit are written.
+   * If the output array is too big, the remaining values are left untouched and a new subarray is returned.
+   * If is a number, a new array of the specified size is created.
+   * @param maxLength - The optional maximum number of values to read from the bitmap and write in the array.
+   * @returns The Uint32Array containing all values in the bitmap.
+   */
+  public toUint32Array(output: Uint32Array | number = new Uint32Array(this.size)): Uint32Array {
+    if (typeof output === "number") {
+      output = new Uint32Array(output);
+    }
+    let written = 0;
+    const { _roaring_sync_iter_next, HEAPU32 } = roaringWasm;
+    const mem = roaringWasm._roaring_sync_iter_init(this.#p, output.length) >>> 2;
+    for (let n = _roaring_sync_iter_next(); n !== 0; n = _roaring_sync_iter_next()) {
+      output.set(HEAPU32.subarray(mem, mem + n), written);
+      written += n;
+    }
+    return written < output.length ? output.subarray(0, written) : output;
   }
 
   /**
@@ -689,56 +718,203 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    *
    * @returns The array containing all values in the bitmap.
    */
-  public toArray(): number[] {
-    const roaringArray = this.toRoaringUint32Array();
-    try {
-      return roaringArray.toArray();
-    } finally {
-      roaringArray.dispose();
+  public toArray(): number[];
+
+  /**
+   * Converts the bitmap to a JS array.
+   * The resulting array may be very big, use this function with caution.
+   *
+   * @param maxLength - The maximum length of the output array.
+   * @returns The array containing all values in the bitmap.
+   */
+  public toArray(maxLength: number): number[];
+
+  /**
+   * Append all items in the bitmap to a JS array.
+   * The resulting array may be very big, use this function with caution.
+   *
+   * @param output - The output array. If not specified, a new array is created.
+   * @param maxLength - The optional maximum number of values to read from the bitmap and push in the array.
+   * @returns The array containing all values in the bitmap.
+   */
+  public toArray(output: number[], maxLength?: number | undefined): number[];
+
+  public toArray(output: number[] | number = [], maxLength: number = 0x100000000): number[] {
+    if (typeof output === "number") {
+      maxLength = output;
+      output = [];
     }
+    const { _roaring_sync_iter_next, HEAPU32 } = roaringWasm;
+    const mem = roaringWasm._roaring_sync_iter_init(this.#p, maxLength) >>> 2;
+    for (let n = _roaring_sync_iter_next(); n !== 0; n = _roaring_sync_iter_next()) {
+      for (let i = 0; i < n; ++i) {
+        output.push(HEAPU32[mem + i]);
+      }
+    }
+    return output;
   }
 
   /**
    * Converts the bitmap to a JS Set<number>.
    * The resulting set may be very big, use this function with caution.
    *
+   * @param output - The output Set. If not specified, a new Set is created.
+   * @param maxLength - The optional maximum number of values to read from the bitmap and add in the set.
+   * @param startIndex - The optional index in the bitmap where to start reading values.
    * @returns The set containing all values in the bitmap.
    */
-  public toSet(): Set<number> {
-    const roaringArray = this.toRoaringUint32Array();
-    try {
-      return new Set<number>(roaringArray.asTypedArray());
-    } finally {
-      roaringArray.dispose();
+  public toSet(output: Set<number> = new Set()): Set<number> {
+    const mem = roaringWasm._roaring_sync_iter_init(this.#p, 0x100000000) >>> 2;
+    const { _roaring_sync_iter_next, HEAPU32 } = roaringWasm;
+    for (let n = _roaring_sync_iter_next(); n !== 0; n = _roaring_sync_iter_next()) {
+      for (let i = 0; i < n; ++i) {
+        output.add(HEAPU32[mem + i]);
+      }
     }
+    return output;
   }
 
   /**
-   * Converts the bitmap to a JS Uint32Array.
+   * Converts the bitmap to a string in the format "1,2,3,4,5".
+   * The resulting string may be very big, use this function with caution.
+   *
+   * @param sepatator - The optional separator to use between values, defaults to ",".
+   * @param maxStringLength - The optional approximate maximum number of characters the output string can contain.
+   */
+  public join(sepatator = ",", maxStringLength = MAX_STRING_LENGTH): string {
+    const mem = roaringWasm._roaring_sync_iter_init(this.#p, (maxStringLength + sepatator.length) * 10) >>> 2;
+    const { _roaring_sync_iter_next, HEAPU32 } = roaringWasm;
+    let result = "";
+    let isFirst = true;
+    for (let n = _roaring_sync_iter_next(); n !== 0; n = _roaring_sync_iter_next()) {
+      for (let i = 0; i < n; ++i) {
+        let s: string;
+        if (isFirst) {
+          isFirst = false;
+          s = HEAPU32[mem + i].toString();
+        } else {
+          s = sepatator + HEAPU32[mem + i];
+        }
+        if (result.length + s.length > maxStringLength) {
+          return result;
+        }
+        result += s;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Converts a slice of the bitmap to a Uint32Array.
    * The resulting array may be very big, use this function with caution.
    *
-   * @returns The array containing all values in the bitmap.
+   * @param minimumValue - The range start value (inclusive).
+   * @param maximumValue - The range end value (exclusive).
+   * @param output - The output array. If not specified, a new array is created.
+   * @returns The array containing all values within the given range in the bitmap.
    */
-  public toUint32Array(output?: Uint32Array): Uint32Array {
+  public rangeUint32Array(
+    minimumValue: number = 0,
+    maximumValue: number = 0x100000000,
+    output?: Uint32Array,
+  ): Uint32Array {
+    let range = roaringWasm._roaring_bitmap_range_cardinality_js(this.#p, minimumValue, maximumValue);
     if (!output) {
-      output = new Uint32Array(this.size);
+      output = new Uint32Array(range);
+    } else if (output.length < range) {
+      range = output.length;
     }
-    const maxLen = output.length;
-    const mem = roaringWasm._roaring_sync_iter_init(this.#p) >>> 2;
-    const { _roaring_sync_iter_next, HEAP32 } = roaringWasm;
-    let written = 0;
-    while (written < maxLen) {
-      let n = _roaring_sync_iter_next();
-      if (written + n > maxLen) {
-        n = maxLen - written;
+    if (range > 0) {
+      const { _roaring_sync_iter_next, HEAPU32 } = roaringWasm;
+      const mem = roaringWasm._roaring_sync_iter_init(this.#p, range) >>> 2;
+      let written = 0;
+      for (let n = roaringWasm._roaring_sync_iter_min(minimumValue); n !== 0; n = _roaring_sync_iter_next()) {
+        output.set(HEAPU32.subarray(mem, mem + n), written);
+        written += n;
       }
-      if (n <= 0) {
-        break;
-      }
-      output.set(HEAP32.subarray(mem, mem + n), written);
-      written += n;
     }
-    return written < output.length ? output.subarray(0, written) : output;
+    return range < output.length ? output.subarray(0, range) : output;
+  }
+
+  /**
+   * Converts a slice of the bitmap to an JS Array.
+   * The resulting array may be very big, use this function with caution.
+   *
+   * @param minimumValue - The range start value (inclusive).
+   * @param maximumValue - The range end value (exclusive).
+   * @param output - The output array. If not specified, a new array is created.
+   * @returns The array containing all values within the given range in the bitmap.
+   */
+  public rangeArray(minimumValue: number = 0, maximumValue: number = 0x100000000, output: number[] = []): number[] {
+    const range = roaringWasm._roaring_bitmap_range_cardinality_js(this.#p, minimumValue, maximumValue);
+    if (range > 0) {
+      const { _roaring_sync_iter_next, HEAPU32 } = roaringWasm;
+      const mem = roaringWasm._roaring_sync_iter_init(this.#p, range) >>> 2;
+      for (let n = roaringWasm._roaring_sync_iter_min(minimumValue); n !== 0; n = _roaring_sync_iter_next()) {
+        for (let i = 0; i < n; ++i) {
+          output.push(HEAPU32[mem + i]);
+        }
+      }
+    }
+    return output;
+  }
+
+  /**
+   * Converts a slice of the bitmap to a Set.
+   * The resulting set may be very big, use this function with caution.
+   *
+   * @param minimumValue - The range start value (inclusive).
+   * @param maximumValue - The range end value (exclusive).
+   * @param output - The output set. If not specified, a new set is created.
+   * @returns The set containing all values within the given range in the bitmap.
+   */
+  public rangeSet(
+    minimumValue: number = 0,
+    maximumValue: number = 0x100000000,
+    output: Set<number> = new Set(),
+  ): Set<number> {
+    const range = roaringWasm._roaring_bitmap_range_cardinality_js(this.#p, minimumValue, maximumValue);
+    if (range > 0) {
+      const { _roaring_sync_iter_next, HEAPU32 } = roaringWasm;
+      const mem = roaringWasm._roaring_sync_iter_init(this.#p, range) >>> 2;
+      for (let n = roaringWasm._roaring_sync_iter_min(minimumValue); n !== 0; n = _roaring_sync_iter_next()) {
+        for (let i = 0; i < n; ++i) {
+          output.add(HEAPU32[mem + i]);
+        }
+      }
+    }
+    return output;
+  }
+
+  /**
+   * Converts a slice of the bitmap to a string in the form "1,2,3,4,5".
+   * The resulting string may be very big, use this function with caution.
+   *
+   * @param minimumValue - The range start value (inclusive).
+   * @param maximumValue - The range end value (exclusive).
+   * @param separator - The separator to use between values. Defaults to ",".
+   * @returns The string containing all values within the given range in the bitmap.
+   */
+  public rangeJoin(minimumValue: number = 0, maximumValue: number = 0x100000000, separator: string = ","): string {
+    const range = roaringWasm._roaring_bitmap_range_cardinality_js(this.#p, minimumValue, maximumValue);
+    let result = "";
+    if (range > 0) {
+      const { _roaring_sync_iter_next, HEAPU32 } = roaringWasm;
+      const mem = roaringWasm._roaring_sync_iter_init(this.#p, range) >>> 2;
+      let isFirst = true;
+      for (let n = roaringWasm._roaring_sync_iter_min(minimumValue); n !== 0; n = _roaring_sync_iter_next()) {
+        if (isFirst) {
+          isFirst = false;
+          result = HEAPU32[mem].toString();
+        } else {
+          result = separator + HEAPU32[mem];
+        }
+        for (let i = 1; i < n; ++i) {
+          result += separator + HEAPU32[mem + i];
+        }
+      }
+    }
+    return result;
   }
 
   /**
@@ -985,7 +1161,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @param rangeEnd The end of the range.
    * @returns boolean True if the bitmap and the range intersects, false if not.
    */
-  public intersectsWithRange(rangeStart: number = 0, rangeEnd: number = 0x10000000): boolean {
+  public intersectsWithRange(rangeStart: number = 0, rangeEnd: number = 0x100000000): boolean {
     return !!roaringWasm._roaring_bitmap_intersect_with_range_js(this.#p, rangeStart, rangeEnd);
   }
 
@@ -1312,8 +1488,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
         _finalizationRegistry.unregister(b);
       }
 
-      const asz = a.#sz;
-      const bsz = b.#sz;
+      const asz = a.#size;
+      const bsz = b.#size;
 
       a.#p = 0;
       b.#p = 0;
@@ -1321,14 +1497,14 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
       a.#setPtr(bptr);
       b.#setPtr(aptr);
 
-      a.#sz = bsz;
-      b.#sz = asz;
+      a.#size = bsz;
+      b.#size = asz;
     }
   }
 
   /** This method is called after the bitmap is modified */
   protected invalidate(): void {
-    this.#sz = -1;
+    this.#size = -1;
     ++this.#v;
   }
 
@@ -1372,7 +1548,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
       _finalizationRegistry.register(this, ptr, this);
     }
     this.#p = ptr;
-    this.#sz = 0;
+    this.#size = 0;
     return ptr;
   }
 

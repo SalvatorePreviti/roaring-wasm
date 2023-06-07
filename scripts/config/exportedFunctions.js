@@ -72,6 +72,7 @@ const exportedFunctions = [
 
   "_roaring_sync_iter_init",
   "_roaring_sync_iter_next",
+  "_roaring_sync_iter_min",
 ];
 
 module.exports = exportedFunctions;
