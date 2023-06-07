@@ -336,6 +336,7 @@ describe("RoaringBitmap32 static", () => {
         null as any,
         undefined as any,
         NaN,
+        false,
         0xffff,
         0xffffffff,
         2,

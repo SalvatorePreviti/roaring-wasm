@@ -86,6 +86,13 @@ export type RoaringWasm = {
   _roaring_sync_iter_init(bitmap: NullablePtr, maxLength: number): number;
   _roaring_sync_iter_next(): number;
   _roaring_sync_iter_min(minimumValue: number): number;
+
+  _roaring_sync_bulk_add_init(bitmap: NullablePtr): number;
+  _roaring_sync_bulk_add_chunk(chunkSize: number): void;
+
+  _roaring_sync_bulk_remove_init(bitmap: NullablePtr): number;
+  _roaring_sync_bulk_remove_chunk(chunkSize: number): void;
+  _roaring_bitmap_remove_many(roaring: number, count: number, valuesPtr: number): void;
 };
 
 const _loadedModule = roaring_wasm_module_init<RoaringWasm>();

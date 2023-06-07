@@ -73,6 +73,13 @@ const exportedFunctions = [
   "_roaring_sync_iter_init",
   "_roaring_sync_iter_next",
   "_roaring_sync_iter_min",
+
+  "_roaring_sync_bulk_add_init",
+  "_roaring_sync_bulk_add_chunk",
+
+  "_roaring_bitmap_remove_many",
+  "_roaring_sync_bulk_remove_init",
+  "_roaring_sync_bulk_remove_chunk",
 ];
 
 module.exports = exportedFunctions;
