@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { RoaringBitmap32 } from "roaring-wasm-src";
 
 describe("RoaringBitmap32 to", () => {
-  describe.only("toUint32Array", () => {
+  describe("toUint32Array", () => {
     it("should return a Uint32Array", () => {
       const bitmap = new RoaringBitmap32([1, 2, 5, 124, 0xffffffff]);
       const a = bitmap.toUint32Array();
@@ -72,7 +72,7 @@ describe("RoaringBitmap32 to", () => {
     });
   });
 
-  describe.only("toArray", () => {
+  describe("toArray", () => {
     it("should return an array", () => {
       const bitmap = new RoaringBitmap32([1, 2, 5, 124, 0xffffffff]);
       const a = bitmap.toArray();
@@ -132,7 +132,7 @@ describe("RoaringBitmap32 to", () => {
     });
   });
 
-  describe.only("join", () => {
+  describe("join", () => {
     it("should work", () => {
       const bitmap = new RoaringBitmap32([1, 2, 5, 124, 0xffffffff]);
       expect(bitmap.join()).eq("1,2,5,124,4294967295");
@@ -162,7 +162,7 @@ describe("RoaringBitmap32 to", () => {
     });
   });
 
-  describe.only("rangeUint32Array", () => {
+  describe("rangeUint32Array", () => {
     it("should return the full bitmap", () => {
       const bitmap = new RoaringBitmap32([1, 2, 5, 124, 0xffffffff]);
       const a = bitmap.rangeUint32Array(0, 0xffffffff + 1);
@@ -233,7 +233,7 @@ describe("RoaringBitmap32 to", () => {
     });
   });
 
-  describe.only("rangeArray", () => {
+  describe("rangeArray", () => {
     it("should work", () => {
       const bitmap = new RoaringBitmap32([1, 2, 5, 124, 0xffffffff]);
       const a = bitmap.rangeArray(2, 126);
@@ -309,6 +309,202 @@ describe("RoaringBitmap32 to", () => {
           expect(array[i]).eq(100 + i);
         }
       }
+    });
+  });
+
+  describe("rangeJoin", () => {
+    it("should work", () => {
+      const bitmap = RoaringBitmap32.fromRange(4, 0xfffff);
+      const splitted = bitmap.rangeJoin(100, 14000).split(",");
+      expect(splitted.length).eq(14000 - 100);
+      for (let i = 0; i < splitted.length; ++i) {
+        if (splitted[i] !== (100 + i).toString()) {
+          expect(splitted[i]).eq((100 + i).toString());
+        }
+      }
+    });
+
+    it("should work with an empty bitmap", () => {
+      const bitmap = new RoaringBitmap32();
+      expect(bitmap.rangeJoin(100, 14000)).eq("");
+    });
+
+    it("should work with an empty range", () => {
+      const bitmap = RoaringBitmap32.fromRange(400, 500);
+      expect(bitmap.rangeJoin(100, 200)).eq("");
+    });
+  });
+
+  describe("sliceUint32Array", () => {
+    it("works for an empty bitmap", () => {
+      const bitmap = new RoaringBitmap32();
+      expect(Array.from(bitmap.sliceUint32Array(0, 100))).deep.eq([]);
+    });
+
+    it("can return the whole bitmap", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceUint32Array(0, 5))).deep.eq([1, 2, 3, 4, 5]);
+    });
+
+    it("can return a subrange", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceUint32Array(1, 3))).deep.eq([2, 3]);
+    });
+
+    it("behaves like array.slice for negative start", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceUint32Array(-2, 5))).deep.eq([4, 5]);
+    });
+
+    it("behaves like array.slice for negative end", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceUint32Array(2, -1))).deep.eq([3, 4]);
+    });
+
+    it("behaves like array.slice for negative start and end", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceUint32Array(-3, -1))).deep.eq([3, 4]);
+    });
+
+    it("returns empty if the range is outside the bitmap", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceUint32Array(6, 10))).deep.eq([]);
+    });
+
+    it("supports end greater than the array size", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceUint32Array(0, 100))).deep.eq([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceUint32Array(2, 100))).deep.eq([3, 4, 5]);
+    });
+  });
+
+  describe("sliceArray", () => {
+    it("works for an empty bitmap", () => {
+      const bitmap = new RoaringBitmap32();
+      expect(bitmap.sliceArray(0, 100)).deep.eq([]);
+    });
+
+    it("can return the whole bitmap", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(bitmap.sliceArray(0, 5)).deep.eq([1, 2, 3, 4, 5]);
+    });
+
+    it("can return a subrange", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(bitmap.sliceArray(1, 3)).deep.eq([2, 3]);
+    });
+
+    it("behaves like array.slice for negative start", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(bitmap.sliceArray(-2, 5)).deep.eq([4, 5]);
+    });
+
+    it("behaves like array.slice for negative end", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(bitmap.sliceArray(2, -1)).deep.eq([3, 4]);
+    });
+
+    it("behaves like array.slice for negative start and end", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(bitmap.sliceArray(-3, -1)).deep.eq([3, 4]);
+    });
+
+    it("returns empty if the range is outside the bitmap", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(bitmap.sliceArray(6, 10)).deep.eq([]);
+    });
+
+    it("supports end greater than the array size", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(bitmap.sliceArray(0, 100)).deep.eq([1, 2, 3, 4, 5]);
+      expect(bitmap.sliceArray(2, 100)).deep.eq([3, 4, 5]);
+    });
+  });
+
+  describe("sliceSet", () => {
+    it("works for an empty bitmap", () => {
+      const bitmap = new RoaringBitmap32();
+      expect(Array.from(bitmap.sliceSet(0, 100))).deep.eq([]);
+    });
+
+    it("can return the whole bitmap", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceSet(0, 5))).deep.eq([1, 2, 3, 4, 5]);
+    });
+
+    it("can return a subrange", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceSet(1, 3))).deep.eq([2, 3]);
+    });
+
+    it("behaves like array.slice for negative start", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceSet(-2, 5))).deep.eq([4, 5]);
+    });
+
+    it("behaves like array.slice for negative end", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceSet(2, -1))).deep.eq([3, 4]);
+    });
+
+    it("behaves like array.slice for negative start and end", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceSet(-3, -1))).deep.eq([3, 4]);
+    });
+
+    it("returns empty if the range is outside the bitmap", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceSet(6, 10))).deep.eq([]);
+    });
+
+    it("supports end greater than the array size", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceSet(0, 100))).deep.eq([1, 2, 3, 4, 5]);
+      expect(Array.from(bitmap.sliceSet(2, 100))).deep.eq([3, 4, 5]);
+    });
+  });
+
+  describe("sliceJoin", () => {
+    it("works for an empty bitmap", () => {
+      const bitmap = new RoaringBitmap32();
+      expect(bitmap.sliceJoin(0, 100)).deep.eq("");
+    });
+
+    it("can return the whole bitmap", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(bitmap.sliceJoin(0, 5)).deep.eq("1,2,3,4,5");
+    });
+
+    it("can return a subrange", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(bitmap.sliceJoin(1, 3)).deep.eq("2,3");
+    });
+
+    it("behaves like array.slice for negative start", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(bitmap.sliceJoin(-2, 5)).deep.eq("4,5");
+      expect(bitmap.sliceJoin(-2, 5, "x")).deep.eq("4x5");
+    });
+
+    it("behaves like array.slice for negative end", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(bitmap.sliceJoin(2, -1)).deep.eq("3,4");
+    });
+
+    it("behaves like array.slice for negative start and end", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(bitmap.sliceJoin(-3, -1, "")).deep.eq("34");
+    });
+
+    it("returns empty if the range is outside the bitmap", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(bitmap.sliceJoin(6, 10)).deep.eq("");
+    });
+
+    it("supports end greater than the array size", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5]);
+      expect(bitmap.sliceJoin(0, 100)).deep.eq([1, 2, 3, 4, 5].join(","));
+      expect(bitmap.sliceJoin(2, 100, "xx")).deep.eq([3, 4, 5].join("xx"));
     });
   });
 });

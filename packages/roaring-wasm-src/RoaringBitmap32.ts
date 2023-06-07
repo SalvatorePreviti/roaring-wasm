@@ -805,7 +805,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   }
 
   /**
-   * Converts a slice of the bitmap to a Uint32Array.
+   * Converts a range of the bitmap to a Uint32Array.
    * The resulting array may be very big, use this function with caution.
    *
    * @param minimumValue - The range start value (inclusive).
@@ -837,7 +837,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   }
 
   /**
-   * Converts a slice of the bitmap to an JS Array.
+   * Converts a range of the bitmap to an JS Array.
    * The resulting array may be very big, use this function with caution.
    *
    * @param minimumValue - The range start value (inclusive).
@@ -860,7 +860,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   }
 
   /**
-   * Converts a slice of the bitmap to a Set.
+   * Converts a range of the bitmap to a Set.
    * The resulting set may be very big, use this function with caution.
    *
    * @param minimumValue - The range start value (inclusive).
@@ -887,7 +887,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   }
 
   /**
-   * Converts a slice of the bitmap to a string in the form "1,2,3,4,5".
+   * Converts a range of the bitmap to a string in the form "1,2,3,4,5".
    * The resulting string may be very big, use this function with caution.
    *
    * @param minimumValue - The range start value (inclusive).
@@ -905,16 +905,88 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
       for (let n = roaringWasm._roaring_sync_iter_min(minimumValue); n !== 0; n = _roaring_sync_iter_next()) {
         if (isFirst) {
           isFirst = false;
-          result = HEAPU32[mem].toString();
         } else {
-          result = separator + HEAPU32[mem];
+          result += separator;
         }
+        result += HEAPU32[mem];
         for (let i = 1; i < n; ++i) {
           result += separator + HEAPU32[mem + i];
         }
       }
     }
     return result;
+  }
+
+  /**
+   * Converts a slice, define by start index (included) and end index (excluded) of the bitmap to a Uint32Array.
+   * The resulting array may be very big, use this function with caution.
+   *
+   * @param start - The slice start index (inclusive).
+   * @param end - The slice end index (exclusive).
+   * @param output - The output array. If not specified, a new array is created.
+   * @returns The array containing all values within the given slice in the bitmap.
+   */
+  public sliceUint32Array(start: number = 0, end: number = 0x100000000, output?: Uint32Array | undefined): Uint32Array {
+    const min = roaringWasm._roaring_bitmap_at_js(this.#p, start);
+    let max = roaringWasm._roaring_bitmap_at_js(this.#p, end);
+    if (max < 0) {
+      max = 0x100000000;
+    }
+    return this.rangeUint32Array(min < 0 ? max : min, max, output);
+  }
+
+  /**
+   * Converts a slice, define by start index (included) and end index (excluded) of the bitmap to a number array.
+   * The resulting array may be very big, use this function with caution.
+   *
+   * @param start - The slice start index (inclusive).
+   * @param end - The slice end index (exclusive).
+   * @param output - The output array. If not specified, a new array is created.
+   * @returns The array containing all values within the given slice in the bitmap.
+   */
+  public sliceArray(start: number = 0, end: number = 0x100000000, output?: number[] | undefined): number[] {
+    const min = roaringWasm._roaring_bitmap_at_js(this.#p, start);
+    let max = roaringWasm._roaring_bitmap_at_js(this.#p, end);
+    if (max < 0) {
+      max = 0x100000000;
+    }
+    return this.rangeArray(min < 0 ? max : min, max, output);
+  }
+
+  /**
+   * Converts a slice, define by start index (included) and end index (excluded) of the bitmap to a Set.
+   * The resulting set may be very big, use this function with caution.
+   *
+   * @param start - The slice start index (inclusive).
+   * @param end - The slice end index (exclusive).
+   * @param output - The output set. If not specified, a new set is created.
+   * @returns The set containing all values within the given slice in the bitmap.
+   */
+  public sliceSet(start: number = 0, end: number = 0x100000000, output?: Set<number> | undefined): Set<number> {
+    const min = roaringWasm._roaring_bitmap_at_js(this.#p, start);
+    let max = roaringWasm._roaring_bitmap_at_js(this.#p, end);
+    if (max < 0) {
+      max = 0x100000000;
+    }
+    return this.rangeSet(min < 0 ? max : min, max, output);
+  }
+
+  /**
+   * Converts a slice, define by start index (included) and end index (excluded) of the bitmap to a string in the form "1,2,3,4,5".
+   * The resulting string may be very big, use this function with caution.
+   *
+   * @param start - The slice start index (inclusive).
+   * @param end - The slice end index (exclusive).
+   * @param separator - The separator to use between values. Defaults to ",".
+   * @returns The string containing all values within the given slice in the bitmap.
+   */
+  public sliceJoin(start: number = 0, end: number = 0x100000000, separator?: string | undefined): string {
+    const min = roaringWasm._roaring_bitmap_at_js(this.#p, start);
+    let max = roaringWasm._roaring_bitmap_at_js(this.#p, end);
+    if (max < 0) {
+      max = 0x100000000;
+    }
+    return this.rangeJoin(min < 0 ? max : min, max, separator);
   }
 
   /**
@@ -960,6 +1032,9 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * @returns element or NaN
    */
   public select(rank: number): number {
+    if (rank < 0) {
+      rank = this.size + rank;
+    }
     return roaringWasm._roaring_bitmap_select_js(this.#p, rank);
   }
 
