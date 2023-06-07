@@ -11,6 +11,7 @@
 #  define CROARING_SERIALIZATION_CONTAINER 2
 #endif
 
+#define MAX_SAFE_INTEGER 9007199254740991.0
 #define MAX_SERIALIZATION_NATIVE_MEMORY 0x00FFFFFF
 
 /** Allocate memory, aligned to 32 bytes, filling it with zeroes */
@@ -24,6 +25,10 @@ void * jsalloc_zero(uint32_t size) {
 }
 
 roaring_bitmap_t * roaring_bitmap_create_js(void) { return roaring_bitmap_create_with_capacity(0); }
+
+double roaring_bitmap_get_cardinality_js(const roaring_bitmap_t * bm) {
+  return bm ? (double)roaring_bitmap_get_cardinality(bm) : 0;
+}
 
 bool roaring_bitmap_optimize_js(roaring_bitmap_t * bitmap) {
   bool result = false;
@@ -291,12 +296,12 @@ double roaring_iterator_js_next(roaring_iterator_js_t * iterator, const roaring_
 }
 
 double roaring_iterator_js_gte(
-  roaring_iterator_js_t * iterator, const roaring_bitmap_t * bitmap, double version, double minimumValue) {
-  if (isnan(minimumValue) || minimumValue < 1) {
-    minimumValue = 0;
-  }
+  roaring_iterator_js_t * iterator, const roaring_bitmap_t * bitmap, double version, double minimum) {
+  minimum = ceil(minimum);
 
-  if (minimumValue >= 0x100000000) {
+  if (isnan(minimum) || minimum < 0) {
+    minimum = 0;
+  } else if (minimum > 0xffffffff) {
     free(iterator);
     return -1;
   }
@@ -322,9 +327,11 @@ double roaring_iterator_js_gte(
     iterator->version = version;
   }
 
+  uint32_t uminimum = (uint32_t)minimum;
+
   if (
-    minimumValue > iterator->iterator.current_value &&
-    !roaring_move_uint32_iterator_equalorlarger(&iterator->iterator, (uint32_t)minimumValue)) {
+    uminimum > iterator->iterator.current_value &&
+    !roaring_move_uint32_iterator_equalorlarger(&iterator->iterator, uminimum)) {
     free(iterator);
     return -1;
   }
@@ -335,4 +342,81 @@ double roaring_iterator_js_gte(
   }
 
   return (double)iterator->iterator.current_value;
+}
+
+#define SYNC_TMP_BUF_SIZE (65536 * 15)
+
+roaring_bitmap_t * sync_bulk_bitmap;
+roaring_bulk_context_t sync_bulk_context;
+
+roaring_uint32_iterator_t sync_iter;
+int64_t sync_iter_buf_left = 0;
+
+uint32_t sync_tmp_buf[SYNC_TMP_BUF_SIZE] __attribute__((aligned(64)));
+
+uint32_t * roaring_sync_iter_init(const roaring_bitmap_t * bitmap, double maxLength) {
+  if (!bitmap || isnan(maxLength) || maxLength < 1) {
+    sync_iter_buf_left = 0;
+    return NULL;
+  } else if (maxLength > MAX_SAFE_INTEGER) {
+    maxLength = MAX_SAFE_INTEGER;
+  }
+  sync_iter_buf_left = (int64_t)maxLength;
+  roaring_init_iterator(bitmap, &sync_iter);
+  return sync_tmp_buf;
+}
+
+uint32_t roaring_sync_iter_next() {
+  if (sync_iter_buf_left <= 0) {
+    return 0;
+  }
+  uint32_t n = roaring_read_uint32_iterator(
+    &sync_iter, sync_tmp_buf, sync_iter_buf_left < SYNC_TMP_BUF_SIZE ? (uint32_t)sync_iter_buf_left : SYNC_TMP_BUF_SIZE);
+  sync_iter_buf_left -= n;
+  return n;
+}
+
+uint32_t roaring_sync_iter_min(double minimum) {
+  if (sync_iter_buf_left <= 0) {
+    return 0;
+  }
+
+  minimum = ceil(minimum);
+  if (minimum > 0 && !roaring_move_uint32_iterator_equalorlarger(&sync_iter, (uint32_t)minimum)) {
+    return 0;
+  }
+
+  uint32_t n = roaring_read_uint32_iterator(
+    &sync_iter, sync_tmp_buf, sync_iter_buf_left < SYNC_TMP_BUF_SIZE ? (uint32_t)sync_iter_buf_left : SYNC_TMP_BUF_SIZE);
+
+  sync_iter_buf_left -= n;
+
+  return n;
+}
+
+uint32_t * roaring_sync_bulk_add_init(roaring_bitmap_t * bitmap) {
+  if (!bitmap) {
+    return NULL;
+  }
+  sync_bulk_bitmap = bitmap;
+  memset(&sync_bulk_context, 0, sizeof(sync_bulk_context));
+  return sync_tmp_buf;
+}
+
+void roaring_sync_bulk_add_chunk(uint32_t chunkSize) {
+  for (uint32_t i = 0; i < chunkSize; i++) {
+    roaring_bitmap_add_bulk(sync_bulk_bitmap, &sync_bulk_context, sync_tmp_buf[i]);
+  }
+}
+
+uint32_t * roaring_sync_bulk_remove_init(roaring_bitmap_t * bitmap) {
+  if (!bitmap) {
+    return NULL;
+  }
+  sync_bulk_bitmap = bitmap;
+  return sync_tmp_buf;
+}
+
+void roaring_sync_bulk_remove_chunk(uint32_t chunkSize) {
+  roaring_bitmap_remove_many(sync_bulk_bitmap, chunkSize, sync_tmp_buf);
 }

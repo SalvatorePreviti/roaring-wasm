@@ -10,6 +10,7 @@ import {
   _roaringArenaAllocator_push,
 } from "./lib/roaring-arena-allocator-stack";
 import { RoaringBitmap32Iterator } from "./RoaringBitmap32Iterator";
+import type { BasicTypedArray } from "./utils";
 
 export class RoaringArenaAllocator {
   #refs: Set<IDisposable> | null;
@@ -148,8 +149,9 @@ export class RoaringArenaAllocator {
     valuesOrCapacity?:
       | RoaringBitmap32
       | RoaringUint32Array
-      | Iterable<number>
-      | ArrayLike<number>
+      | BasicTypedArray
+      | Iterable<number | null | undefined | false | string>
+      | readonly (number | null | undefined | false | string)[]
       | number
       | null
       | undefined,

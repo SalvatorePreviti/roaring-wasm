@@ -39,7 +39,7 @@ export class RoaringBitmap32Iterator implements IDisposable, IterableIterator<nu
     return this.#r;
   }
 
-  public throw(e?: unknown): never {
+  public throw(e?: unknown): IteratorResult<number> | never {
     this.dispose();
     // eslint-disable-next-line @typescript-eslint/no-throw-literal
     throw e;

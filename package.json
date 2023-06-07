@@ -13,7 +13,8 @@
     "test": "node scripts/test.js",
     "doc": "typedoc ./packages/roaring-wasm/index.d.ts --tsconfig ./packages/roaring-wasm/tsconfig.json",
     "web-app": "vite --config ./test/web/vite.config.ts",
-    "web-test": "playwright test"
+    "web-test": "playwright test",
+    "precommit": "lint-staged && pretty-quick --staged"
   },
   "repository": {
     "type": "git",
@@ -76,6 +77,16 @@
     "typedoc": "^0.24.7",
     "typescript": "^5.0.4",
     "vite": "^4.3.9",
-    "vite-plugin-node-polyfills": "^0.8.2"
+    "vite-plugin-node-polyfills": "^0.8.2",
+    "eslint-plugin-mocha": "^10.1.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mts,cts,cjs,mjs,json}": [
+      "eslint --no-error-on-unmatched-pattern --fix",
+      "prettier --write --loglevel=warn"
+    ],
+    "*.{yml,yaml,md,htm,html,css,scss,less}": [
+      "prettier --write --loglevel=warn"
+    ]
   }
 }
