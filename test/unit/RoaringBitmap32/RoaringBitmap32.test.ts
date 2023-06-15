@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { RoaringArenaAllocator, RoaringBitmap32, RoaringUint32Array, roaringLibraryInitialize } from "roaring-wasm-src";
+import { RoaringArenaAllocator, RoaringBitmap32, roaringLibraryInitialize } from "roaring-wasm-src";
 
 describe("RoaringBitmap32", () => {
   before(roaringLibraryInitialize);
@@ -42,28 +42,25 @@ describe("RoaringBitmap32", () => {
       for (const item of array) {
         bitmap.add(item);
       }
-      expect(bitmap.toArray().sort()).deep.eq(array);
+      expect(bitmap.toArray()).deep.eq(array);
     });
 
-    it("adds a RoaringUint32Array", () => {
-      const buffer = new RoaringUint32Array(array);
+    it("adds a UInt32Array", () => {
+      const buffer = new Uint32Array(array);
       const bitmap = new RoaringBitmap32();
-      expect(buffer.toArray()).deep.eq(array);
       bitmap.addMany(buffer);
-      expect(buffer.isDisposed).eq(false);
-      expect(buffer.toArray()).deep.eq(array);
-      expect(bitmap.toArray().sort()).deep.eq(array);
+      expect(bitmap.toArray()).deep.eq(array);
     });
 
     it("adds a simple array", () => {
       const bitmap = new RoaringBitmap32();
       bitmap.addMany(array);
-      expect(bitmap.toArray().sort()).deep.eq(array);
+      expect(bitmap.toArray()).deep.eq(array);
     });
 
     it("works in the constructor", () => {
       const bitmap = new RoaringBitmap32(array);
-      expect(bitmap.toArray().sort()).deep.eq(array);
+      expect(bitmap.toArray()).deep.eq(array);
     });
   });
 

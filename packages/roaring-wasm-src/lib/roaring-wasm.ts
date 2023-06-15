@@ -16,6 +16,7 @@ export type RoaringWasm = {
   readonly HEAPF32: Float32Array;
   readonly HEAPF64: Float64Array;
 
+  _jsalloc_unsafe(size: number): Ptr;
   _jsalloc_zero(size: number): Ptr;
   _free(pointer: NullablePtr): void;
   _roaring_bitmap_create_js(): number;
@@ -23,7 +24,6 @@ export type RoaringWasm = {
   _roaring_bitmap_free(roaring: number): void;
   _roaring_bitmap_is_empty(roaring: number): WasmBool;
   _roaring_bitmap_add_checked(roaring: number, value: number): WasmBool;
-  _roaring_bitmap_add_many(roaring: number, count: number, values: number): void;
   _roaring_bitmap_remove_checked(roaring: number, value: number): WasmBool;
   _roaring_bitmap_maximum(roaring: number): number;
   _roaring_bitmap_minimum(roaring: number): number;
@@ -75,6 +75,7 @@ export type RoaringWasm = {
   _roaring_bitmap_xor_js(roaring1: NullablePtr, roaring2: NullablePtr): number;
   _roaring_bitmap_andnot_js(roaring1: NullablePtr, roaring2: NullablePtr): number;
   _roaring_bitmap_or_many(count: number, bitmapsPtrs: number): number;
+  _roaring_bitmap_or_many_heap(count: number, bitmapsPtrs: number): number;
   _roaring_bitmap_xor_many(count: number, bitmapsPtrs: number): number;
   _roaring_bitmap_intersect_with_range_js(bitmap: NullablePtr, rangeStart: number, rangeEnd: number): WasmBool;
 

@@ -17,9 +17,6 @@ describe("package test", () => {
 
     const a = new roaring.RoaringUint8Array([1, 2, 3]);
     expect(a.toArray()).deep.eq([1, 2, 3]);
-
-    const b = new roaring.RoaringUint32Array([1, 2, 3]);
-    expect(b.toArray()).deep.eq([1, 2, 3]);
   });
 
   it("allow iterating a large array", () => {

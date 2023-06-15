@@ -31,10 +31,6 @@ describe("RoaringBitmap32 one element", () => {
       expect(new RoaringBitmap32([123]).contains(123)).eq(true);
     });
 
-    it("has a toRoaringUint32Array() that returns [123]", () => {
-      expect(new RoaringBitmap32([123]).toRoaringUint32Array().toArray()).deep.eq([123]);
-    });
-
     it("has a toArray() that returns [123]", () => {
       expect(new RoaringBitmap32([123]).toArray()).deep.eq([123]);
     });
@@ -44,8 +40,8 @@ describe("RoaringBitmap32 one element", () => {
     });
 
     it("should serialize as (portable)", () => {
-      const array = new RoaringBitmap32([123]).serializeToRoaringUint8Array(true).toArray();
-      expect(array).deep.eq([58, 48, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 123, 0]);
+      const buf = new RoaringBitmap32([123]).serializeToRoaringUint8Array(true);
+      expect(Array.from(buf.asTypedArray())).deep.eq([58, 48, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 123, 0]);
     });
 
     it("should have a native serialization size 9", () => {
@@ -53,8 +49,8 @@ describe("RoaringBitmap32 one element", () => {
     });
 
     it("should serialize as (native)", () => {
-      const array = new RoaringBitmap32([123]).serializeToRoaringUint8Array().toArray();
-      expect(array).deep.eq([1, 1, 0, 0, 0, 123, 0, 0, 0]);
+      const buf = new RoaringBitmap32([123]).serializeToRoaringUint8Array();
+      expect(Array.from(buf.asTypedArray())).deep.eq([1, 1, 0, 0, 0, 123, 0, 0, 0]);
     });
 
     it("should be a subset of itself", () => {

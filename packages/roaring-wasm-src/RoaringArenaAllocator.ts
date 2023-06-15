@@ -2,7 +2,6 @@ import type { IDisposable } from "./IDisposable";
 import { dispose } from "./IDisposable";
 
 import { RoaringUint8Array } from "./RoaringUint8Array";
-import { RoaringUint32Array } from "./RoaringUint32Array";
 import { RoaringBitmap32 } from "./RoaringBitmap32";
 import {
   _roaringArenaAllocator_head,
@@ -135,11 +134,6 @@ export class RoaringArenaAllocator {
     return new RoaringUint8Array(lengthOrArray, this);
   }
 
-  public newRoaringUint32Array(lengthOrArray?: number | Iterable<number> | ArrayLike<number> | null | undefined) {
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    return new RoaringUint32Array(lengthOrArray, this);
-  }
-
   public newRoaringBitmap32Iterator(bitmap?: RoaringBitmap32 | null | undefined): RoaringBitmap32Iterator {
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     return new RoaringBitmap32Iterator(bitmap, this);
@@ -148,7 +142,6 @@ export class RoaringArenaAllocator {
   public newRoaringBitmap32(
     valuesOrCapacity?:
       | RoaringBitmap32
-      | RoaringUint32Array
       | BasicTypedArray
       | Iterable<number | null | undefined | false | string>
       | readonly (number | null | undefined | false | string)[]

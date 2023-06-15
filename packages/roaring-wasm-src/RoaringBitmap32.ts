@@ -4,7 +4,6 @@ import type { NullablePtr } from "./lib/roaring-wasm";
 import { roaringWasm } from "./lib/roaring-wasm";
 import type { RoaringArenaAllocator } from "./RoaringArenaAllocator";
 import { RoaringBitmap32Iterator } from "./RoaringBitmap32Iterator";
-import { RoaringUint32Array } from "./RoaringUint32Array";
 import { RoaringUint8Array } from "./RoaringUint8Array";
 import type { BasicTypedArray } from "./utils";
 
@@ -38,7 +37,6 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   public static from(
     values:
       | RoaringBitmap32
-      | RoaringUint32Array
       | BasicTypedArray
       | Iterable<number | null | undefined | false | string>
       | readonly (number | null | undefined | false | string)[]
@@ -102,28 +100,6 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   }
 
   /**
-   * Utility function that deserializes a RoaringBitmap32 serialized in a buffer to an Array<number> of values.
-   * The array can be very big, be careful when you use this function.
-   *
-   * @param buffer - The buffer to deserialize.
-   * @param portable - If true, deserialization is compatible with the Java and Go versions of the library.
-   * If false, deserialization is compatible with the C version of the library. Default is false.
-   * @returns All the values in the bitmap.
-   */
-  public static deserializeToArray(
-    buffer: RoaringUint8Array | Uint8Array | Iterable<number>,
-    portable: boolean = false,
-  ): number[] {
-    const bitmap = new RoaringBitmap32();
-    try {
-      bitmap.deserialize(buffer, portable);
-      return bitmap.toArray();
-    } finally {
-      bitmap.dispose();
-    }
-  }
-
-  /**
    * addOffset adds the value 'offset' to each and every value in a bitmap, generating a new bitmap in the process.
    * If offset + element is outside of the range [0,2^32), that the element will be dropped.
    *
@@ -151,50 +127,6 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   }
 
   /**
-   * Utility function that serializes an array of uint32 to a new NodeJS buffer.
-   * The returned buffer is automatically garbage collected.
-   *
-   * @param values - The values to serialize, a bitmap or an iterable of uint32 values.
-   * @param portable - If true, serialization is compatible with the Java and Go versions of the library.
-   * If false, serialization is compatible with the C version of the library. Default is false.
-   * @returns The NodeJS buffer containing the serialized data.
-   */
-  public static serializeArrayToNewBuffer(
-    values: RoaringUint32Array | Iterable<number>,
-    portable: boolean = false,
-  ): Buffer {
-    const bitmap = new RoaringBitmap32(values);
-    try {
-      bitmap.optimize();
-      return bitmap.serializeToNodeBuffer(portable);
-    } finally {
-      bitmap.dispose();
-    }
-  }
-
-  /**
-   * Utility function that deserializes a RoaringBitmap32 serialized in a buffer to a Set<number> of values.
-   * The array can be very big, be careful when you use this function.
-   *
-   * @param buffer - The buffer to deserialize.
-   * @param portable - If true, deserialization is compatible with the Java and Go versions of the library.
-   * If false, deserialization is compatible with the C version of the library. Default is false.
-   * @returns All the values in the bitmap.
-   */
-  public static deserializeToSet(
-    buffer: RoaringUint8Array | Uint8Array | Iterable<number>,
-    portable: boolean = false,
-  ): Set<number> {
-    const bitmap = new RoaringBitmap32();
-    try {
-      bitmap.deserialize(buffer, portable);
-      return bitmap.toSet();
-    } finally {
-      bitmap.dispose();
-    }
-  }
-
-  /**
    * Makes this roaring bitmap readonly.
    * Sets isFrozen to true.
    * This is a no-op if isFrozen is already true.
@@ -218,7 +150,6 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   public constructor(
     valuesOrCapacity?:
       | RoaringBitmap32
-      | RoaringUint32Array
       | BasicTypedArray
       | Iterable<number | null | undefined | false | string>
       | readonly (number | null | undefined | false | string)[]
@@ -544,7 +475,6 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   public addMany(
     values:
       | RoaringBitmap32
-      | RoaringUint32Array
       | BasicTypedArray
       | Iterable<number | null | undefined | false | string>
       | readonly (number | null | undefined | false | string)[]
@@ -553,14 +483,6 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   ): void {
     if (this.#frozen) {
       _throwFrozen();
-    }
-
-    if (values instanceof RoaringUint32Array) {
-      if (values.length > 0) {
-        roaringWasm._roaring_bitmap_add_many(this.#p || this.#createEmpty(), values.length, values.byteOffset);
-        this.invalidate();
-      }
-      return;
     }
 
     if (values instanceof RoaringBitmap32) {
@@ -583,7 +505,6 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   public removeMany(
     values:
       | RoaringBitmap32
-      | RoaringUint32Array
       | BasicTypedArray
       | Iterable<number | null | undefined | false | string>
       | readonly (number | null | undefined | false | string)[]
@@ -596,14 +517,6 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
 
     const p = this.#p;
     if (!p) {
-      return;
-    }
-
-    if (values instanceof RoaringUint32Array) {
-      if (values.length > 0) {
-        roaringWasm._roaring_bitmap_remove_many(p, values.length, values.byteOffset);
-        this.invalidate();
-      }
       return;
     }
 
@@ -715,25 +628,6 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     const a = this.#p;
     const b = other.#p;
     return !!(a && b && roaringWasm._roaring_bitmap_is_strict_subset(a, b));
-  }
-
-  /**
-   * Converts the bitmap to an array.
-   * The array may be very big, use this function with caution.
-   * The returned RoaringUint32Array is allocated in WASM memory and not garbage collected,
-   * it need to be freed manually calling dispose().
-   *
-   * This avoid copying to JS memory.
-   *
-   * @returns The RoaringUint32Array. Remember to manually dispose to free the memory as soon as possible.
-   */
-  public toRoaringUint32Array(): RoaringUint32Array {
-    const size = this.size;
-    const result = new RoaringUint32Array(size);
-    if (size > 0) {
-      roaringWasm._roaring_bitmap_to_uint32_array(this.#p as number, result.byteOffset);
-    }
-    return result;
   }
 
   /**
@@ -1367,9 +1261,9 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     const result = new RoaringUint8Array(size);
     if (size) {
       if (portable) {
-        roaringWasm._roaring_bitmap_portable_serialize(ptr, result.byteOffset);
+        roaringWasm._roaring_bitmap_portable_serialize(ptr, result._p);
       } else {
-        roaringWasm._roaring_bitmap_serialize(ptr, result.byteOffset);
+        roaringWasm._roaring_bitmap_serialize(ptr, result._p);
       }
     }
     return result;
@@ -1383,27 +1277,10 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * If false, serialization is compatible with the C version of the library. Default is false.
    * @returns The Uint8Array that contains the serialized bitmap
    */
-  public serializeToUint8Array(portable: boolean = false): Uint8Array {
+  public serialize(portable: boolean = false): Uint8Array {
     const roaringArray = this.serializeToRoaringUint8Array(portable);
     try {
       return roaringArray.toTypedArray();
-    } finally {
-      roaringArray.dispose();
-    }
-  }
-
-  /**
-   * Serializes a bitmap to a NodeJS buffer.
-   * The returned buffer is automatically garbage collected and there is no need to be disposed manually.
-   *
-   * @param portable - If true, serialization is compatible with the Java and Go versions of the library.
-   * If false, serialization is compatible with the C version of the library. Default is false.
-   * @returns The NodeJS Buffer that contains the serialized bitmap
-   */
-  public serializeToNodeBuffer(portable: boolean = false): Buffer {
-    const roaringArray = this.serializeToRoaringUint8Array(portable);
-    try {
-      return roaringArray.toNodeBuffer();
     } finally {
       roaringArray.dispose();
     }
@@ -1433,8 +1310,8 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     }
 
     const ptr = portable
-      ? roaringWasm._roaring_bitmap_portable_deserialize_safe(buffer.byteOffset, buffer.byteLength)
-      : roaringWasm._roaring_bitmap_deserialize_safe(buffer.byteOffset, buffer.byteLength);
+      ? roaringWasm._roaring_bitmap_portable_deserialize_safe(buffer._p, buffer.byteLength)
+      : roaringWasm._roaring_bitmap_deserialize_safe(buffer._p, buffer.byteLength);
 
     if (!ptr) {
       throw new Error(`RoaringBitmap32 deserialization failed`);
@@ -1552,6 +1429,7 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
    * Performs a union between all the given array of RoaringBitmap32 instances.
    *
    * This function is faster than calling or multiple times.
+   * In some circumstances orManyHeap is faster than orMany.
    *
    * @param bitmaps - An array of RoaringBitmap32 instances to or together.
    * @returns A new RoaringBitmap32 that contains the union of all the given bitmaps.
@@ -1559,25 +1437,41 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   public static orMany(bitmaps: readonly (RoaringBitmap32 | null | undefined | false)[]): RoaringBitmap32 {
     const len = bitmaps.length;
     const result = new RoaringBitmap32();
-    if (len) {
-      const ptrs = new RoaringUint32Array(len);
+    if (len > 0) {
+      const mem = roaringWasm._jsalloc_unsafe(len << 2);
       try {
-        const buf = ptrs.asTypedArray();
-        let count = 0;
-        for (let i = 0; i < len; ++i) {
-          const v = bitmaps[i];
-          if (v) {
-            const ptr = v.#p;
-            if (ptr) {
-              buf[count++] = ptr;
-            }
-          }
-        }
+        const count = this.#orManyPtrs(mem, len, bitmaps);
         if (count) {
-          result.#setPtr(roaringWasm._roaring_bitmap_or_many(count, ptrs.byteOffset));
+          result.#setPtr(roaringWasm._roaring_bitmap_or_many(count, mem));
         }
       } finally {
-        ptrs.dispose();
+        roaringWasm._free(mem);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Performs a union between all the given array of RoaringBitmap32 instances.
+   *
+   * This function is faster than calling or multiple times.
+   * In some circumstances orManyHeap is faster than orMany.
+   *
+   * @param bitmaps - An array of RoaringBitmap32 instances to or together.
+   * @returns A new RoaringBitmap32 that contains the union of all the given bitmaps.
+   */
+  public static orManyHeap(bitmaps: readonly (RoaringBitmap32 | null | undefined | false)[]): RoaringBitmap32 {
+    const len = bitmaps.length;
+    const result = new RoaringBitmap32();
+    if (len > 0) {
+      const mem = roaringWasm._jsalloc_unsafe(len << 2);
+      try {
+        const count = this.#orManyPtrs(mem, len, bitmaps);
+        if (count) {
+          result.#setPtr(roaringWasm._roaring_bitmap_or_many_heap(count, mem));
+        }
+      } finally {
+        roaringWasm._free(mem);
       }
     }
     return result;
@@ -1594,25 +1488,26 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
   public static xorMany(bitmaps: readonly (RoaringBitmap32 | null | undefined | false)[]): RoaringBitmap32 {
     const len = bitmaps.length;
     const result = new RoaringBitmap32();
-    if (len) {
-      const ptrs = new RoaringUint32Array(len);
+    if (len > 0) {
+      const mem = roaringWasm._jsalloc_unsafe(len << 2);
       try {
-        const buf = ptrs.asTypedArray();
+        const p = mem >>> 2;
+        const ptrArray = roaringWasm.HEAPU32.subarray(p, p + len * 4);
         let count = 0;
         for (let i = 0; i < len; ++i) {
           const v = bitmaps[i];
           if (v) {
-            const ptr = v.#p;
+            const ptr = v.#p || v.#createEmpty();
             if (ptr) {
-              buf[count++] = ptr;
+              ptrArray[count++] = ptr;
             }
           }
         }
         if (count) {
-          result.#setPtr(roaringWasm._roaring_bitmap_xor_many(count, ptrs.byteOffset));
+          result.#setPtr(roaringWasm._roaring_bitmap_xor_many(count, mem));
         }
       } finally {
-        ptrs.dispose();
+        roaringWasm._free(mem);
       }
     }
     return result;
@@ -1820,6 +1715,26 @@ export class RoaringBitmap32 implements IDisposable, Iterable<number> {
     if (changed) {
       this.invalidate();
     }
+  }
+
+  static #orManyPtrs(
+    mem: number,
+    len: number,
+    bitmaps: readonly (false | RoaringBitmap32 | null | undefined)[],
+  ): number {
+    const p = mem >>> 2;
+    const ptrArray = roaringWasm.HEAPU32.subarray(p, p + len * 4);
+    let count = 0;
+    for (let i = 0; i < len; ++i) {
+      const v = bitmaps[i];
+      if (v) {
+        const ptr = v.#p;
+        if (ptr) {
+          ptrArray[count++] = ptr;
+        }
+      }
+    }
+    return count;
   }
 
   /**

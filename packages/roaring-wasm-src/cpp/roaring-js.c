@@ -24,6 +24,15 @@ void * jsalloc_zero(uint32_t size) {
   return result;
 }
 
+/** Allocate memory, aligned to 32 bytes, without clearing it */
+void * jsalloc_unsafe(uint32_t size) {
+  void * result;
+  if (posix_memalign(&result, 32, size) != 0) {
+    return NULL;
+  }
+  return result;
+}
+
 roaring_bitmap_t * roaring_bitmap_create_js(void) { return roaring_bitmap_create_with_capacity(0); }
 
 double roaring_bitmap_get_cardinality_js(const roaring_bitmap_t * bm) {

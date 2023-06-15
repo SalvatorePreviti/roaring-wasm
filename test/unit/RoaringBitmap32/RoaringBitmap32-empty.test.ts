@@ -35,8 +35,8 @@ describe("RoaringBitmap32 empty", () => {
   });
 
   it('should serialize as "empty" (portable)', () => {
-    const array = new RoaringBitmap32().serializeToRoaringUint8Array(true).toArray();
-    expect(array).deep.eq([58, 48, 0, 0, 0, 0, 0, 0]);
+    const buf = new RoaringBitmap32().serializeToRoaringUint8Array(true);
+    expect(Array.from(buf.asTypedArray())).deep.eq([58, 48, 0, 0, 0, 0, 0, 0]);
   });
 
   it("should have a native serialization size 5", () => {
@@ -44,8 +44,8 @@ describe("RoaringBitmap32 empty", () => {
   });
 
   it('should serialize as "empty" (native)', () => {
-    const array = new RoaringBitmap32().serializeToRoaringUint8Array().toArray();
-    expect(array).deep.eq([1, 0, 0, 0, 0]);
+    const buf = new RoaringBitmap32().serializeToRoaringUint8Array();
+    expect(Array.from(buf.asTypedArray())).deep.eq([1, 0, 0, 0, 0]);
   });
 
   it("should be a subset of itself", () => {

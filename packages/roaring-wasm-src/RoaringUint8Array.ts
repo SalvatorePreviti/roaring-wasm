@@ -1,79 +1,31 @@
 import type { IDisposable } from "./IDisposable";
+import { _free_finalizationRegistry, _free_finalizationRegistry_init } from "./lib/free-finalization-registry";
+import { _roaringArenaAllocator_head } from "./lib/roaring-arena-allocator-stack";
 import { roaringWasm } from "./lib/roaring-wasm";
-import { RoaringAllocatedMemory } from "./RoaringAllocatedMemory";
 import type { RoaringArenaAllocator } from "./RoaringArenaAllocator";
 
 /**
  * Array of bytes allocted directly in roaring library WASM memory.
- * Note: Memory is not garbage collected, you are responsible to free the allocated memory calling "dispose" method.
+ * Note: to release memory as soon as possible, you are responsible to free the allocated memory calling "dispose" method.
  */
-export class RoaringUint8Array extends RoaringAllocatedMemory implements Iterable<number>, IDisposable {
-  /**
-   * The type of typed array used by this class.
-   * For RoaringUint8Array is Uint8Array.
-   */
-  public declare static readonly TypedArray: typeof Uint8Array;
-
-  /**
-   * The size in bytes of each element in the array.
-   * For RoaringUint8Array is always 1
-   */
-  public declare static readonly BYTES_PER_ELEMENT: 1;
-
-  /**
-   * The type of typed array used by this class.
-   * For RoaringUint8Array is Uint8Array.
-   */
-  public declare readonly TypedArray: typeof Uint8Array;
-
-  /**
-   * The size in bytes of each element in the array.
-   * For RoaringUint8Array is always 1
-   */
-  public declare readonly BYTES_PER_ELEMENT: 1;
-
-  /**
-   * The ArrayBuffer instance referenced by the array.
-   * Note that the buffer may become invalid if the WASM allocated memory grows.
-   * When the WASM grows the preallocated memory this property will return the new allocated buffer.
-   * Use the returned buffer for short periods of time.
-   */
-  public get buffer(): ArrayBuffer {
-    return roaringWasm.HEAPU8.buffer;
-  }
+export class RoaringUint8Array implements IDisposable {
+  #p: number;
+  #size: number;
+  #alloc: RoaringArenaAllocator | null;
 
   /**
    * The length in bytes of the array.
+   * For RoaringUint8Array it is equal to this.length
    */
-  public get length(): number {
-    return this.byteLength;
+  public get byteLength(): number {
+    return this.#size;
   }
 
   /**
-   * The length in bytes of the array.
+   * Returns true if this object was deallocated.
    */
-  public get size(): number {
-    return this.byteLength;
-  }
-
-  /**
-   * The full WASM heap in hich this array is allocated.
-   * Note that the buffer may become invalid if the WASM allocated memory grows.
-   * When the WASM grows the preallocated memory this property will return the new allocated buffer.
-   * Use the returned array for short periods of time.
-   */
-  public get heap(): Uint8Array {
-    return roaringWasm.HEAPU8;
-  }
-
-  /**
-   * The position in this.heap where the array starts.
-   * Is byteOffset.
-   * @see byteOffset
-   * @see heap
-   */
-  public get heapOffset(): number {
-    return this.byteOffset;
+  public get isDisposed(): boolean {
+    return !this.#p;
   }
 
   /**
@@ -87,9 +39,13 @@ export class RoaringUint8Array extends RoaringAllocatedMemory implements Iterabl
    * @param lengthOrArray - Length of the array to allocate or the array to copy
    */
   public constructor(
-    lengthOrArray?: number | Iterable<number> | ArrayLike<number> | null | undefined,
-    arenaAllocator?: RoaringArenaAllocator | null | undefined,
+    lengthOrArray: number | Iterable<number> | ArrayLike<number> | null | undefined = 0,
+    arenaAllocator: RoaringArenaAllocator | null | undefined = _roaringArenaAllocator_head,
   ) {
+    this.#p = 0;
+    this.#size = 0;
+    this.#alloc = arenaAllocator;
+
     if (lengthOrArray) {
       let length: number;
       if (typeof lengthOrArray === "number") {
@@ -110,11 +66,22 @@ export class RoaringUint8Array extends RoaringAllocatedMemory implements Iterabl
         if (length >= 0x10000000) {
           throw new RangeError(`RoaringUint8Array too big, ${length} bytes`);
         }
-        const pointer = roaringWasm._jsalloc_zero(length);
+        const pointer = roaringWasm._jsalloc_zero(length) >>> 0;
         if (!pointer) {
           throw new Error(`RoaringUint8Array failed to allocate ${length} bytes`);
         }
-        super(pointer, length, arenaAllocator);
+
+        this.#p = pointer;
+        this.#size = length;
+
+        const finalizationRegistry = _free_finalizationRegistry || _free_finalizationRegistry_init();
+        if (finalizationRegistry) {
+          finalizationRegistry.register(this, pointer, this);
+        }
+        if (arenaAllocator) {
+          arenaAllocator.register(this);
+        }
+
         if (typeof lengthOrArray !== "number") {
           try {
             this.set(lengthOrArray as Iterable<number>);
@@ -123,10 +90,8 @@ export class RoaringUint8Array extends RoaringAllocatedMemory implements Iterabl
             throw error;
           }
         }
-        return;
       }
     }
-    super(0, 0, arenaAllocator);
   }
 
   /**
@@ -139,29 +104,66 @@ export class RoaringUint8Array extends RoaringAllocatedMemory implements Iterabl
   }
 
   /**
+   * Frees the allocated memory.
+   * Is safe to call this method more than once.
+   * @returns True if memory gets freed during this call, false if not.
+   */
+  public dispose(): boolean {
+    const ptr = this.#p;
+    if (ptr) {
+      this.#p = 0;
+      this.#size = 0;
+
+      const allocator = this.#alloc;
+      if (allocator) {
+        this.#alloc = null;
+        allocator.unregister(this);
+      }
+      if (_free_finalizationRegistry) {
+        _free_finalizationRegistry.unregister(this);
+      }
+      roaringWasm._free(ptr);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Decreases the size of the allocated memory.
+   * It does nothing if the new length is greater or equal to the current length.
+   * If the new length is less than 1, it disposes the allocated memory.
+   * NOTE: if the value is non zero, this does not reallocate the consumed memory, it just chances the reported size in byteLength and length properties.
+   * @param newLength - The new length in bytes.
+   * @returns True if the memory was shrunk, false if not.
+   */
+  public shrink(newLength: number): boolean {
+    if (Number.isNaN(newLength)) {
+      return false;
+    }
+    if (newLength < 1) {
+      return this.dispose();
+    }
+    if (newLength >= this.#size) {
+      return false;
+    }
+    this.#size = newLength >>> 0;
+    return true;
+  }
+
+  /**
    * Writes the given array at the specified position
    * @param array - A typed or untyped array of values to set.
    * @param offset - The index in the current array at which the values are to be written.
    */
-  public set(array: Iterable<number>, offset: number = 0): this {
-    if (!Number.isInteger(offset) || offset < 0) {
-      throw new TypeError(`Invalid offset ${offset}`);
+  public set(array: ArrayLike<number> | Iterable<number>, offset: number = 0): this {
+    if ((array as ArrayLike<number>).length) {
+      this.asTypedArray().set(array as ArrayLike<number>, offset);
+    } else {
+      let typedArray: Uint8Array | undefined;
+      for (const value of array as Iterable<number>) {
+        (typedArray || (typedArray = this.asTypedArray()))[offset++] = value;
+      }
     }
-
-    if (array instanceof RoaringUint8Array) {
-      array = array.asTypedArray();
-    }
-
-    const length = (array as unknown as ArrayLike<number>).length;
-    if (typeof length !== "number") {
-      return this.set(new Uint8Array(array));
-    }
-
-    if (offset + length > this.length) {
-      throw new TypeError(`Invalid offset ${offset}`);
-    }
-
-    this.heap.set(array as unknown as ArrayLike<number>, this.byteOffset + offset);
     return this;
   }
 
@@ -173,55 +175,29 @@ export class RoaringUint8Array extends RoaringAllocatedMemory implements Iterabl
    * @returns A new typed array that shares the memory with this array.
    */
   public asTypedArray(): Uint8Array {
-    return roaringWasm.HEAPU8.subarray(this.byteOffset, this.byteOffset + this.length) as Buffer;
+    const ptr = this.#p;
+    return roaringWasm.HEAPU8.subarray(ptr, ptr + this.#size);
   }
 
   /**
-   * Gets a new NodeJS Buffer instance that shares the memory used by this buffer.
-   * Note that the buffer may point to an outdated WASM memory if the WASM allocated memory grows while using the returned buffer.
-   * Use the returned array for short periods of time.
+   * Copies the content of this buffer to a typed array and returns it
    *
-   * @returns A new instance of NodeJS Buffer
+   * @param output - The typed array to copy to. If not provided, a new typed array is created.
+   * @returns A typed array with the content of this buffer. It could be smaller than the buffer if the output array is smaller.
    */
-  public asNodeBuffer(): Buffer {
-    if (typeof Buffer === "undefined") {
-      return roaringWasm.HEAPU8.subarray(this.byteOffset, this.byteOffset + this.length) as Buffer;
+  public toTypedArray(output?: Uint8Array): Uint8Array {
+    const ptr = this.#p;
+    const size = this.#size;
+    if (!output) {
+      return roaringWasm.HEAPU8.slice(ptr, ptr + size);
     }
-    return Buffer.from(roaringWasm.HEAPU8.buffer, this.byteOffset, this.length);
-  }
-
-  /**
-   * Copies the content of this buffer to a typed array.
-   * The returned array is garbage collected and don't need to be disposed manually.
-   *
-   * @returns A new typed array that contains a copy of this buffer
-   */
-  public toTypedArray(): Uint8Array {
-    const array = new Uint8Array(this.length);
-    array.set(this.asTypedArray());
-    return array;
-  }
-
-  /**
-   * Copies the content of this buffer to a NodeJS Buffer.
-   * The returned buffer is garbage collected and don't need to be disposed manually.
-   *
-   * @returns A new instance of NodeJS Buffer that contains a copy of this buffer
-   */
-  public toNodeBuffer(): Buffer {
-    if (typeof Buffer === "undefined") {
-      return this.toTypedArray() as Buffer;
+    let outlen = output.length;
+    if (outlen > size) {
+      outlen = size;
+      output = output.subarray(0, size);
     }
-    return Buffer.from(this.asNodeBuffer());
-  }
-
-  /**
-   * Copies the content of this typed array into a standard JS array of numbers and returns it.
-   *
-   * @returns A new array.
-   */
-  public toArray(): number[] {
-    return Array.from(this.asTypedArray());
+    output.set(roaringWasm.HEAPU8.subarray(ptr, ptr + outlen));
+    return output;
   }
 
   /**
@@ -232,13 +208,6 @@ export class RoaringUint8Array extends RoaringAllocatedMemory implements Iterabl
   }
 
   /**
-   * Iterator that iterates through all values in the array.
-   */
-  public [Symbol.iterator](): IterableIterator<number> {
-    return this.asTypedArray()[Symbol.iterator]();
-  }
-
-  /**
    * The at() method takes an integer value and returns the item at that index, allowing for positive and negative integers. Negative integers count back from the last item in the array.
    * Follows the specification for array.at().
    * If the computed index is less than 0, or equal to length, undefined is returned.
@@ -246,11 +215,12 @@ export class RoaringUint8Array extends RoaringAllocatedMemory implements Iterabl
    * @returns The element in the array matching the given index. Always returns undefined if index < -array.length or index >= array.length without attempting to access the corresponding property.
    */
   public at(index: number): number | undefined {
-    const { length, byteOffset, heap } = this;
+    const ptr = this.#p;
+    const length = this.#size;
     if (index < 0) {
       index += length;
     }
-    return index >= 0 && index < length ? heap[(byteOffset + index) >>> 0] : undefined;
+    return ptr && index >= 0 && index < length ? roaringWasm.HEAPU8[(ptr + index) >>> 0] : undefined;
   }
 
   /**
@@ -260,22 +230,23 @@ export class RoaringUint8Array extends RoaringAllocatedMemory implements Iterabl
    * @returns True if the value was set, false if the index is out of bounds.
    */
   public setAt(index: number, value: number): boolean {
-    const { length, byteOffset, heap } = this;
+    const ptr = this.#p;
+    const length = this.#size;
     if (index < 0) {
       index += length;
     }
-    if (index >= 0 && index < length) {
-      heap[(byteOffset + index) >>> 0] = value;
+    if (ptr && index >= 0 && index < length) {
+      roaringWasm.HEAPU8[(ptr + index) >>> 0] = value;
       return true;
     }
     return false;
   }
+
+  /**
+   * Internal property, do not use.
+   * @internal
+   */
+  get _p(): number {
+    return this.#p;
+  }
 }
-
-const _props = {
-  TypedArray: { value: Uint8Array },
-  BYTES_PER_ELEMENT: { value: 1 },
-};
-
-Object.defineProperties(RoaringUint8Array, _props);
-Object.defineProperties(RoaringUint8Array.prototype, _props);

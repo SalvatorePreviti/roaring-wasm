@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { RoaringArenaAllocator, RoaringBitmap32, RoaringUint32Array, roaringLibraryInitialize } from "roaring-wasm-src";
+import { RoaringArenaAllocator, RoaringBitmap32, roaringLibraryInitialize } from "roaring-wasm-src";
 
 describe("RoaringBitmap32 many", () => {
   before(roaringLibraryInitialize);
@@ -9,7 +9,6 @@ describe("RoaringBitmap32 many", () => {
   describe("addMany", () => {
     it("works with empty arrays", () => {
       const bitmap = new RoaringBitmap32();
-      bitmap.addMany(new RoaringUint32Array([]));
       bitmap.addMany(new Uint32Array([]));
       bitmap.addMany(new Int32Array([]));
       bitmap.addMany(new Uint8Array([]));
@@ -17,12 +16,6 @@ describe("RoaringBitmap32 many", () => {
       bitmap.addMany(null);
       bitmap.addMany(undefined);
       expect(bitmap.toArray()).deep.eq([]);
-    });
-
-    it("works with a small RoaringUint32Array", () => {
-      const bitmap = new RoaringBitmap32();
-      bitmap.addMany(new RoaringUint32Array([1, 5, 10, 10, 0xffffffff, 4, 2, 10, 2, 2, 1, 5]));
-      expect(bitmap.toArray()).deep.eq([1, 2, 4, 5, 10, 0xffffffff]);
     });
 
     it("works with a small Uint32Array", () => {
@@ -104,7 +97,6 @@ describe("RoaringBitmap32 many", () => {
   describe("removeMany", () => {
     it("works with empty arrays", () => {
       const bitmap = new RoaringBitmap32([1, 2, 3, 4]);
-      bitmap.removeMany(new RoaringUint32Array([]));
       bitmap.removeMany(new Uint32Array([]));
       bitmap.removeMany(new Int32Array([]));
       bitmap.removeMany(new Uint8Array([]));
@@ -116,7 +108,7 @@ describe("RoaringBitmap32 many", () => {
 
     it("works with a small RoaringUint32Array", () => {
       const bitmap = new RoaringBitmap32([1, 2, 3, 4, 5, 6, 7]);
-      bitmap.removeMany(new RoaringUint32Array([2, 3, 4, 11]));
+      bitmap.removeMany(new Uint32Array([2, 3, 11, 4]));
       expect(bitmap.toArray()).deep.eq([1, 5, 6, 7]);
     });
 

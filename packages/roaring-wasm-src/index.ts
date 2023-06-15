@@ -2,11 +2,7 @@ export * from "./IDisposable";
 
 export { roaringLibraryInitialize, roaringLibraryIsReady } from "./lib/roaring-wasm";
 
-export { RoaringAllocatedMemory } from "./RoaringAllocatedMemory";
-
 export { RoaringUint8Array } from "./RoaringUint8Array";
-
-export { RoaringUint32Array } from "./RoaringUint32Array";
 
 export { RoaringBitmap32 } from "./RoaringBitmap32";
 

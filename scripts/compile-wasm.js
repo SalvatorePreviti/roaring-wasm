@@ -134,6 +134,7 @@ async function compileWasm() {
   };
 
   await timed("emcc compile", async () => {
+    await spawnAsync(emccPath, ["--version"], {});
     const promises = [];
     for (const file of srcFiles) {
       promises.push(compileObjectFile(file));

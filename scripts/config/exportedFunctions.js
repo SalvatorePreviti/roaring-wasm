@@ -1,4 +1,5 @@
 const exportedFunctions = [
+  "_jsalloc_unsafe",
   "_jsalloc_zero",
   "_free",
 
@@ -7,7 +8,6 @@ const exportedFunctions = [
   "_roaring_bitmap_free",
   "_roaring_bitmap_is_empty",
   "_roaring_bitmap_add",
-  "_roaring_bitmap_add_many",
   "_roaring_bitmap_remove",
   "_roaring_bitmap_maximum",
   "_roaring_bitmap_minimum",
