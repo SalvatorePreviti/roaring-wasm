@@ -234,6 +234,13 @@ export class RoaringBitmap32 {
       _throwFrozen();
     }
 
+    const thisptr = this.#p;
+    if (thisptr) {
+      this.#setPtr(0);
+    } else if (thisptr === false) {
+      this.throwIfDisposed();
+    }
+
     let buffer: RoaringUint8Array | Uint8Array;
     let format: DeserializationFormatType;
     if (typeof a === "string" || typeof a === "boolean") {
@@ -243,8 +250,6 @@ export class RoaringBitmap32 {
       format = b as DeserializationFormatType;
       buffer = a;
     }
-
-    this.#setPtr(0);
 
     if (!buffer.byteLength) {
       return this;
