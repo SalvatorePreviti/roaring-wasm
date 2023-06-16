@@ -16,7 +16,7 @@ describe("package test", () => {
     expect(bitmap.toArray()).deep.eq([1, 2, 3]);
 
     const a = new roaring.RoaringUint8Array([1, 2, 3]);
-    expect(a.toArray()).deep.eq([1, 2, 3]);
+    expect(Array.from(a.asTypedArray())).deep.eq([1, 2, 3]);
   });
 
   it("allow iterating a large array", () => {

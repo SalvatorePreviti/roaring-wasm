@@ -7,11 +7,11 @@ describe("RoaringBitmap32 empty", () => {
   afterEach(RoaringArenaAllocator.stop);
 
   it("should have isEmpty() === true", () => {
-    expect(new RoaringBitmap32().isEmpty()).eq(true);
+    expect(new RoaringBitmap32().isEmpty).eq(true);
   });
 
-  it("should have cardinality() === 0", () => {
-    expect(new RoaringBitmap32().cardinality()).eq(0);
+  it("should have size === 0", () => {
+    expect(new RoaringBitmap32().size).eq(0);
   });
 
   it("has a toArray() that returns an empty array", () => {
@@ -27,7 +27,7 @@ describe("RoaringBitmap32 empty", () => {
   });
 
   it("should not contain 0", () => {
-    expect(new RoaringBitmap32().contains(0)).eq(false);
+    expect(new RoaringBitmap32().has(0)).eq(false);
   });
 
   it("should have a portable serialization size 8", () => {

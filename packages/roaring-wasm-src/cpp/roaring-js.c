@@ -429,3 +429,11 @@ uint32_t * roaring_sync_bulk_remove_init(roaring_bitmap_t * bitmap) {
 void roaring_sync_bulk_remove_chunk(uint32_t chunkSize) {
   roaring_bitmap_remove_many(sync_bulk_bitmap, chunkSize, sync_tmp_buf);
 }
+
+bool roaring_bitmap_has_js(const roaring_bitmap_t * bitmap, double value) {
+  if (!bitmap || isnan(value) || value < 0 || value > 0xffffffff) {
+    return false;
+  }
+  uint32_t v = (uint32_t)value;
+  return v == value && roaring_bitmap_contains(bitmap, v);
+}

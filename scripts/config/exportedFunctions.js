@@ -11,7 +11,6 @@ const exportedFunctions = [
   "_roaring_bitmap_remove",
   "_roaring_bitmap_maximum",
   "_roaring_bitmap_minimum",
-  "_roaring_bitmap_contains",
   "_roaring_bitmap_is_subset",
   "_roaring_bitmap_is_strict_subset",
   "_roaring_bitmap_to_uint32_array",
@@ -31,6 +30,7 @@ const exportedFunctions = [
   "_roaring_bitmap_andnot_inplace",
   "_roaring_bitmap_intersect",
   "_roaring_bitmap_jaccard_index_js",
+  "_roaring_bitmap_has_js",
 
   "_roaring_bitmap_add_checked",
   "_roaring_bitmap_remove_checked",

@@ -27,7 +27,6 @@ export type RoaringWasm = {
   _roaring_bitmap_remove_checked(roaring: number, value: number): WasmBool;
   _roaring_bitmap_maximum(roaring: number): number;
   _roaring_bitmap_minimum(roaring: number): number;
-  _roaring_bitmap_contains(roaring: number, value: number): WasmBool;
   _roaring_bitmap_is_subset(roaring1: number, roaring2: number): WasmBool;
   _roaring_bitmap_is_strict_subset(roaring1: number, roaring2: number): WasmBool;
   _roaring_bitmap_to_uint32_array(roaring: number, arrayPtr: number): void;
@@ -94,6 +93,7 @@ export type RoaringWasm = {
   _roaring_sync_bulk_remove_init(bitmap: NullablePtr): number;
   _roaring_sync_bulk_remove_chunk(chunkSize: number): void;
   _roaring_bitmap_remove_many(roaring: number, count: number, valuesPtr: number): void;
+  _roaring_bitmap_has_js(roaring: NullablePtr, value: number): WasmBool;
 };
 
 const _loadedModule = roaring_wasm_module_init<RoaringWasm>();

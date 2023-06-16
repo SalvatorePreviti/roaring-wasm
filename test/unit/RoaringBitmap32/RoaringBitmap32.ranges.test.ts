@@ -8,10 +8,10 @@ describe("RoaringBitmap32 ranges", () => {
 
   describe("fromRange", () => {
     it("returns an empty bitmap with invalid values", () => {
-      expect(RoaringBitmap32.fromRange(-1, -1).isEmpty()).eq(true);
-      expect(RoaringBitmap32.fromRange(89999999999, 99999999999).isEmpty()).eq(true);
-      expect(RoaringBitmap32.fromRange(0, 0).isEmpty()).eq(true);
-      expect(RoaringBitmap32.fromRange(20, 20).isEmpty()).eq(true);
+      expect(RoaringBitmap32.fromRange(-1, -1).isEmpty).eq(true);
+      expect(RoaringBitmap32.fromRange(89999999999, 99999999999).isEmpty).eq(true);
+      expect(RoaringBitmap32.fromRange(0, 0).isEmpty).eq(true);
+      expect(RoaringBitmap32.fromRange(20, 20).isEmpty).eq(true);
     });
 
     it("works with range 0, 6", () => {
@@ -137,9 +137,9 @@ describe("RoaringBitmap32 ranges", () => {
 
     it("works with 0xFFFFFFFE and 0xFFFFFFFF", () => {
       const bitmap = new RoaringBitmap32([4294967294, 4294967295]);
-      expect(bitmap.contains(4294967293)).eq(false);
-      expect(bitmap.contains(4294967294)).eq(true);
-      expect(bitmap.contains(4294967295)).eq(true);
+      expect(bitmap.has(4294967293)).eq(false);
+      expect(bitmap.has(4294967294)).eq(true);
+      expect(bitmap.has(4294967295)).eq(true);
       expect(bitmap.hasRange(4294967295, 4294967296)).eq(true);
       expect(bitmap.hasRange(4294967294, 4294967295)).eq(true);
       expect(bitmap.hasRange(4294967293, 4294967294)).eq(false);
@@ -151,10 +151,10 @@ describe("RoaringBitmap32 ranges", () => {
 
     it("works with 0xFFFFFFFD, 0xFFFFFFFE and 0xFFFFFFFF", () => {
       const bitmap = new RoaringBitmap32([4294967293, 4294967294, 4294967295]);
-      expect(bitmap.contains(4294967292)).eq(false);
-      expect(bitmap.contains(4294967293)).eq(true);
-      expect(bitmap.contains(4294967294)).eq(true);
-      expect(bitmap.contains(4294967295)).eq(true);
+      expect(bitmap.has(4294967292)).eq(false);
+      expect(bitmap.has(4294967293)).eq(true);
+      expect(bitmap.has(4294967294)).eq(true);
+      expect(bitmap.has(4294967295)).eq(true);
 
       expect(bitmap.hasRange(4294967292, 4294967293)).eq(false);
       expect(bitmap.hasRange(4294967292, 4294967294)).eq(false);
@@ -253,30 +253,30 @@ describe("RoaringBitmap32 ranges", () => {
     it("adds 0xFFFFFFFF", () => {
       const bitmap = new RoaringBitmap32();
       bitmap.addRange(4294967295, 4294967296);
-      expect(bitmap.contains(4294967294)).eq(false);
-      expect(bitmap.contains(4294967295)).eq(true);
+      expect(bitmap.has(4294967294)).eq(false);
+      expect(bitmap.has(4294967295)).eq(true);
     });
 
     it("adds 0xFFFFFFFE and 0xFFFFFFFF", () => {
       const bitmap = new RoaringBitmap32();
       bitmap.addRange(4294967294, 4294967296);
-      expect(bitmap.contains(4294967293)).eq(false);
-      expect(bitmap.contains(4294967294)).eq(true);
-      expect(bitmap.contains(4294967295)).eq(true);
+      expect(bitmap.has(4294967293)).eq(false);
+      expect(bitmap.has(4294967294)).eq(true);
+      expect(bitmap.has(4294967295)).eq(true);
     });
 
     it("supports very big numbers", () => {
       const bitmap = new RoaringBitmap32();
       bitmap.addRange(4294967294, 9000000000);
-      expect(bitmap.contains(4294967294)).eq(true);
-      expect(bitmap.contains(4294967295)).eq(true);
+      expect(bitmap.has(4294967294)).eq(true);
+      expect(bitmap.has(4294967295)).eq(true);
     });
 
     it("supports positive infinity", () => {
       const bitmap = new RoaringBitmap32();
       bitmap.addRange(4294967294, Infinity);
-      expect(bitmap.contains(4294967294)).eq(true);
-      expect(bitmap.contains(4294967295)).eq(true);
+      expect(bitmap.has(4294967294)).eq(true);
+      expect(bitmap.has(4294967295)).eq(true);
     });
   });
 
@@ -345,30 +345,30 @@ describe("RoaringBitmap32 ranges", () => {
     it("flips 0xFFFFFFFF", () => {
       const bitmap = new RoaringBitmap32();
       bitmap.flipRange(4294967295, 4294967296);
-      expect(bitmap.contains(4294967294)).eq(false);
-      expect(bitmap.contains(4294967295)).eq(true);
+      expect(bitmap.has(4294967294)).eq(false);
+      expect(bitmap.has(4294967295)).eq(true);
     });
 
     it("flips 0xFFFFFFFE and 0xFFFFFFFF", () => {
       const bitmap = new RoaringBitmap32();
       bitmap.flipRange(4294967294, 4294967296);
-      expect(bitmap.contains(4294967293)).eq(false);
-      expect(bitmap.contains(4294967294)).eq(true);
-      expect(bitmap.contains(4294967295)).eq(true);
+      expect(bitmap.has(4294967293)).eq(false);
+      expect(bitmap.has(4294967294)).eq(true);
+      expect(bitmap.has(4294967295)).eq(true);
     });
 
     it("supports very big numbers", () => {
       const bitmap = new RoaringBitmap32();
       bitmap.flipRange(4294967294, 9000000000);
-      expect(bitmap.contains(4294967294)).eq(true);
-      expect(bitmap.contains(4294967295)).eq(true);
+      expect(bitmap.has(4294967294)).eq(true);
+      expect(bitmap.has(4294967295)).eq(true);
     });
 
     it("supports positive infinity", () => {
       const bitmap = new RoaringBitmap32();
       bitmap.flipRange(4294967294, Infinity);
-      expect(bitmap.contains(4294967294)).eq(true);
-      expect(bitmap.contains(4294967295)).eq(true);
+      expect(bitmap.has(4294967294)).eq(true);
+      expect(bitmap.has(4294967295)).eq(true);
     });
   });
 
