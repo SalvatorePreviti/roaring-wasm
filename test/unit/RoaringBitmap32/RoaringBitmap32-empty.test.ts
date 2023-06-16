@@ -40,11 +40,11 @@ describe("RoaringBitmap32 empty", () => {
   });
 
   it("should have a native serialization size 5", () => {
-    expect(new RoaringBitmap32().getSerializationSizeInBytes()).eq(5);
+    expect(new RoaringBitmap32().getSerializationSizeInBytes("croaring")).eq(5);
   });
 
   it('should serialize as "empty" (native)', () => {
-    const buf = new RoaringBitmap32().serializeToRoaringUint8Array();
+    const buf = new RoaringBitmap32().serializeToRoaringUint8Array("croaring");
     expect(Array.from(buf.asTypedArray())).deep.eq([1, 0, 0, 0, 0]);
   });
 

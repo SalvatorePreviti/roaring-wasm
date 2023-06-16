@@ -35,10 +35,14 @@ const exportedFunctions = [
   "_roaring_bitmap_add_checked",
   "_roaring_bitmap_remove_checked",
 
+  "_roaring_bitmap_add_many",
   "_roaring_bitmap_portable_size_in_bytes",
+  "_roaring_bitmap_frozen_size_in_bytes",
   "_roaring_bitmap_portable_serialize",
   "_roaring_bitmap_portable_deserialize_safe",
-
+  "_roaring_bitmap_frozen_serialize",
+  "_roaring_bitmap_frozen_view",
+  "_roaring_bitmap_portable_deserialize_frozen",
   "_roaring_bitmap_size_in_bytes",
   "_roaring_bitmap_serialize",
   "_roaring_bitmap_deserialize_safe",

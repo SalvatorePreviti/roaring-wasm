@@ -1,3 +1,5 @@
+export * from "./enums";
+
 export * from "./IDisposable";
 
 export { roaringLibraryInitialize, roaringLibraryIsReady } from "./lib/roaring-wasm";

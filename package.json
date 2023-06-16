@@ -57,7 +57,7 @@
     "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
     "delete-empty": "^3.0.0",
-    "esbuild": "^0.18.3",
+    "esbuild": "^0.18.4",
     "eslint": "^8.42.0",
     "eslint-plugin-chai-expect": "^3.0.0",
     "eslint-plugin-import": "^2.27.5",

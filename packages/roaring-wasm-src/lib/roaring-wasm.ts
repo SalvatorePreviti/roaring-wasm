@@ -46,10 +46,15 @@ export type RoaringWasm = {
   _roaring_bitmap_andnot_inplace(roaring1: number, roaring2: number): void;
   _roaring_bitmap_intersect(roaring1: number, roaring2: number): WasmBool;
   _roaring_bitmap_jaccard_index_js(roaring1: NullablePtr, roaring2: NullablePtr): number;
+  _roaring_bitmap_add_many(roaring: number, size: number, uint32Array: number): void;
 
   _roaring_bitmap_portable_size_in_bytes(roaring: number): number;
+  _roaring_bitmap_frozen_size_in_bytes(roaring: number): number;
   _roaring_bitmap_portable_serialize(roaring: number, buf: number): number;
+  _roaring_bitmap_frozen_serialize(roaring: number, buf: number): number;
   _roaring_bitmap_portable_deserialize_safe(buf: number, maxBytes: number): number;
+  _roaring_bitmap_frozen_view(buf: number, size: number): number;
+  _roaring_bitmap_portable_deserialize_frozen(buf: number, maxBytes: number): number;
 
   _roaring_bitmap_size_in_bytes(roaring: number): number;
   _roaring_bitmap_serialize(roaring: number, buf: number): number;

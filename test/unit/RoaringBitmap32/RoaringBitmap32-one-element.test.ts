@@ -45,11 +45,11 @@ describe("RoaringBitmap32 one element", () => {
     });
 
     it("should have a native serialization size 9", () => {
-      expect(new RoaringBitmap32([123]).getSerializationSizeInBytes()).eq(9);
+      expect(new RoaringBitmap32([123]).getSerializationSizeInBytes(false)).eq(9);
     });
 
     it("should serialize as (native)", () => {
-      const buf = new RoaringBitmap32([123]).serializeToRoaringUint8Array();
+      const buf = new RoaringBitmap32([123]).serializeToRoaringUint8Array(false);
       expect(Array.from(buf.asTypedArray())).deep.eq([1, 1, 0, 0, 0, 123, 0, 0, 0]);
     });
 
