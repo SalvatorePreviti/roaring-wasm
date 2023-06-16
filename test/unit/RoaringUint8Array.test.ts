@@ -2,10 +2,6 @@ import { expect } from "chai";
 import { roaringWasm } from "../../packages/roaring-wasm-src/lib/roaring-wasm";
 import { RoaringArenaAllocator, RoaringUint8Array, roaringLibraryInitialize } from "roaring-wasm-src";
 
-function sameInstance(a: any, b: any): boolean {
-  return a === b;
-}
-
 describe("RoaringUint8Array", () => {
   before(roaringLibraryInitialize);
   beforeEach(RoaringArenaAllocator.start);
@@ -13,38 +9,23 @@ describe("RoaringUint8Array", () => {
 
   it("allows creating empty arrays", () => {
     const p = new RoaringUint8Array(0);
-    expect(p.length).eq(0);
-    expect(p.byteOffset).eq(0);
     expect(p.byteLength).eq(0);
-    expect(p.BYTES_PER_ELEMENT).eq(1);
-    expect(p.heap).to.be.an.instanceOf(Uint8Array);
-    expect(p.buffer).to.be.an.instanceOf(ArrayBuffer);
-    expect(sameInstance(p.heap, roaringWasm.HEAPU8)).eq(true);
-    expect(sameInstance(p.buffer, roaringWasm.HEAPU8.buffer)).eq(true);
-    expect(p.toArray()).deep.eq([]);
+    expect(p.asTypedArray().length).eq(0);
     expect(p.isDisposed).eq(true);
   });
 
   it("allows creating a small array", () => {
     const p = new RoaringUint8Array(12);
-    expect(p.length).eq(12);
     expect(p.byteLength).eq(12);
-    expect(p.byteOffset).to.be.greaterThan(0);
-    expect(p.BYTES_PER_ELEMENT).eq(1);
-    expect(p.heap).to.be.an.instanceOf(Uint8Array);
-    expect(p.buffer).to.be.an.instanceOf(ArrayBuffer);
-    expect(sameInstance(p.heap, roaringWasm.HEAPU8)).eq(true);
-    expect(sameInstance(p.buffer, roaringWasm.HEAPU8.buffer)).eq(true);
+    expect(p.asTypedArray().length).eq(12);
     expect(p.isDisposed).eq(false);
   });
 
   it("copies arrays", () => {
     const p = new RoaringUint8Array([1, 2, 3]);
-    expect(p.length).eq(3);
     expect(p.byteLength).eq(3);
-    expect(p.byteOffset).to.be.greaterThan(0);
-    expect(p.BYTES_PER_ELEMENT).eq(1);
-    expect(p.toArray()).deep.eq([1, 2, 3]);
+    expect(p.asTypedArray().length).eq(3);
+    expect(Array.from(p.asTypedArray())).deep.eq([1, 2, 3]);
     expect(p.isDisposed).eq(false);
   });
 
@@ -56,7 +37,7 @@ describe("RoaringUint8Array", () => {
       expect(buf[0]).eq(1);
       expect(buf[1]).eq(2);
       expect(buf[2]).eq(3);
-      expect(buf.buffer === p.buffer).eq(true);
+      expect(buf.buffer === roaringWasm.HEAPU8.buffer).eq(true);
     });
   });
 
@@ -68,31 +49,38 @@ describe("RoaringUint8Array", () => {
       expect(buf[0]).eq(1);
       expect(buf[1]).eq(2);
       expect(buf[2]).eq(3);
-      expect(buf.buffer !== p.buffer).eq(true);
+      expect(buf.buffer !== roaringWasm.HEAPU8.buffer).eq(true);
     });
-  });
 
-  describe("asNodeBuffer", () => {
-    it("returns a valid view", () => {
+    it("accepts a smaller output array", () => {
       const p = new RoaringUint8Array([1, 2, 3]);
-      const buf = p.asNodeBuffer();
-      expect(buf.length).eq(3);
+      const buf = new Uint8Array(2);
+      p.toTypedArray(buf);
+      expect(buf.length).eq(2);
       expect(buf[0]).eq(1);
       expect(buf[1]).eq(2);
-      expect(buf[2]).eq(3);
-      expect(buf.buffer === p.buffer).eq(true);
     });
-  });
 
-  describe("toNodeBuffer", () => {
-    it("returns a copy", () => {
+    it("accepts a larger output array", () => {
       const p = new RoaringUint8Array([1, 2, 3]);
-      const buf = p.toNodeBuffer();
-      expect(buf.length).eq(3);
-      expect(buf[0]).eq(1);
-      expect(buf[1]).eq(2);
-      expect(buf[2]).eq(3);
-      expect(buf.buffer !== p.buffer).eq(true);
+      const buf = new Uint8Array(4);
+      const ret = p.toTypedArray(buf);
+      expect(ret.buffer).eq(buf.buffer);
+      expect(ret.length).eq(3);
+      expect(ret[0]).eq(1);
+      expect(ret[1]).eq(2);
+      expect(ret[2]).eq(3);
+    });
+
+    it("accepts same size output array", () => {
+      const p = new RoaringUint8Array([1, 2, 3]);
+      const buf = new Uint8Array(3);
+      const ret = p.toTypedArray(buf);
+      expect(ret).eq(buf);
+      expect(ret.length).eq(3);
+      expect(ret[0]).eq(1);
+      expect(ret[1]).eq(2);
+      expect(ret[2]).eq(3);
     });
   });
 
@@ -109,7 +97,8 @@ describe("RoaringUint8Array", () => {
       const p = new RoaringUint8Array([1, 2, 3]);
       expect(p.dispose()).eq(true);
       expect(p.byteLength).eq(0);
-      expect(p.byteOffset).eq(0);
+      expect(p.asTypedArray().length).eq(0);
+      expect(p.isDisposed).eq(true);
     });
   });
 
@@ -132,19 +121,14 @@ describe("RoaringUint8Array", () => {
     it("should shrink the allocated memory", () => {
       const array = new RoaringUint8Array(100);
       expect(array.byteLength).eq(100);
-      expect(array.length).eq(100);
       expect(array.shrink(50)).true;
       expect(array.byteLength).eq(50);
-      expect(array.length).eq(50);
       expect(array.shrink(50)).false;
       expect(array.byteLength).eq(50);
-      expect(array.length).eq(50);
       expect(array.shrink(0)).true;
       expect(array.byteLength).eq(0);
-      expect(array.length).eq(0);
       expect(array.shrink(0)).false;
       expect(array.byteLength).eq(0);
-      expect(array.length).eq(0);
       expect(array.isDisposed).true;
     });
   });
@@ -178,7 +162,7 @@ describe("RoaringUint8Array", () => {
       expect(array.setAt(0, 10)).true;
       expect(array.setAt(1, 20)).true;
       expect(array.setAt(2, 30)).true;
-      expect(array.toArray()).deep.eq([10, 20, 30]);
+      expect(Array.from(array.asTypedArray())).deep.eq([10, 20, 30]);
     });
 
     it("should behaves like array.at() if the index is negative", () => {
@@ -186,7 +170,7 @@ describe("RoaringUint8Array", () => {
       expect(array.setAt(-1, 10)).true;
       expect(array.setAt(-2, 20)).true;
       expect(array.setAt(-3, 30)).true;
-      expect(array.toArray()).deep.eq([30, 20, 10]);
+      expect(Array.from(array.asTypedArray())).deep.eq([30, 20, 10]);
     });
 
     it("should return false if the index is out of bounds", () => {
@@ -194,7 +178,7 @@ describe("RoaringUint8Array", () => {
       expect(array.setAt(3, 10)).false;
       expect(array.setAt(4, 20)).false;
       expect(array.setAt(-5, 30)).false;
-      expect(array.toArray()).deep.eq([1, 2, 3]);
+      expect(Array.from(array.asTypedArray())).deep.eq([1, 2, 3]);
     });
 
     it("shoudl work for floating point values like array.at()", () => {
@@ -202,7 +186,7 @@ describe("RoaringUint8Array", () => {
       expect(array.setAt(0.1, 10)).true;
       expect(array.setAt(1.1, 20)).true;
       expect(array.setAt(2.1, 30)).true;
-      expect(array.toArray()).deep.eq([10, 20, 30]);
+      expect(Array.from(array.asTypedArray())).deep.eq([10, 20, 30]);
     });
   });
 });

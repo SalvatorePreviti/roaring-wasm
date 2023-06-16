@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { RoaringArenaAllocator, RoaringBitmap32, RoaringUint32Array, RoaringUint8Array } from "roaring-wasm-src";
+import { RoaringArenaAllocator, RoaringBitmap32, RoaringUint8Array } from "roaring-wasm-src";
 
 describe("RoaringArenaAllocator", () => {
   it("should start and stop an arena allocator, and should dispose only non escaped objects", () => {
@@ -69,15 +69,6 @@ describe("RoaringArenaAllocator", () => {
     expect(array.isDisposed).eq(true);
   });
 
-  it("should allocate a new RoaringUint32Array", () => {
-    const allocator = new RoaringArenaAllocator();
-    const array = allocator.newRoaringUint32Array(5);
-    expect(array).instanceOf(RoaringUint32Array);
-    expect(array.isDisposed).eq(false);
-    allocator.stop();
-    expect(array.isDisposed).eq(true);
-  });
-
   it("should allocate a RoaringBitmap32", () => {
     const allocator = new RoaringArenaAllocator();
     const array = allocator.newRoaringBitmap32();
@@ -91,14 +82,6 @@ describe("RoaringArenaAllocator", () => {
     it("should register to current when creating a new RoaringUint8Array", () => {
       RoaringArenaAllocator.start();
       const instance = new RoaringUint8Array(2);
-      expect(instance.isDisposed).eq(false);
-      RoaringArenaAllocator.stop();
-      expect(instance.isDisposed).eq(true);
-    });
-
-    it("should register to current when creating a new RoaringUint32Array", () => {
-      RoaringArenaAllocator.start();
-      const instance = new RoaringUint32Array(2);
       expect(instance.isDisposed).eq(false);
       RoaringArenaAllocator.stop();
       expect(instance.isDisposed).eq(true);

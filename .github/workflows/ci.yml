@@ -17,7 +17,7 @@ jobs:
       - name: Install emcc
         uses: mymindstorm/setup-emsdk@v12
         with:
-          version: 3.1.40
+          version: 3.1.41
       - run: npm ci
       - run: npm run lint:ci # run linting
       - run: npm run build # build the library and run tests

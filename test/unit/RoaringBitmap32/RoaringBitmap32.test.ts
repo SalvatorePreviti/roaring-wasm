@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { RoaringArenaAllocator, RoaringBitmap32, RoaringUint32Array, roaringLibraryInitialize } from "roaring-wasm-src";
+import { RoaringArenaAllocator, RoaringBitmap32, roaringLibraryInitialize } from "roaring-wasm-src";
 
 describe("RoaringBitmap32", () => {
   before(roaringLibraryInitialize);
@@ -9,28 +9,54 @@ describe("RoaringBitmap32", () => {
   describe("addChecked", () => {
     it("returns false if nothing changes", () => {
       const bitmap = new RoaringBitmap32([123]);
-      expect(bitmap.addChecked(123)).eq(false);
-      expect(bitmap.cardinality()).eq(1);
+      expect(bitmap.tryAdd(123)).eq(false);
+      expect(bitmap.size).eq(1);
     });
 
     it("returns true if something changes", () => {
       const bitmap = new RoaringBitmap32([124]);
-      expect(bitmap.addChecked(123)).eq(true);
-      expect(bitmap.cardinality()).eq(2);
+      expect(bitmap.tryAdd(123)).eq(true);
+      expect(bitmap.size).eq(2);
     });
   });
 
-  describe("removeChecked", () => {
+  describe("delete", () => {
     it("returns false if nothing changes", () => {
       const bitmap = new RoaringBitmap32([125]);
-      expect(bitmap.removeChecked(123)).eq(false);
-      expect(bitmap.cardinality()).eq(1);
+      expect(bitmap.delete(123)).eq(false);
+      expect(bitmap.size).eq(1);
     });
 
     it("returns true if something changes", () => {
       const bitmap = new RoaringBitmap32([123]);
-      expect(bitmap.removeChecked(123)).eq(true);
-      expect(bitmap.cardinality()).eq(0);
+      expect(bitmap.remove(123)).eq(true);
+      expect(bitmap.size).eq(0);
+    });
+  });
+
+  describe("pop", () => {
+    it("returns the last element", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3]);
+      expect(bitmap.pop()).eq(3);
+      expect(bitmap.toArray()).deep.eq([1, 2]);
+    });
+
+    it("returns undefined if empty", () => {
+      const bitmap = new RoaringBitmap32();
+      expect(bitmap.pop()).eq(undefined);
+    });
+  });
+
+  describe("shift", () => {
+    it("returns the first element", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3]);
+      expect(bitmap.shift()).eq(1);
+      expect(bitmap.toArray()).deep.eq([2, 3]);
+    });
+
+    it("returns undefined if empty", () => {
+      const bitmap = new RoaringBitmap32();
+      expect(bitmap.shift()).eq(undefined);
     });
   });
 
@@ -42,28 +68,25 @@ describe("RoaringBitmap32", () => {
       for (const item of array) {
         bitmap.add(item);
       }
-      expect(bitmap.toArray().sort()).deep.eq(array);
+      expect(bitmap.toArray()).deep.eq(array);
     });
 
-    it("adds a RoaringUint32Array", () => {
-      const buffer = new RoaringUint32Array(array);
+    it("adds a UInt32Array", () => {
+      const buffer = new Uint32Array(array);
       const bitmap = new RoaringBitmap32();
-      expect(buffer.toArray()).deep.eq(array);
       bitmap.addMany(buffer);
-      expect(buffer.isDisposed).eq(false);
-      expect(buffer.toArray()).deep.eq(array);
-      expect(bitmap.toArray().sort()).deep.eq(array);
+      expect(bitmap.toArray()).deep.eq(array);
     });
 
     it("adds a simple array", () => {
       const bitmap = new RoaringBitmap32();
       bitmap.addMany(array);
-      expect(bitmap.toArray().sort()).deep.eq(array);
+      expect(bitmap.toArray()).deep.eq(array);
     });
 
     it("works in the constructor", () => {
       const bitmap = new RoaringBitmap32(array);
-      expect(bitmap.toArray().sort()).deep.eq(array);
+      expect(bitmap.toArray()).deep.eq(array);
     });
   });
 
@@ -114,7 +137,7 @@ describe("RoaringBitmap32", () => {
       expect(bitmap1 !== bitmap2).eq(true);
       expect(bitmap2).to.be.instanceOf(RoaringBitmap32);
       expect(bitmap2.size).eq(0);
-      expect(bitmap2.isEmpty()).eq(true);
+      expect(bitmap2.isEmpty).eq(true);
     });
 
     it("returns a cloned bitmap", () => {
@@ -124,7 +147,7 @@ describe("RoaringBitmap32", () => {
       expect(bitmap1 !== bitmap2).eq(true);
       expect(bitmap2).to.be.instanceOf(RoaringBitmap32);
       expect(bitmap2.size).eq(values.length);
-      expect(bitmap2.isEmpty()).eq(false);
+      expect(bitmap2.isEmpty).eq(false);
       expect(Array.from(bitmap2.toUint32Array())).deep.equal(values);
     });
   });

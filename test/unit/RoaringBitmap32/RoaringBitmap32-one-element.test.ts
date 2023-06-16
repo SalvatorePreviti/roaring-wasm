@@ -8,11 +8,11 @@ describe("RoaringBitmap32 one element", () => {
 
   describe("read", () => {
     it("should not be empty", () => {
-      expect(new RoaringBitmap32([123]).isEmpty()).eq(false);
+      expect(new RoaringBitmap32([123]).isEmpty).eq(false);
     });
 
-    it("should have cardinality() === 1", () => {
-      expect(new RoaringBitmap32([123]).cardinality()).eq(1);
+    it("should have size === 1", () => {
+      expect(new RoaringBitmap32([123]).size).eq(1);
     });
 
     it("should have minimum === 123", () => {
@@ -24,15 +24,11 @@ describe("RoaringBitmap32 one element", () => {
     });
 
     it("should not contain 0", () => {
-      expect(new RoaringBitmap32([123]).contains(0)).eq(false);
+      expect(new RoaringBitmap32([123]).has(0)).eq(false);
     });
 
     it("should contain 123", () => {
-      expect(new RoaringBitmap32([123]).contains(123)).eq(true);
-    });
-
-    it("has a toRoaringUint32Array() that returns [123]", () => {
-      expect(new RoaringBitmap32([123]).toRoaringUint32Array().toArray()).deep.eq([123]);
+      expect(new RoaringBitmap32([123]).has(123)).eq(true);
     });
 
     it("has a toArray() that returns [123]", () => {
@@ -44,17 +40,17 @@ describe("RoaringBitmap32 one element", () => {
     });
 
     it("should serialize as (portable)", () => {
-      const array = new RoaringBitmap32([123]).serializeToRoaringUint8Array(true).toArray();
-      expect(array).deep.eq([58, 48, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 123, 0]);
+      const buf = new RoaringBitmap32([123]).serializeToRoaringUint8Array(true);
+      expect(Array.from(buf.asTypedArray())).deep.eq([58, 48, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 123, 0]);
     });
 
     it("should have a native serialization size 9", () => {
-      expect(new RoaringBitmap32([123]).getSerializationSizeInBytes()).eq(9);
+      expect(new RoaringBitmap32([123]).getSerializationSizeInBytes(false)).eq(9);
     });
 
     it("should serialize as (native)", () => {
-      const array = new RoaringBitmap32([123]).serializeToRoaringUint8Array().toArray();
-      expect(array).deep.eq([1, 1, 0, 0, 0, 123, 0, 0, 0]);
+      const buf = new RoaringBitmap32([123]).serializeToRoaringUint8Array(false);
+      expect(Array.from(buf.asTypedArray())).deep.eq([1, 1, 0, 0, 0, 123, 0, 0, 0]);
     });
 
     it("should be a subset of itself", () => {
@@ -69,12 +65,12 @@ describe("RoaringBitmap32 one element", () => {
 
     it("should be equal to itself", () => {
       const instance = new RoaringBitmap32([123]);
-      expect(instance.equals(instance)).eq(true);
+      expect(instance.isEqual(instance)).eq(true);
     });
 
     it("should not be equal to an empty instance", () => {
       const instance = new RoaringBitmap32([123]);
-      expect(instance.equals(new RoaringBitmap32([]))).eq(false);
+      expect(instance.isEqual(new RoaringBitmap32([]))).eq(false);
     });
 
     it("should select", () => {

@@ -16,6 +16,7 @@ export type RoaringWasm = {
   readonly HEAPF32: Float32Array;
   readonly HEAPF64: Float64Array;
 
+  _jsalloc_unsafe(size: number): Ptr;
   _jsalloc_zero(size: number): Ptr;
   _free(pointer: NullablePtr): void;
   _roaring_bitmap_create_js(): number;
@@ -23,11 +24,9 @@ export type RoaringWasm = {
   _roaring_bitmap_free(roaring: number): void;
   _roaring_bitmap_is_empty(roaring: number): WasmBool;
   _roaring_bitmap_add_checked(roaring: number, value: number): WasmBool;
-  _roaring_bitmap_add_many(roaring: number, count: number, values: number): void;
   _roaring_bitmap_remove_checked(roaring: number, value: number): WasmBool;
   _roaring_bitmap_maximum(roaring: number): number;
   _roaring_bitmap_minimum(roaring: number): number;
-  _roaring_bitmap_contains(roaring: number, value: number): WasmBool;
   _roaring_bitmap_is_subset(roaring1: number, roaring2: number): WasmBool;
   _roaring_bitmap_is_strict_subset(roaring1: number, roaring2: number): WasmBool;
   _roaring_bitmap_to_uint32_array(roaring: number, arrayPtr: number): void;
@@ -47,10 +46,15 @@ export type RoaringWasm = {
   _roaring_bitmap_andnot_inplace(roaring1: number, roaring2: number): void;
   _roaring_bitmap_intersect(roaring1: number, roaring2: number): WasmBool;
   _roaring_bitmap_jaccard_index_js(roaring1: NullablePtr, roaring2: NullablePtr): number;
+  _roaring_bitmap_add_many(roaring: number, size: number, uint32Array: number): void;
 
   _roaring_bitmap_portable_size_in_bytes(roaring: number): number;
+  _roaring_bitmap_frozen_size_in_bytes(roaring: number): number;
   _roaring_bitmap_portable_serialize(roaring: number, buf: number): number;
+  _roaring_bitmap_frozen_serialize(roaring: number, buf: number): number;
   _roaring_bitmap_portable_deserialize_safe(buf: number, maxBytes: number): number;
+  _roaring_bitmap_frozen_view(buf: number, size: number): number;
+  _roaring_bitmap_portable_deserialize_frozen(buf: number, maxBytes: number): number;
 
   _roaring_bitmap_size_in_bytes(roaring: number): number;
   _roaring_bitmap_serialize(roaring: number, buf: number): number;
@@ -75,6 +79,7 @@ export type RoaringWasm = {
   _roaring_bitmap_xor_js(roaring1: NullablePtr, roaring2: NullablePtr): number;
   _roaring_bitmap_andnot_js(roaring1: NullablePtr, roaring2: NullablePtr): number;
   _roaring_bitmap_or_many(count: number, bitmapsPtrs: number): number;
+  _roaring_bitmap_or_many_heap(count: number, bitmapsPtrs: number): number;
   _roaring_bitmap_xor_many(count: number, bitmapsPtrs: number): number;
   _roaring_bitmap_intersect_with_range_js(bitmap: NullablePtr, rangeStart: number, rangeEnd: number): WasmBool;
 
@@ -93,6 +98,7 @@ export type RoaringWasm = {
   _roaring_sync_bulk_remove_init(bitmap: NullablePtr): number;
   _roaring_sync_bulk_remove_chunk(chunkSize: number): void;
   _roaring_bitmap_remove_many(roaring: number, count: number, valuesPtr: number): void;
+  _roaring_bitmap_has_js(roaring: NullablePtr, value: number): WasmBool;
 };
 
 const _loadedModule = roaring_wasm_module_init<RoaringWasm>();

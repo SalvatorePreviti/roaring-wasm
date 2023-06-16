@@ -12,7 +12,7 @@ describe("RoaringBitmap32 static", () => {
       const offsetted = RoaringBitmap32.addOffset(input, 10);
       expect(offsetted).to.not.eq(input);
       expect(offsetted.toArray()).deep.equal([]);
-      expect(offsetted.isEmpty()).to.be.true;
+      expect(offsetted.isEmpty).to.be.true;
     });
 
     it("increment values", () => {
@@ -46,13 +46,13 @@ describe("RoaringBitmap32 static", () => {
     it("creates an empty bitmap with an empty array", () => {
       const bitmap = RoaringBitmap32.from([]);
       expect(bitmap.size).eq(0);
-      expect(bitmap.isEmpty()).eq(true);
+      expect(bitmap.isEmpty).eq(true);
     });
 
     it("creates an empty bitmap with an empty bitmap", () => {
       const bitmap = RoaringBitmap32.from(new RoaringBitmap32());
       expect(bitmap.size).eq(0);
-      expect(bitmap.isEmpty()).eq(true);
+      expect(bitmap.isEmpty).eq(true);
     });
 
     it("creates a bitmap from an array", () => {
@@ -82,14 +82,14 @@ describe("RoaringBitmap32 static", () => {
     it("returns empty with empty bitmaps", () => {
       const bitmap = RoaringBitmap32.and(new RoaringBitmap32(), new RoaringBitmap32());
       expect(bitmap).to.be.instanceOf(RoaringBitmap32);
-      expect(bitmap.isEmpty()).eq(true);
+      expect(bitmap.isEmpty).eq(true);
       expect(bitmap.size).eq(0);
     });
 
     it("returns empty with an non empty bitmap", () => {
       const bitmap = RoaringBitmap32.and(new RoaringBitmap32(), new RoaringBitmap32([1, 2, 3]));
       expect(bitmap).to.be.instanceOf(RoaringBitmap32);
-      expect(bitmap.isEmpty()).eq(true);
+      expect(bitmap.isEmpty).eq(true);
       expect(bitmap.size).eq(0);
     });
 
@@ -104,7 +104,7 @@ describe("RoaringBitmap32 static", () => {
     it("returns empty with empty bitmaps", () => {
       const bitmap = RoaringBitmap32.or(new RoaringBitmap32(), new RoaringBitmap32());
       expect(bitmap).to.be.instanceOf(RoaringBitmap32);
-      expect(bitmap.isEmpty()).eq(true);
+      expect(bitmap.isEmpty).eq(true);
       expect(bitmap.size).eq(0);
     });
 
@@ -122,7 +122,7 @@ describe("RoaringBitmap32 static", () => {
   describe("static xor", () => {
     it("returns empty with empty bitmaps", () => {
       const c = RoaringBitmap32.xor(new RoaringBitmap32(), new RoaringBitmap32());
-      expect(c.isEmpty()).eq(true);
+      expect(c.isEmpty).eq(true);
     });
 
     it("performs or with empty and non empty", () => {
@@ -139,12 +139,12 @@ describe("RoaringBitmap32 static", () => {
   describe("static andNot", () => {
     it("returns empty with empty bitmaps", () => {
       const c = RoaringBitmap32.andNot(new RoaringBitmap32(), new RoaringBitmap32());
-      expect(c.isEmpty()).eq(true);
+      expect(c.isEmpty).eq(true);
     });
 
     it("returns empty  with an non empty array", () => {
       const c = RoaringBitmap32.andNot(new RoaringBitmap32(), new RoaringBitmap32([1, 2, 3]));
-      expect(c.isEmpty()).eq(true);
+      expect(c.isEmpty).eq(true);
     });
 
     it("andnots two bitmaps", () => {
@@ -176,35 +176,35 @@ describe("RoaringBitmap32 static", () => {
       const x = RoaringBitmap32.orMany([]);
       expect(x).to.be.instanceOf(RoaringBitmap32);
       expect(x.size).eq(0);
-      expect(x.isEmpty()).eq(true);
+      expect(x.isEmpty).eq(true);
     });
 
     it("creates an empty bitmap with a single empty bitmap passed", () => {
       const x = RoaringBitmap32.orMany([new RoaringBitmap32()]);
       expect(x).to.be.instanceOf(RoaringBitmap32);
       expect(x.size).eq(0);
-      expect(x.isEmpty()).eq(true);
+      expect(x.isEmpty).eq(true);
     });
 
     it("creates an empty bitmap with a single empty bitmap passed as array", () => {
       const x = RoaringBitmap32.orMany([new RoaringBitmap32()]);
       expect(x).to.be.instanceOf(RoaringBitmap32);
       expect(x.size).eq(0);
-      expect(x.isEmpty()).eq(true);
+      expect(x.isEmpty).eq(true);
     });
 
     it("creates an empty bitmap with multiple empty bitmap passed", () => {
       const x = RoaringBitmap32.orMany([new RoaringBitmap32(), new RoaringBitmap32(), new RoaringBitmap32()]);
       expect(x).to.be.instanceOf(RoaringBitmap32);
       expect(x.size).eq(0);
-      expect(x.isEmpty()).eq(true);
+      expect(x.isEmpty).eq(true);
     });
 
     it("creates an empty bitmap with a multiple empty bitmap passed as array", () => {
       const x = RoaringBitmap32.orMany([new RoaringBitmap32(), new RoaringBitmap32(), new RoaringBitmap32()]);
       expect(x).to.be.instanceOf(RoaringBitmap32);
       expect(x.size).eq(0);
-      expect(x.isEmpty()).eq(true);
+      expect(x.isEmpty).eq(true);
     });
   });
 
@@ -233,35 +233,35 @@ describe("RoaringBitmap32 static", () => {
       const x = RoaringBitmap32.xorMany([]);
       expect(x).to.be.instanceOf(RoaringBitmap32);
       expect(x.size).eq(0);
-      expect(x.isEmpty()).eq(true);
+      expect(x.isEmpty).eq(true);
     });
 
     it("creates an empty bitmap with a single empty bitmap passed", () => {
       const x = RoaringBitmap32.xorMany([new RoaringBitmap32()]);
       expect(x).to.be.instanceOf(RoaringBitmap32);
       expect(x.size).eq(0);
-      expect(x.isEmpty()).eq(true);
+      expect(x.isEmpty).eq(true);
     });
 
     it("creates an empty bitmap with a single empty bitmap passed as array", () => {
       const x = RoaringBitmap32.xorMany([new RoaringBitmap32()]);
       expect(x).to.be.instanceOf(RoaringBitmap32);
       expect(x.size).eq(0);
-      expect(x.isEmpty()).eq(true);
+      expect(x.isEmpty).eq(true);
     });
 
     it("creates an empty bitmap with multiple empty bitmap passed", () => {
       const x = RoaringBitmap32.xorMany([new RoaringBitmap32(), new RoaringBitmap32(), new RoaringBitmap32()]);
       expect(x).to.be.instanceOf(RoaringBitmap32);
       expect(x.size).eq(0);
-      expect(x.isEmpty()).eq(true);
+      expect(x.isEmpty).eq(true);
     });
 
     it("creates an empty bitmap with a multiple empty bitmap passed as array", () => {
       const x = RoaringBitmap32.xorMany([new RoaringBitmap32(), new RoaringBitmap32(), new RoaringBitmap32()]);
       expect(x).to.be.instanceOf(RoaringBitmap32);
       expect(x.size).eq(0);
-      expect(x.isEmpty()).eq(true);
+      expect(x.isEmpty).eq(true);
     });
   });
 
@@ -271,9 +271,9 @@ describe("RoaringBitmap32 static", () => {
       const b = new RoaringBitmap32();
       RoaringBitmap32.swap(a, b);
       expect(a.size).eq(0);
-      expect(a.isEmpty()).eq(true);
+      expect(a.isEmpty).eq(true);
       expect(b.size).eq(0);
-      expect(b.isEmpty()).eq(true);
+      expect(b.isEmpty).eq(true);
     });
 
     it("swaps one empty with a non empty bitmap", () => {
@@ -281,9 +281,9 @@ describe("RoaringBitmap32 static", () => {
       const b = new RoaringBitmap32([1, 2, 3]);
       RoaringBitmap32.swap(a, b);
       expect(a.size).eq(3);
-      expect(a.isEmpty()).eq(false);
+      expect(a.isEmpty).eq(false);
       expect(b.size).eq(0);
-      expect(b.isEmpty()).eq(true);
+      expect(b.isEmpty).eq(true);
     });
 
     it("swaps two bitmaps", () => {
@@ -291,9 +291,9 @@ describe("RoaringBitmap32 static", () => {
       const b = new RoaringBitmap32([1, 2, 3]);
       RoaringBitmap32.swap(a, b);
       expect(a.size).eq(3);
-      expect(a.isEmpty()).eq(false);
+      expect(a.isEmpty).eq(false);
       expect(b.size).eq(2);
-      expect(b.isEmpty()).eq(false);
+      expect(b.isEmpty).eq(false);
       expect(a.toArray()).deep.equal([1, 2, 3]);
       expect(b.toArray()).deep.equal([4, 5]);
     });
@@ -304,14 +304,14 @@ describe("RoaringBitmap32 static", () => {
       const bitmap = RoaringBitmap32.of();
       expect(bitmap).to.be.instanceOf(RoaringBitmap32);
       expect(bitmap.size).eq(0);
-      expect(bitmap.isEmpty()).eq(true);
+      expect(bitmap.isEmpty).eq(true);
     });
 
     it("creates a bitmap with one value", () => {
       const bitmap = RoaringBitmap32.of(1);
       expect(bitmap).to.be.instanceOf(RoaringBitmap32);
       expect(bitmap.size).eq(1);
-      expect(bitmap.isEmpty()).eq(false);
+      expect(bitmap.isEmpty).eq(false);
       expect(bitmap.toArray()).deep.equal([1]);
     });
 
@@ -319,7 +319,7 @@ describe("RoaringBitmap32 static", () => {
       const bitmap = RoaringBitmap32.of(1, 2, 2, 2, 0xffff, 3);
       expect(bitmap).to.be.instanceOf(RoaringBitmap32);
       expect(bitmap.size).eq(4);
-      expect(bitmap.isEmpty()).eq(false);
+      expect(bitmap.isEmpty).eq(false);
       expect(bitmap.toArray()).deep.equal([1, 2, 3, 0xffff]);
     });
 
@@ -346,7 +346,7 @@ describe("RoaringBitmap32 static", () => {
         4.2,
       );
       expect(bitmap).to.be.instanceOf(RoaringBitmap32);
-      expect(bitmap.isEmpty()).eq(false);
+      expect(bitmap.isEmpty).eq(false);
       expect(bitmap.toArray()).deep.equal([1, 2, 3, 4, 123, 0xffff, 0xffffffff]);
     });
   });

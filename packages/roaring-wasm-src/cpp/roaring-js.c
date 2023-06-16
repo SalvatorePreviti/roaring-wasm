@@ -24,6 +24,15 @@ void * jsalloc_zero(uint32_t size) {
   return result;
 }
 
+/** Allocate memory, aligned to 32 bytes, without clearing it */
+void * jsalloc_unsafe(uint32_t size) {
+  void * result;
+  if (posix_memalign(&result, 32, size) != 0) {
+    return NULL;
+  }
+  return result;
+}
+
 roaring_bitmap_t * roaring_bitmap_create_js(void) { return roaring_bitmap_create_with_capacity(0); }
 
 double roaring_bitmap_get_cardinality_js(const roaring_bitmap_t * bm) {
@@ -419,4 +428,12 @@ uint32_t * roaring_sync_bulk_remove_init(roaring_bitmap_t * bitmap) {
 
 void roaring_sync_bulk_remove_chunk(uint32_t chunkSize) {
   roaring_bitmap_remove_many(sync_bulk_bitmap, chunkSize, sync_tmp_buf);
+}
+
+bool roaring_bitmap_has_js(const roaring_bitmap_t * bitmap, double value) {
+  if (!bitmap || isnan(value) || value < 0 || value > 0xffffffff) {
+    return false;
+  }
+  uint32_t v = (uint32_t)value;
+  return v == value && roaring_bitmap_contains(bitmap, v);
 }
