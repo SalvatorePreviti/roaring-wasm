@@ -7,6 +7,8 @@ import {
 } from "roaring-wasm-src";
 import { expect } from "chai";
 
+import testDataSerialized from "./data/serialized.json";
+
 describe("RoaringBitmap32 serialization", () => {
   before(roaringLibraryInitialize);
   beforeEach(RoaringArenaAllocator.start);
@@ -111,57 +113,65 @@ describe("RoaringBitmap32 serialization", () => {
   describe("deserialize", () => {
     it("deserializes zero length buffer (non portable)", () => {
       const bitmap = new RoaringBitmap32([1, 2, 3]);
-      bitmap.deserialize(Buffer.from([]), false);
+      bitmap.deserialize(new Uint8Array([]), false);
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
-      bitmap.deserialize(Buffer.from([]), "croaring");
-      expect(bitmap.size).eq(0);
-      expect(bitmap.isEmpty).eq(true);
-    });
-
-    it("deserializes empty bitmap (non portable)", () => {
-      const bitmap = new RoaringBitmap32([1, 2, 3]);
-      bitmap.deserialize(Buffer.from([1, 0, 0, 0, 0]), false);
-      expect(bitmap.size).eq(0);
-      expect(bitmap.isEmpty).eq(true);
-      bitmap.deserialize(Buffer.from([1, 0, 0, 0, 0]), "croaring");
+      bitmap.deserialize(new Uint8Array([]), "croaring");
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
     });
 
     it("deserializes empty bitmap (non portable)", () => {
       const bitmap = new RoaringBitmap32([1, 2, 3]);
-      bitmap.deserialize(Buffer.from([1, 0, 0, 0, 0]), false);
+      bitmap.deserialize(new Uint8Array([1, 0, 0, 0, 0]), false);
+      expect(bitmap.size).eq(0);
+      expect(bitmap.isEmpty).eq(true);
+      bitmap.deserialize(new Uint8Array([1, 0, 0, 0, 0]), "croaring");
+      expect(bitmap.size).eq(0);
+      expect(bitmap.isEmpty).eq(true);
+    });
+
+    it("deserializes empty bitmap (non portable)", () => {
+      const bitmap = new RoaringBitmap32([1, 2, 3]);
+      bitmap.deserialize(new Uint8Array([1, 0, 0, 0, 0]), false);
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
     });
 
     it("deserializes empty bitmap (portable)", () => {
       const bitmap = new RoaringBitmap32([1, 2]);
-      bitmap.deserialize(Buffer.from([58, 48, 0, 0, 0, 0, 0, 0]), true);
+      bitmap.deserialize(new Uint8Array([58, 48, 0, 0, 0, 0, 0, 0]), true);
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
-      bitmap.deserialize(Buffer.from([58, 48, 0, 0, 0, 0, 0, 0]), "portable");
+      bitmap.deserialize(new Uint8Array([58, 48, 0, 0, 0, 0, 0, 0]), "portable");
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
     });
 
     it("deserializes zero length buffer (portable)", () => {
       const bitmap = new RoaringBitmap32([1, 2]);
-      bitmap.deserialize(Buffer.from([]), true);
+      bitmap.deserialize(new Uint8Array([]), true);
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
-      bitmap.deserialize(Buffer.from([]), "portable");
+      bitmap.deserialize(new Uint8Array([]), "portable");
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
     });
 
-    it("is able to deserialize test data", () => {
-      const testDataSerialized = require("./data/serialized.json");
+    function _base64ToArrayBuffer(base64: string) {
+      const binary_string = atob(base64);
+      const len = binary_string.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binary_string.charCodeAt(i);
+      }
+      return bytes;
+    }
 
+    it("is able to deserialize test data", () => {
       let total = 0;
       for (const s of testDataSerialized) {
-        const bitmap = RoaringBitmap32.deserialize(Buffer.from(s, "base64"), false);
+        const bitmap = RoaringBitmap32.deserialize(_base64ToArrayBuffer(s), false);
         const size = bitmap.size;
         if (size !== 0) {
           expect(bitmap.has(bitmap.minimum())).eq(true);
@@ -175,49 +185,49 @@ describe("RoaringBitmap32 serialization", () => {
 
   describe("deserialize static", () => {
     it("deserializes zero length buffer (non portable)", () => {
-      let bitmap = RoaringBitmap32.deserialize(Buffer.from([]), false);
+      let bitmap = RoaringBitmap32.deserialize(new Uint8Array([]), false);
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
-      bitmap = RoaringBitmap32.deserialize(Buffer.from([]), "portable");
+      bitmap = RoaringBitmap32.deserialize(new Uint8Array([]), "portable");
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
     });
 
     it("deserializes zero length buffer (portable)", () => {
-      let bitmap = RoaringBitmap32.deserialize(Buffer.from([]), true);
+      let bitmap = RoaringBitmap32.deserialize(new Uint8Array([]), true);
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
-      bitmap = RoaringBitmap32.deserialize(Buffer.from([]), "portable");
-      expect(bitmap.size).eq(0);
-      expect(bitmap.isEmpty).eq(true);
-    });
-
-    it("deserializes empty bitmap (non portable)", () => {
-      const bitmap = RoaringBitmap32.deserialize(Buffer.from([1, 0, 0, 0, 0]), false);
+      bitmap = RoaringBitmap32.deserialize(new Uint8Array([]), "portable");
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
     });
 
     it("deserializes empty bitmap (non portable)", () => {
-      const bitmap = RoaringBitmap32.deserialize(Buffer.from([1, 0, 0, 0, 0]), false);
+      const bitmap = RoaringBitmap32.deserialize(new Uint8Array([1, 0, 0, 0, 0]), false);
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
     });
 
     it("deserializes empty bitmap (non portable)", () => {
-      let bitmap = RoaringBitmap32.deserialize(Buffer.from([1, 0, 0, 0, 0]), false);
+      const bitmap = RoaringBitmap32.deserialize(new Uint8Array([1, 0, 0, 0, 0]), false);
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
-      bitmap = RoaringBitmap32.deserialize(Buffer.from([1, 0, 0, 0, 0]), "croaring");
+    });
+
+    it("deserializes empty bitmap (non portable)", () => {
+      let bitmap = RoaringBitmap32.deserialize(new Uint8Array([1, 0, 0, 0, 0]), false);
+      expect(bitmap.size).eq(0);
+      expect(bitmap.isEmpty).eq(true);
+      bitmap = RoaringBitmap32.deserialize(new Uint8Array([1, 0, 0, 0, 0]), "croaring");
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
     });
 
     it("deserializes empty bitmap (portable)", () => {
-      let bitmap = RoaringBitmap32.deserialize(Buffer.from([58, 48, 0, 0, 0, 0, 0, 0]), true);
+      let bitmap = RoaringBitmap32.deserialize(new Uint8Array([58, 48, 0, 0, 0, 0, 0, 0]), true);
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
-      bitmap = RoaringBitmap32.deserialize(Buffer.from([58, 48, 0, 0, 0, 0, 0, 0]), "portable");
+      bitmap = RoaringBitmap32.deserialize(new Uint8Array([58, 48, 0, 0, 0, 0, 0, 0]), "portable");
       expect(bitmap.size).eq(0);
       expect(bitmap.isEmpty).eq(true);
     });
@@ -248,33 +258,33 @@ describe("RoaringBitmap32 serialization", () => {
 
     it("throws if buffer is too small", () => {
       const bitmap = new RoaringBitmap32(data);
-      const buffer = Buffer.alloc(bitmap.getSerializationSizeInBytes(false) - 1);
+      const buffer = new Uint8Array(bitmap.getSerializationSizeInBytes(false) - 1);
       expect(() => bitmap.serialize(false, buffer)).to.throw();
     });
 
     it("throws if buffer is too small (portable)", () => {
       const bitmap = new RoaringBitmap32(data);
-      const buffer = Buffer.alloc(bitmap.getSerializationSizeInBytes(true) - 1);
+      const buffer = new Uint8Array(bitmap.getSerializationSizeInBytes(true) - 1);
       expect(() => bitmap.serialize(true, buffer)).to.throw();
     });
 
     it("serializes to buffer (non portable)", () => {
       const bitmap = new RoaringBitmap32(data);
-      const buffer = Buffer.alloc(bitmap.getSerializationSizeInBytes(false));
+      const buffer = new Uint8Array(bitmap.getSerializationSizeInBytes(false));
       expect(bitmap.serialize(false, buffer)).to.eq(buffer);
       expect(RoaringBitmap32.deserialize(buffer, false).toArray()).to.deep.eq(data);
     });
 
     it("serializes to buffer (portable)", () => {
       const bitmap = new RoaringBitmap32(data);
-      const buffer = Buffer.alloc(bitmap.getSerializationSizeInBytes(true));
+      const buffer = new Uint8Array(bitmap.getSerializationSizeInBytes(true));
       expect(bitmap.serialize(true, buffer)).to.eq(buffer);
       expect(RoaringBitmap32.deserialize(buffer, true).toArray()).to.deep.eq(data);
     });
 
     it("serializes to buffer (portable), inverted arguments", () => {
       const bitmap = new RoaringBitmap32(data);
-      const buffer = Buffer.alloc(bitmap.getSerializationSizeInBytes(true));
+      const buffer = new Uint8Array(bitmap.getSerializationSizeInBytes(true));
       expect(bitmap.serialize(buffer, true)).to.eq(buffer);
       expect(RoaringBitmap32.deserialize(buffer, true).toArray()).to.deep.eq(data);
     });
@@ -282,9 +292,9 @@ describe("RoaringBitmap32 serialization", () => {
     it("handles offset correctly and deserialize correctly", () => {
       const bitmap = new RoaringBitmap32(data);
       const serlength = bitmap.getSerializationSizeInBytes(true);
-      const buffer = Buffer.alloc(serlength + 30);
-      const serialized = bitmap.serialize("portable", Buffer.from(buffer.buffer, 10));
-      expect(Array.from(serialized)).to.deep.eq(Array.from(Buffer.from(buffer.buffer, 10, serlength)));
+      const buffer = new Uint8Array(serlength + 30);
+      const serialized = bitmap.serialize("portable", new Uint8Array(buffer.buffer, 10));
+      expect(Array.from(serialized)).to.deep.eq(Array.from(new Uint8Array(buffer.buffer, 10, serlength)));
       expect(RoaringBitmap32.deserialize(serialized, true).toArray()).to.deep.eq(data);
     });
   });
