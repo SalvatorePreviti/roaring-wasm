@@ -10,6 +10,17 @@ Roaring bitmaps are compressed bitmaps. They can be hundreds of times faster.
 This package is intended as a stripped down cross platform and broewser alternative to [roaring-node](https://www.npmjs.com/package/roaring), [repository](https://github.com/SalvatorePreviti/roaring-node).
 If you are using just NodeJS, [roaring-node](https://github.com/SalvatorePreviti/roaring-node) is faster, has a better API that fully leverages the v8 garbage collector and the native CPU SIMD instructions, and has also asynchronous operations.
 
+# WARNING ⚠️ - breaking API changes introduced in version 1.0.0
+
+Please update your codebase accordingly.
+
+- remove cardinality() method, replaced with "size" property
+- convert method isEmpty() to a property isEmpty: boolean
+- serialize and deserialize now require a format argument
+- removed RoaringUint32Array - since we have "streaming" functions now that copy chunks data in chunks between JS
+- removed some utility methods
+- removed usage of Node buffer
+
 ## installation
 
 ```sh
