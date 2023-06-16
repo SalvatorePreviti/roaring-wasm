@@ -50,8 +50,8 @@ bitmap2.addMany([3, 4, 1000]);
 console.log("bitmap2.toSet():", bitmap1.toSet());
 
 var bitmap3 = new RoaringBitmap32();
-console.log("bitmap1.cardinality():", bitmap1.cardinality());
-console.log("bitmap2.contains(3):", bitmap2.contains(3));
+console.log("bitmap1.size:", bitmap1.size);
+console.log("bitmap2.has(3):", bitmap2.has(3));
 
 bitmap3.add(111);
 bitmap3.add(544);
