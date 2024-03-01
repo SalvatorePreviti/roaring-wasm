@@ -7,7 +7,7 @@ Roaring bitmaps are compressed bitmaps. They can be hundreds of times faster.
 
 ## NOTE
 
-This package is intended as a stripped down cross platform and broewser alternative to [roaring-node](https://www.npmjs.com/package/roaring), [repository](https://github.com/SalvatorePreviti/roaring-node).
+This package is intended as a stripped down cross platform and browser compatible alternative to [roaring-node](https://www.npmjs.com/package/roaring), [repository](https://github.com/SalvatorePreviti/roaring-node).
 If you are using just NodeJS, [roaring-node](https://github.com/SalvatorePreviti/roaring-node) is faster, has a better API that fully leverages the v8 garbage collector and the native CPU SIMD instructions, and has also asynchronous operations.
 
 # WARNING ⚠️ - breaking API changes introduced in version 1.0.0
