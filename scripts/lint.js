@@ -31,7 +31,7 @@ async function lint(args = process.argv.slice(2)) {
   }
 
   const prettierPromise = timed(isFix ? "prettier fix" : "prettier check", () =>
-    forkAsync(require.resolve("prettier/bin-prettier.js"), ["--loglevel=warn", isFix ? "--write" : "--check", "."], {
+    forkAsync(require.resolve("prettier/bin/prettier.cjs"), ["--loglevel=warn", isFix ? "--write" : "--check", "."], {
       cwd: ROOT_FOLDER,
     }),
   );
