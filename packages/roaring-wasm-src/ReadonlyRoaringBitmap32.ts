@@ -49,8 +49,8 @@ export interface ReadonlyRoaringBitmap32 {
   ): TOutput extends RoaringUint8Array
     ? RoaringUint8Array
     : TOutput extends typeof RoaringUint8Array
-    ? RoaringUint8Array
-    : Uint8Array;
+      ? RoaringUint8Array
+      : Uint8Array;
 
   /**
    * Serializes a bitmap to a typed Uint8Array.

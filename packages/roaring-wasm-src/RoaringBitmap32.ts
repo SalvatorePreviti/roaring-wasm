@@ -365,8 +365,8 @@ export class RoaringBitmap32 {
   ): TOutput extends RoaringUint8Array
     ? RoaringUint8Array
     : TOutput extends typeof RoaringUint8Array
-    ? RoaringUint8Array
-    : Uint8Array;
+      ? RoaringUint8Array
+      : Uint8Array;
 
   /**
    * Serializes a bitmap to a typed Uint8Array.
@@ -394,8 +394,8 @@ export class RoaringBitmap32 {
   ): TOutput extends RoaringUint8Array
     ? RoaringUint8Array
     : TOutput extends typeof RoaringUint8Array
-    ? RoaringUint8Array
-    : Uint8Array {
+      ? RoaringUint8Array
+      : Uint8Array {
     let format: SerializationFormatType;
     let output: Uint8Array | RoaringUint8Array | undefined;
     if (!b || typeof a === "string" || typeof a === "boolean") {

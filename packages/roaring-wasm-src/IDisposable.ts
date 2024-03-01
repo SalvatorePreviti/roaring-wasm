@@ -69,8 +69,8 @@ export const using: {
   ): ReturnType<TFn> extends never
     ? never
     : ReturnType<TFn> extends PromiseLike<Awaited<infer TReturn>>
-    ? Promise<TReturn>
-    : ReturnType<TFn>;
+      ? Promise<TReturn>
+      : ReturnType<TFn>;
 
   <TValue, TDisposable extends Readonly<IDisposable> | null | undefined = IDisposable>(
     disposable: TDisposable,

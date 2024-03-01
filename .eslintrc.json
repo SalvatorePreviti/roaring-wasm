@@ -2,7 +2,8 @@
   "extends": ["@balsamic"],
   "plugins": ["node", "import"],
   "rules": {
-    "global-require": 0
+    "global-require": 0,
+    "@typescript-eslint/no-unsafe-declaration-merging": 0
   },
   "overrides": [
     {
