@@ -88,12 +88,12 @@ async function compileTs() {
     await Promise.all(
       files.map(async (file) => {
         const content = await fs.promises.readFile(file, "utf-8");
-        const formatted = prettier.format(content, {
+        const fcontent = await prettier.format(content, {
           filepath: file,
           parser: file.endsWith(".ts") ? "typescript" : "espree",
         });
-        if (formatted !== content) {
-          await fs.promises.writeFile(file, formatted);
+        if (fcontent !== content) {
+          await fs.promises.writeFile(file, fcontent);
         }
       }),
     );

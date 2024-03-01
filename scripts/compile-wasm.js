@@ -167,7 +167,7 @@ async function compileWasm() {
         src += 'if (typeof exports === "object")\nexports.default = roaring_wasm;';
       }
 
-      src = prettier.format(src, { parser: "espree" });
+      src = await prettier.format(src, { parser: "espree" });
 
       await fs.promises.writeFile(filename, src);
 
