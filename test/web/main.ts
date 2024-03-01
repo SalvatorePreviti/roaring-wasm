@@ -26,6 +26,7 @@ const pass = () => {
 try {
   mocha.setup({ ui: "bdd" });
 
+  // eslint-disable-next-line @typescript-eslint/await-thenable
   const tests = await import.meta.glob("../**/*.test.ts");
 
   for (const path in tests) {
