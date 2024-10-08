@@ -254,7 +254,7 @@ roaring_iterator_js_t * roaring_iterator_js_new(const roaring_bitmap_t * bitmap,
     return NULL;
   }
 
-  roaring_init_iterator(bitmap, &iterator->iterator);
+  roaring_iterator_init(bitmap, &iterator->iterator);
 
   if (!iterator->iterator.has_value) {
     free(iterator);
@@ -288,9 +288,9 @@ double roaring_iterator_js_next(roaring_iterator_js_t * iterator, const roaring_
       return -1;
     }
 
-    roaring_init_iterator(bitmap, &iterator->iterator);
+    roaring_iterator_init(bitmap, &iterator->iterator);
 
-    if (!roaring_move_uint32_iterator_equalorlarger(&iterator->iterator, value)) {
+    if (!roaring_uint32_iterator_move_equalorlarger(&iterator->iterator, value)) {
       free(iterator);
       return -1;
     }
@@ -300,7 +300,7 @@ double roaring_iterator_js_next(roaring_iterator_js_t * iterator, const roaring_
     iterator->version = version;
   }
 
-  roaring_advance_uint32_iterator(&iterator->iterator);
+  roaring_uint32_iterator_advance(&iterator->iterator);
   return (double)value;
 }
 
@@ -326,7 +326,7 @@ double roaring_iterator_js_gte(
       return -1;
     }
 
-    roaring_init_iterator(bitmap, &iterator->iterator);
+    roaring_iterator_init(bitmap, &iterator->iterator);
 
     if (!iterator->iterator.has_value) {
       free(iterator);
@@ -340,7 +340,7 @@ double roaring_iterator_js_gte(
 
   if (
     uminimum > iterator->iterator.current_value &&
-    !roaring_move_uint32_iterator_equalorlarger(&iterator->iterator, uminimum)) {
+    !roaring_uint32_iterator_move_equalorlarger(&iterator->iterator, uminimum)) {
     free(iterator);
     return -1;
   }
@@ -371,7 +371,7 @@ uint32_t * roaring_sync_iter_init(const roaring_bitmap_t * bitmap, double maxLen
     maxLength = MAX_SAFE_INTEGER;
   }
   sync_iter_buf_left = (int64_t)maxLength;
-  roaring_init_iterator(bitmap, &sync_iter);
+  roaring_iterator_init(bitmap, &sync_iter);
   return sync_tmp_buf;
 }
 
@@ -379,7 +379,7 @@ uint32_t roaring_sync_iter_next() {
   if (sync_iter_buf_left <= 0) {
     return 0;
   }
-  uint32_t n = roaring_read_uint32_iterator(
+  uint32_t n = roaring_uint32_iterator_read(
     &sync_iter, sync_tmp_buf, sync_iter_buf_left < SYNC_TMP_BUF_SIZE ? (uint32_t)sync_iter_buf_left : SYNC_TMP_BUF_SIZE);
   sync_iter_buf_left -= n;
   return n;
@@ -391,11 +391,11 @@ uint32_t roaring_sync_iter_min(double minimum) {
   }
 
   minimum = ceil(minimum);
-  if (minimum > 0 && !roaring_move_uint32_iterator_equalorlarger(&sync_iter, (uint32_t)minimum)) {
+  if (minimum > 0 && !roaring_uint32_iterator_move_equalorlarger(&sync_iter, (uint32_t)minimum)) {
     return 0;
   }
 
-  uint32_t n = roaring_read_uint32_iterator(
+  uint32_t n = roaring_uint32_iterator_read(
     &sync_iter, sync_tmp_buf, sync_iter_buf_left < SYNC_TMP_BUF_SIZE ? (uint32_t)sync_iter_buf_left : SYNC_TMP_BUF_SIZE);
 
   sync_iter_buf_left -= n;
