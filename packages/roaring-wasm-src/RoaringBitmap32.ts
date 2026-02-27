@@ -1471,9 +1471,11 @@ export class RoaringBitmap32 {
   public andNotCardinality(other: ReadonlyRoaringBitmap32): number {
     const a = this.#p;
     return a
-      ? roaringWasm._roaring_bitmap_andnot_cardinality(
-          a,
-          (other as RoaringBitmap32).#p || (other as RoaringBitmap32).#createEmpty(),
+      ? Number(
+          roaringWasm._roaring_bitmap_andnot_cardinality(
+            a,
+            (other as RoaringBitmap32).#p || (other as RoaringBitmap32).#createEmpty(),
+          ),
         ) >>> 0
       : 0;
   }
@@ -1488,7 +1490,7 @@ export class RoaringBitmap32 {
   public xorCardinality(other: ReadonlyRoaringBitmap32): number {
     const a = this.#p;
     const b = (other as RoaringBitmap32).#p;
-    return !a ? other.size : !b ? this.size : roaringWasm._roaring_bitmap_xor_cardinality(a, b) >>> 0;
+    return !a ? other.size : !b ? this.size : Number(roaringWasm._roaring_bitmap_xor_cardinality(a, b)) >>> 0;
   }
 
   /**
@@ -1599,7 +1601,7 @@ export class RoaringBitmap32 {
    */
   public rank(value: number): number {
     const ptr = this.#p;
-    return ptr ? roaringWasm._roaring_bitmap_rank(ptr, value) >>> 0 : 0;
+    return ptr ? Number(roaringWasm._roaring_bitmap_rank(ptr, value)) >>> 0 : 0;
   }
 
   /**

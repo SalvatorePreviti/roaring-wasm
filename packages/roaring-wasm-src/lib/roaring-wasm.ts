@@ -7,14 +7,8 @@ export type WasmBool = number | boolean;
 export type Ptr = number;
 
 export type RoaringWasm = {
-  readonly HEAP8: Int8Array;
-  readonly HEAP16: Int16Array;
-  readonly HEAP32: Int32Array;
   readonly HEAPU8: Uint8Array;
-  readonly HEAPU16: Uint16Array;
   readonly HEAPU32: Uint32Array;
-  readonly HEAPF32: Float32Array;
-  readonly HEAPF64: Float64Array;
 
   _jsalloc_unsafe(size: number): Ptr;
   _jsalloc_zero(size: number): Ptr;

@@ -32,6 +32,7 @@ function buildLinkArgs(environment) {
   }
 
   linkargs.push("-s", `EXPORTED_FUNCTIONS=${JSON.stringify(exportedFunctions)}`);
+  linkargs.push("-s", "EXPORTED_RUNTIME_METHODS=HEAPU8,HEAPU32");
   linkargs.push("-s", "INCOMING_MODULE_JS_API=[]");
 
   linkargs.push("-s", `WASM_ASYNC_COMPILATION=${environment === "browser" ? "1" : "0"}`);
@@ -54,7 +55,7 @@ function buildLinkArgs(environment) {
   linkargs.push("-s", "ASSERTIONS"); // useful when debugging
 
   if (environment === "browser") {
-    linkargs.push("-s", "USE_ES6_IMPORT_META=0");
+    //    linkargs.push("-s", "USE_ES6_IMPORT_META=0");
   }
 
   // optimizations
@@ -65,6 +66,7 @@ function buildLinkArgs(environment) {
   // optimizations
   linkargs.push("-flto=full");
   linkargs.push("-ffast-math");
+  linkargs.push("-fno-finite-math-only");
   linkargs.push("-fno-exceptions");
 
   // js settings
@@ -95,6 +97,7 @@ async function compileWasm() {
   cflags.push("-Wno-error=unused-local-typedefs");
   cflags.push("-flto=full");
   cflags.push("-ffast-math");
+  cflags.push("-fno-finite-math-only");
   cflags.push("-fno-exceptions");
 
   const emccSpawnOptions = {
